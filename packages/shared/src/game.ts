@@ -37,8 +37,11 @@ export interface TeamPublic {
   memberCount: number
 }
 
+/** Omit applied to each member of a union separately (plain Omit keeps only the shared keys). */
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
+
 /** Question as shown while answering: never contains the correct answer. */
-export type PublicQuestion = Omit<
+export type PublicQuestion = DistributiveOmit<
   Question,
   'correctOptionId' | 'correctOptionIds' | 'correct' | 'acceptedAnswers' | 'tolerance'
 >

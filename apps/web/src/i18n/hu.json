@@ -20,6 +20,12 @@
     "nameTaken": "Ez a név már foglalt.",
     "invalidInput": "Hibás adat.",
     "notFound": "Nem található.",
-    "connectionLost": "Megszakadt a kapcsolat, újracsatlakozás…"
+    "connectionLost": "Megszakadt a kapcsolat, újracsatlakozás…",
+    "questionClosed": "Ez a kérdés már lezárult.",
+    "alreadyAnswered": "Már válaszoltál.",
+    "invalidAnswer": "Érvénytelen válasz.",
+    "unknownTeam": "Válassz csapatot.",
+    "invalidTransition": "Ez most nem lehetséges.",
+    "playerNotFound": "A játékos nem található. Csatlakozz újra."
   }
 }

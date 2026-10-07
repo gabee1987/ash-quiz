@@ -20,6 +20,12 @@
     "nameTaken": "That name is already taken.",
     "invalidInput": "Invalid input.",
     "notFound": "Not found.",
-    "connectionLost": "Connection lost, reconnecting…"
+    "connectionLost": "Connection lost, reconnecting…",
+    "questionClosed": "This question is closed.",
+    "alreadyAnswered": "You have already answered.",
+    "invalidAnswer": "Invalid answer.",
+    "unknownTeam": "Choose a team.",
+    "invalidTransition": "That is not possible right now.",
+    "playerNotFound": "Player not found. Join again."
   }
 }
