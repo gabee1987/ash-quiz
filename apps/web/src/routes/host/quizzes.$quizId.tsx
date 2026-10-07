@@ -107,10 +107,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
   }, [draft.questions, errors, visited])
   const setQuestions = (next: Question[]) => setDraft((d) => ({ ...d, questions: next }))
   const titleError = errors.title
-  const colourful = draft.settings.answerStyle === 'colourful'
 
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
+    // data-palette colours the option badges in the editor like the answers in the game.
+    <div data-palette={draft.settings.answerPalette} className="mx-auto grid w-full max-w-6xl gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
       <div className="flex min-w-0 flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Button asChild variant="ghost" size="sm">
@@ -221,7 +221,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
         </Button>
         {showPreview && (
           <div className="xl:hidden">
-            <PhonePreview question={questions[selectedIndex] ?? null} index={selectedIndex} count={questions.length} colourful={colourful} />
+            <PhonePreview question={questions[selectedIndex] ?? null} index={selectedIndex} count={questions.length} settings={draft.settings} />
           </div>
         )}
       </div>
@@ -229,7 +229,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
       <aside className="hidden xl:block">
         <div className="sticky top-4 flex flex-col gap-2">
           <p className="text-center text-sm font-semibold text-muted-foreground">{t('editor.preview')}</p>
-          <PhonePreview question={questions[selectedIndex] ?? null} index={selectedIndex} count={questions.length} colourful={colourful} />
+          <PhonePreview question={questions[selectedIndex] ?? null} index={selectedIndex} count={questions.length} settings={draft.settings} />
         </div>
       </aside>
     </div>

@@ -59,6 +59,8 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     revealAnswers: 'afterQuestion',
     scoreboard: 'afterQuestion',
     answerStyle: 'plain',
+    answerPalette: 'vivid',
+    answerSymbols: 'shapes',
     finalResults: 'immediately',
     theme: 'classic',
     ...overrides,

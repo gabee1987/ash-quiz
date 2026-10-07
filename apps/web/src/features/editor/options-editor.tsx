@@ -4,7 +4,7 @@ import { PlusIcon, XIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ShapeIcon } from '../../components/icons'
-import { optionColour } from '../../components/option-colours'
+import { optionFill, optionVars } from '../../components/option-colours'
 import { newId, withImage } from './draft'
 import { ImageField } from './image-field'
 import type { FieldErrors } from './validate'
@@ -62,7 +62,7 @@ export function OptionsEditor({
             className={`flex flex-col gap-2 rounded-2xl border-2 p-2 transition-colors ${correct ? 'border-success bg-success/10' : 'bg-card'}`}
           >
             <div className="flex items-center gap-2">
-              <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${optionColour(index)}`}>
+              <span style={optionVars(index)} className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${optionFill}`}>
                 <ShapeIcon index={index} className="size-5" />
               </span>
               <Input

@@ -3,12 +3,12 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/cn'
 import { Slot } from 'radix-ui'
 
-// Chunky game buttons: solid variants sit on a darker bottom edge and sink into it when pressed.
+// Chunky game buttons: solid variants sit on a darker bottom edge, lift a little on hover and sink into the edge when pressed.
 const solid =
-  'shadow-[0_4px_0_0_var(--edge)] enabled:active:translate-y-1 enabled:active:shadow-none [a&]:active:translate-y-1 [a&]:active:shadow-none'
+  'shadow-[0_4px_0_0_var(--edge)] enabled:hover:-translate-y-0.5 enabled:hover:shadow-[0_6px_0_0_var(--edge)] enabled:active:translate-y-1 enabled:active:shadow-none [a&]:hover:-translate-y-0.5 [a&]:hover:shadow-[0_6px_0_0_var(--edge)] [a&]:active:translate-y-1 [a&]:active:shadow-none'
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap transition-[transform,box-shadow,background-color,color,filter] duration-100 outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap transition-[transform,box-shadow,background-color,color,filter] duration-150 ease-out outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   {
     variants: {
       variant: {

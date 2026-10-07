@@ -1,9 +1,19 @@
-import { gameSettingsSchema, gameThemes, type GameSettings } from '@ash-quiz/shared'
+import {
+  answerPalettes,
+  answerSymbols,
+  gameSettingsSchema,
+  gameThemes,
+  type AnswerPalette,
+  type AnswerSymbols,
+  type GameSettings,
+} from '@ash-quiz/shared'
 import type { TFunction } from 'i18next'
 import { XIcon } from 'lucide-react'
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChoiceCards } from '@/components/choice-cards'
+import { OptionSymbol } from '@/components/icons'
+import { OPTION_COLOURS } from '@/components/option-colours'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -27,6 +37,8 @@ export function settingsSummary(settings: GameSettings, t: TFunction): string {
     `${t('host.create.finalResults')}: ${t(`host.create.finalResultsOptions.${settings.finalResults}`)}`,
     t(`host.create.answerStyleOptions.${settings.answerStyle}`),
     `${t('host.create.theme')}: ${t(`host.create.themeOptions.${settings.theme}`)}`,
+    settings.answerPalette !== 'vivid' ? t(`host.create.answerPaletteOptions.${settings.answerPalette}`) : null,
+    settings.answerSymbols !== 'shapes' ? t(`host.create.answerSymbolsOptions.${settings.answerSymbols}`) : null,
     settings.speedBonus ? t('host.create.speedBonus') : null,
     settings.shuffleOptions ? t('host.create.shuffle') : null,
   ]
@@ -147,9 +159,30 @@ export function GameSettingsForm({ value, onChange }: { value: GameSettings; onC
         help={value.finalResults === 'onRelease' ? t('host.create.finalResultsHelp') : undefined}
       />
       <ChoiceCards
+        legend={t('host.create.answerPalette')}
+        value={value.answerPalette}
+        choices={answerPalettes.map((palette) => ({
+          value: palette,
+          label: t(`host.create.answerPaletteOptions.${palette}`),
+          adornment: <PaletteSwatch palette={palette} />,
+        }))}
+        onChange={(answerPalette) => set({ answerPalette })}
+        help={t('host.create.answerPaletteHelp')}
+      />
+      <ChoiceCards
+        legend={t('host.create.answerSymbols')}
+        value={value.answerSymbols}
+        choices={answerSymbols.map((symbols) => ({
+          value: symbols,
+          label: t(`host.create.answerSymbolsOptions.${symbols}`),
+          adornment: <SymbolsSwatch symbols={symbols} />,
+        }))}
+        onChange={(answerSymbols) => set({ answerSymbols })}
+      />
+      <ChoiceCards
         legend={t('host.create.answerStyle')}
         value={value.answerStyle}
-        choices={choices(['plain', 'colourful'] as const, (v) => t(`host.create.answerStyleOptions.${v}`))}
+        choices={choices(['colourful', 'plain'] as const, (v) => t(`host.create.answerStyleOptions.${v}`))}
         onChange={(answerStyle) => set({ answerStyle })}
         help={t('host.create.answerStyleHelp')}
       />
@@ -180,6 +213,29 @@ function ThemeSwatch({ colours }: { colours: readonly string[] }) {
     <span aria-hidden="true" className="flex shrink-0 -space-x-1.5">
       {colours.map((colour) => (
         <span key={colour} className="size-6 rounded-full border-2 border-card" style={{ background: colour }} />
+      ))}
+    </span>
+  )
+}
+
+/** The six answer colours of a palette; the wrapper's data-palette selects them in styles.css. */
+function PaletteSwatch({ palette }: { palette: AnswerPalette }) {
+  return (
+    <span aria-hidden="true" data-palette={palette} className="flex shrink-0 -space-x-1">
+      {Array.from({ length: OPTION_COLOURS }, (_, n) => (
+        <span key={n} className="size-5 rounded-full border-2 border-card" style={{ background: `var(--option-${n + 1})` }} />
+      ))}
+    </span>
+  )
+}
+
+function SymbolsSwatch({ symbols }: { symbols: AnswerSymbols }) {
+  return (
+    <span aria-hidden="true" className="flex shrink-0 gap-1 text-foreground">
+      {[0, 1, 2].map((index) => (
+        <span key={index} className="grid size-6 place-items-center rounded-md bg-muted text-xs">
+          <OptionSymbol symbols={symbols} index={index} className="size-3.5" />
+        </span>
       ))}
     </span>
   )

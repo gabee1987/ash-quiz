@@ -23,7 +23,12 @@
     "submit": "Csatlakozom",
     "hostLogin": "Játékvezető belépés",
     "pinInvalid": "Add meg a 6 jegyű PIN-t.",
-    "nameRequired": "Adj meg egy nevet."
+    "nameRequired": "Adj meg egy nevet.",
+    "scan": "QR-kód beolvasása",
+    "scanHint": "Irányítsd a kamerát a kivetítőn látható QR-kódra.",
+    "cameraDenied": "Nincs engedély a kamera használatára. Írd be a PIN-t.",
+    "cameraUnavailable": "A kamera nem érhető el. Írd be a PIN-t.",
+    "pinDigit": "{{n}}. számjegy"
   },
   "common": {
     "loading": "Betöltés…",
@@ -170,7 +175,26 @@
         "classic": "Klasszikus",
         "arcade": "Játékterem",
         "sunset": "Naplemente",
-        "mint": "Menta"
+        "mint": "Menta",
+        "ocean": "Óceán",
+        "berry": "Bogyó",
+        "forest": "Erdő",
+        "graphite": "Grafit"
+      },
+      "answerPalette": "Válaszok színei",
+      "answerPaletteHelp": "A válaszgombok és az eredménysávok színei a telefonokon és a kivetítőn, a témától függetlenül.",
+      "answerPaletteOptions": {
+        "vivid": "Élénk",
+        "candy": "Cukorka",
+        "neon": "Neon",
+        "earth": "Földszínek"
+      },
+      "answerSymbols": "Válaszok jelei",
+      "answerSymbolsOptions": {
+        "shapes": "Formák",
+        "letters": "Betűk",
+        "numbers": "Számok",
+        "icons": "Ikonok"
       }
     },
     "newQuiz": "Új kvíz",
@@ -224,7 +248,13 @@
     "backToHome": "Vissza a kezdőlapra",
     "yourAnswers": "Válaszaid",
     "yourAnswer": "A te válaszod",
-    "resultsComing": "Hamarosan jönnek az eredmények."
+    "resultsComing": "Hamarosan jönnek az eredmények.",
+    "movedUp_one": "{{count}} hellyel előrébb",
+    "movedUp_other": "{{count}} hellyel előrébb",
+    "movedDown_one": "{{count}} hellyel hátrébb",
+    "movedDown_other": "{{count}} hellyel hátrébb",
+    "wellPlayed": "Szép játék!",
+    "champion": "Győztes"
   },
   "screen": {
     "joinAt": "Csatlakozás itt",
@@ -233,7 +263,11 @@
     "other": "Egyéb",
     "correctCount_one": "{{count}} válaszból {{correct}} helyes",
     "correctCount_other": "{{count}} válaszból {{correct}} helyes",
-    "qrCode": "QR-kód a csatlakozáshoz"
+    "qrCode": "QR-kód a csatlakozáshoz",
+    "runnersUp": "A többiek",
+    "previous": "Előző",
+    "next": "Következő",
+    "keyHint": "Szóköz"
   },
   "questionTypes": {
     "single": "Egy helyes válasz",
@@ -296,7 +330,6 @@
     "preview": "Telefonos előnézet",
     "showPreview": "Telefonos előnézet megjelenítése",
     "hidePreview": "Telefonos előnézet elrejtése",
-    "previewEmpty": "Válasszon ki egy kérdést az előnézethez.",
     "status": {
       "saved": "Mentve",
       "pending": "Nem mentett módosítások…",
@@ -315,7 +348,13 @@
       "markCorrect": "Jelölje meg a helyes lehetőséget.",
       "duplicateOptions": "A lehetőségeknek különbözniük kell.",
       "duplicateQuestions": "Ismétlődő kérdésazonosító; másolja újra a kérdést."
-    }
+    },
+    "sampleQuestion": "Melyik a Naprendszer legnagyobb bolygója?",
+    "sampleOption1": "Jupiter",
+    "sampleOption2": "Mars",
+    "sampleOption3": "Vénusz",
+    "sampleOption4": "Szaturnusz",
+    "previewSample": "Mintakérdés a beállítások előnézetéhez."
   },
   "users": {
     "title": "Felhasználók",

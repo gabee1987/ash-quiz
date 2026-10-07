@@ -1,14 +1,17 @@
 import type { GamePublicInfo } from '@ash-quiz/shared'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, type FormEvent } from 'react'
+import { CameraIcon, Loader2Icon, PlayIcon } from 'lucide-react'
+import { Suspense, lazy, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { ChoiceCards } from '@/components/choice-cards'
 import { FormAlert } from '@/components/form-alert'
+import { PinInput } from '@/components/pin-input'
 import { Button } from '@/components/ui/button'
 import { TextField } from '../components/text-field'
 import { apiFetch } from '../lib/api'
+import { PIN_PATTERN } from '../lib/pin'
 import { getStoredPlayer, storePlayer } from '../lib/player-storage'
 import { emitAck, ensureConnected } from '../lib/socket'
 
@@ -19,7 +22,11 @@ export const Route = createFileRoute('/')({
   component: JoinPage,
 })
 
-const PIN_PATTERN = /^[0-9]{6}$/
+// The scanner and its decoder load only when the camera button is pressed.
+const QrScanner = lazy(() => import('../components/qr-scanner'))
+
+/** Camera access exists only in secure contexts (HTTPS or localhost); elsewhere the button is not offered. */
+const canScan = typeof navigator !== 'undefined' && typeof navigator.mediaDevices?.getUserMedia === 'function'
 
 function JoinPage() {
   const { t } = useTranslation()
@@ -30,6 +37,7 @@ function JoinPage() {
   const [teamId, setTeamId] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [pending, setPending] = useState(false)
+  const [scanning, setScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const pinValid = PIN_PATTERN.test(pin)
@@ -41,7 +49,8 @@ function JoinPage() {
   })
   const teamMode = info.data?.mode === 'team'
 
-  const pinError = submitted && !pinValid ? t('join.pinInvalid') : undefined
+  const infoError = info.error && 'code' in info.error ? (info.error as { code: string }).code : null
+  const pinError = submitted && !pinValid ? t('join.pinInvalid') : infoError ? t(infoError) : undefined
   const nameError = submitted && !name.trim() ? t('join.nameRequired') : undefined
   const teamError = submitted && teamMode && !teamId ? t('errors.unknownTeam') : undefined
 
@@ -74,26 +83,33 @@ function JoinPage() {
     }
   }
 
-  const infoError = info.error && 'code' in info.error ? (info.error as { code: string }).code : null
-
   return (
     <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-5">
-      <h1 className="text-center text-3xl font-black tracking-tight">{t('join.title')}</h1>
-      <form className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-soft" onSubmit={(e) => void onSubmit(e)} noValidate>
-        <TextField
-          label={t('join.pin')}
-          name="pin"
-          inputMode="numeric"
-          autoComplete="off"
-          enterKeyHint="next"
-          maxLength={6}
-          value={pin}
-          onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-          placeholder={t('join.pinPlaceholder')}
-          error={pinError ?? (infoError ? t(infoError) : undefined)}
-        />
+      <h1 className="animate-fade-up text-center text-3xl font-black tracking-tight">{t('join.title')}</h1>
+      <form
+        className="flex animate-pop flex-col gap-5 rounded-3xl border bg-card p-5 shadow-soft"
+        onSubmit={(e) => void onSubmit(e)}
+        noValidate
+      >
+        <div className="flex flex-col gap-2">
+          <div className="flex min-h-10 items-center justify-between gap-2">
+            <span className="font-semibold">{t('join.pin')}</span>
+            {canScan && (
+              <Button type="button" variant="outline" size="sm" onClick={() => setScanning(true)}>
+                <CameraIcon aria-hidden="true" />
+                {t('join.scan')}
+              </Button>
+            )}
+          </div>
+          <PinInput value={pin} onChange={setPin} invalid={!!pinError} describedBy={pinError ? 'pin-error' : undefined} />
+          {pinError && (
+            <p id="pin-error" className="text-sm font-semibold text-destructive">
+              {pinError}
+            </p>
+          )}
+        </div>
         {info.data && (
-          <p className="rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
+          <p className="animate-pop rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
             {info.data.quizTitle}
           </p>
         )}
@@ -119,7 +135,8 @@ function JoinPage() {
           />
         )}
         {error && <FormAlert>{t(error)}</FormAlert>}
-        <Button type="submit" size="lg" disabled={pending}>
+        <Button type="submit" size="xl" disabled={pending}>
+          {pending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
           {pending ? t('common.loading') : t('join.submit')}
         </Button>
       </form>
@@ -129,6 +146,17 @@ function JoinPage() {
       >
         {t('join.hostLogin')}
       </Link>
+      {scanning && (
+        <Suspense fallback={null}>
+          <QrScanner
+            onResult={(scanned) => {
+              setPin(scanned)
+              setScanning(false)
+            }}
+            onClose={() => setScanning(false)}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

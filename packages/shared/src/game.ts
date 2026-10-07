@@ -30,6 +30,8 @@ export interface PlayerPublic {
   connected: boolean
   score: number
   rank: number
+  /** Rank before the current question's points were added; equals `rank` outside a reveal. */
+  previousRank: number
   /** Answers marked correct so far. */
   correctCount: number
   /** Points earned on the current question once it is revealed, otherwise 0. */
@@ -41,6 +43,8 @@ export interface TeamPublic {
   name: string
   score: number
   rank: number
+  /** Rank before the current question's points were added; equals `rank` outside a reveal. */
+  previousRank: number
   memberCount: number
 }
 

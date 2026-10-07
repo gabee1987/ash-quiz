@@ -23,7 +23,7 @@ function PlayPage() {
   const { pin } = Route.useParams()
   const navigate = useNavigate()
   const { status, player, clockOffset, closed } = useGameStore()
-  useGameTheme(player?.settings.theme)
+  useGameTheme(player?.settings)
 
   useEffect(() => {
     const stored = getStoredPlayer(pin)

@@ -1,10 +1,14 @@
 import type { PlayerSnapshot } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/lib/cn'
 import { CheckIcon, CrossIcon } from '../../components/icons'
+import { RankArrow } from '../../components/rank-arrow'
+import { stagger, useCountUp } from '../../lib/motion'
 import { CorrectAnswer } from '../questions/correct-answer'
 
 export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
   const { t } = useTranslation()
+  const points = useCountUp(snapshot.lastPoints ?? 0, 900, 350)
   if (snapshot.answersHidden) return <AnswerKept answered={snapshot.myAnswer !== null} />
 
   const question = snapshot.reveal?.question
@@ -12,7 +16,7 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
   const answered = snapshot.myAnswer !== null
   const correct = snapshot.lastCorrect
 
-  let tone = 'bg-card border'
+  let tone = 'border bg-card'
   let title = t('play.noAnswer')
   if (isPoll) title = answered ? t('play.thanksForVoting') : t('play.noAnswer')
   else if (correct === true) [tone, title] = ['bg-success text-success-foreground', t('play.correct')]
@@ -21,22 +25,58 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
-      <div className={`flex w-full flex-col items-center gap-2 rounded-2xl px-4 py-8 ${tone}`}>
-        {correct === true && <CheckIcon className="size-14" />}
-        {correct === false && <CrossIcon className="size-14" />}
-        <h1 className="text-3xl font-black">{title}</h1>
-        {!isPoll && snapshot.lastPoints !== null && (
-          <p className="text-xl font-semibold">{t('play.points', { count: snapshot.lastPoints })}</p>
+      <div className={cn('relative flex w-full animate-pop flex-col items-center gap-3 rounded-3xl px-4 py-8 shadow-soft', tone)}>
+        {correct === true && <Sparkles />}
+        {correct === true && (
+          <span className="grid size-20 animate-pop place-items-center rounded-full bg-success-foreground/20" style={stagger(1, 0, 150)}>
+            <CheckIcon className="size-12" drawn />
+          </span>
         )}
+        {correct === false && (
+          <span className="grid size-20 animate-wiggle place-items-center rounded-full bg-destructive-foreground/20" style={stagger(1, 0, 150)}>
+            <CrossIcon className="size-12" />
+          </span>
+        )}
+        <h1 className="text-3xl font-black">{title}</h1>
+        {!isPoll && snapshot.lastPoints !== null && <p className="text-2xl font-black tabular-nums">{t('play.points', { count: points })}</p>}
       </div>
-      {question && <CorrectAnswer question={question} />}
+      {question && (
+        <div className="animate-fade-up" style={stagger(1, 0, 300)}>
+          <CorrectAnswer question={question} symbols={snapshot.settings.answerSymbols} />
+        </div>
+      )}
       {/* The running rank is a scoreboard of its own: only shown when the scoreboard follows every question. */}
       {snapshot.settings.scoreboard === 'afterQuestion' && (
-        <p className="text-muted-foreground">
-          {t('play.totalScore', { score: snapshot.me.score })} · {t('play.rank', { rank: snapshot.me.rank })}
+        <p className="flex animate-fade-up items-center gap-2 font-semibold text-muted-foreground" style={stagger(1, 0, 450)}>
+          <span>{t('play.totalScore', { score: snapshot.me.score })}</span>
+          <span aria-hidden="true">·</span>
+          <span>{t('play.rank', { rank: snapshot.me.rank })}</span>
+          <RankArrow previous={snapshot.me.previousRank} rank={snapshot.me.rank} />
         </p>
       )}
     </div>
+  )
+}
+
+/** Eight dots flying out from the centre of the card once. */
+function Sparkles() {
+  return (
+    <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-visible">
+      {Array.from({ length: 8 }, (_, i) => {
+        const angle = (i / 8) * Math.PI * 2
+        return (
+          <span
+            key={i}
+            className="absolute top-1/2 left-1/2 size-3 animate-burst rounded-full bg-success-foreground"
+            style={{
+              ['--dx' as string]: `${Math.cos(angle) * 130}px`,
+              ['--dy' as string]: `${Math.sin(angle) * 110}px`,
+              animationDelay: '200ms',
+            }}
+          />
+        )
+      })}
+    </span>
   )
 }
 
@@ -45,10 +85,10 @@ function AnswerKept({ answered }: { answered: boolean }) {
   const { t } = useTranslation()
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
-      <div className="flex w-full flex-col items-center gap-2 rounded-2xl bg-card border px-4 py-8">
-        <h1 className="text-3xl font-bold">{answered ? t('play.answerKept') : t('play.noAnswer')}</h1>
+      <div className="flex w-full animate-pop flex-col items-center gap-2 rounded-3xl border bg-card px-4 py-8 shadow-soft">
+        <h1 className="text-3xl font-black">{answered ? t('play.answerKept') : t('play.noAnswer')}</h1>
       </div>
-      <p className="text-muted-foreground">{t('play.resultsAtEnd')}</p>
+      <p className="font-semibold text-muted-foreground">{t('play.resultsAtEnd')}</p>
     </div>
   )
 }

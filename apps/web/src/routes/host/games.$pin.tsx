@@ -29,7 +29,7 @@ function HostGamePage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
   const { status, host, clockOffset, closed } = useGameStore()
-  useGameTheme(host?.settings.theme)
+  useGameTheme(host?.settings)
   const info = useQuery({
     queryKey: ['game', pin],
     queryFn: () => apiFetch<GameHostInfo>(`/api/games/${pin}`),
@@ -157,7 +157,7 @@ function PhaseDetail({
       return host.reveal ? (
         <div className="flex flex-col gap-3">
           <p className="text-xl font-extrabold wrap-break-word">{host.reveal.question.text}</p>
-          <DistributionBars reveal={host.reveal} />
+          <DistributionBars reveal={host.reveal} symbols={host.settings.answerSymbols} />
         </div>
       ) : null
     case 'finished':

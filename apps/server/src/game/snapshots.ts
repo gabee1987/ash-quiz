@@ -89,8 +89,8 @@ function conceal(state: GameState, base: GameSnapshotBase): GameSnapshotBase {
     ...base,
     question: base.reveal && question ? toPublicQuestion(question) : base.question,
     reveal: null,
-    players: base.players.map((p) => ({ ...p, score: 0, rank: 1, correctCount: 0, roundPoints: 0 })),
-    teams: base.teams.map((t) => ({ ...t, score: 0, rank: 1 })),
+    players: base.players.map((p) => ({ ...p, score: 0, rank: 1, previousRank: 1, correctCount: 0, roundPoints: 0 })),
+    teams: base.teams.map((t) => ({ ...t, score: 0, rank: 1, previousRank: 1 })),
     questionStats: base.questionStats.map((q) => ({ ...q, correctCount: 0 })),
   }
 }
@@ -130,6 +130,18 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience):
   const revealed = question !== null && isRevealed(state)
   const players = Object.values(state.players)
 
+  const roundPoints = (p: Player) => (revealed && question ? (p.answers[question.id]?.points ?? 0) : 0)
+  // Ranks before this question's points: what the scoreboard shows as "moved up" or "moved down".
+  const previousPlayerRank = rankLookup(players.map((p) => ({ id: p.id, name: p.name, score: p.score - roundPoints(p) })))
+  const previousTeamRank = rankLookup(
+    Object.values(state.teams).map((team) => {
+      const members = players.filter((p) => p.teamId === team.id)
+      const gain = members.reduce((sum, p) => sum + roundPoints(p), 0)
+      // Mirrors addTeamGains: a team gains the rounded mean of its members' points.
+      return { id: team.id, name: team.name, score: team.score - (members.length === 0 ? 0 : Math.round(gain / members.length)) }
+    }),
+  )
+
   const rankedPlayers: PlayerPublic[] = denseRank(players).map((p) => ({
     id: p.id,
     name: p.name,
@@ -137,14 +149,16 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience):
     connected: p.connected,
     score: p.score,
     rank: p.rank,
+    previousRank: previousPlayerRank.get(p.id) ?? p.rank,
     correctCount: Object.values(p.answers).filter((a) => a.correct === true).length,
-    roundPoints: revealed && question ? (p.answers[question.id]?.points ?? 0) : 0,
+    roundPoints: roundPoints(p),
   }))
   const rankedTeams: TeamPublic[] = denseRank(Object.values(state.teams)).map((t) => ({
     id: t.id,
     name: t.name,
     score: t.score,
     rank: t.rank,
+    previousRank: previousTeamRank.get(t.id) ?? t.rank,
     memberCount: players.filter((p) => p.teamId === t.id).length,
   }))
 
@@ -168,6 +182,10 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience):
     answersHidden: answersHidden(state, audience),
     resultsPending: resultsPendingFor(state, audience),
   }
+}
+
+function rankLookup(items: { id: string; name: string; score: number }[]): Map<string, number> {
+  return new Map(denseRank(items).map((item) => [item.id, item.rank]))
 }
 
 /** Distribution and correctness of one question over every player's recorded answer. */

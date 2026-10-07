@@ -23,7 +23,12 @@
     "submit": "Join",
     "hostLogin": "Host login",
     "pinInvalid": "Enter the 6-digit PIN.",
-    "nameRequired": "Enter a name."
+    "nameRequired": "Enter a name.",
+    "scan": "Scan QR code",
+    "scanHint": "Point the camera at the QR code on the screen.",
+    "cameraDenied": "Camera access was refused. Type the PIN instead.",
+    "cameraUnavailable": "The camera is not available. Type the PIN instead.",
+    "pinDigit": "Digit {{n}}"
   },
   "common": {
     "loading": "Loading…",
@@ -170,7 +175,26 @@
         "classic": "Classic",
         "arcade": "Arcade",
         "sunset": "Sunset",
-        "mint": "Mint"
+        "mint": "Mint",
+        "ocean": "Ocean",
+        "berry": "Berry",
+        "forest": "Forest",
+        "graphite": "Graphite"
+      },
+      "answerPalette": "Answer colours",
+      "answerPaletteHelp": "The answer buttons and the result bars on the phones and the projector, independent of the theme.",
+      "answerPaletteOptions": {
+        "vivid": "Vivid",
+        "candy": "Candy",
+        "neon": "Neon",
+        "earth": "Earth"
+      },
+      "answerSymbols": "Answer symbols",
+      "answerSymbolsOptions": {
+        "shapes": "Shapes",
+        "letters": "Letters",
+        "numbers": "Numbers",
+        "icons": "Icons"
       }
     },
     "newQuiz": "New quiz",
@@ -224,7 +248,13 @@
     "backToHome": "Back to home",
     "yourAnswers": "Your answers",
     "yourAnswer": "Your answer",
-    "resultsComing": "The results will be shown soon."
+    "resultsComing": "The results will be shown soon.",
+    "movedUp_one": "Up {{count}} place",
+    "movedUp_other": "Up {{count}} places",
+    "movedDown_one": "Down {{count}} place",
+    "movedDown_other": "Down {{count}} places",
+    "wellPlayed": "Well played!",
+    "champion": "Winner"
   },
   "screen": {
     "joinAt": "Join at",
@@ -233,7 +263,11 @@
     "other": "Other",
     "correctCount_one": "{{correct}} of {{count}} answered correctly",
     "correctCount_other": "{{correct}} of {{count}} answered correctly",
-    "qrCode": "QR code to join the game"
+    "qrCode": "QR code to join the game",
+    "runnersUp": "Runners-up",
+    "previous": "Previous",
+    "next": "Next",
+    "keyHint": "Space"
   },
   "questionTypes": {
     "single": "Single choice",
@@ -296,7 +330,6 @@
     "preview": "Phone preview",
     "showPreview": "Show phone preview",
     "hidePreview": "Hide phone preview",
-    "previewEmpty": "Select a question to preview it.",
     "status": {
       "saved": "Saved",
       "pending": "Unsaved changes…",
@@ -315,7 +348,13 @@
       "markCorrect": "Mark the correct option.",
       "duplicateOptions": "Options must be distinct.",
       "duplicateQuestions": "Duplicate question ids; duplicate the question again."
-    }
+    },
+    "sampleQuestion": "Which is the largest planet in the Solar System?",
+    "sampleOption1": "Jupiter",
+    "sampleOption2": "Mars",
+    "sampleOption3": "Venus",
+    "sampleOption4": "Saturn",
+    "previewSample": "A sample question to preview the settings."
   },
   "users": {
     "title": "Users",

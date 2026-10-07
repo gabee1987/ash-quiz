@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { OptionButton } from '../../components/option-button'
+import { stagger } from '../../lib/motion'
 import type { QuestionProps } from './types'
 
-export function TrueFalse({ mode, disabled, large, colourful, onSubmit }: QuestionProps<'truefalse'>) {
+export function TrueFalse({ mode, disabled, pending, large, colourful, symbols, onSubmit }: QuestionProps<'truefalse'>) {
   const { t } = useTranslation()
+  const [chosen, setChosen] = useState<boolean | null>(null)
   const choices = [
     { value: true, label: t('play.true') },
     { value: false, label: t('play.false') },
@@ -11,17 +14,25 @@ export function TrueFalse({ mode, disabled, large, colourful, onSubmit }: Questi
   return (
     <div className="@container flex flex-1 flex-col">
       <div className="grid flex-1 auto-rows-fr gap-3 @md:grid-cols-2">
-      {choices.map((choice, index) => (
-        <OptionButton
-          key={String(choice.value)}
-          index={index}
-          label={choice.label}
-          large={large ?? false}
-          colourful={colourful ?? large ?? false}
-          disabled={mode === 'display' || disabled}
-          onClick={() => onSubmit?.({ type: 'truefalse', value: choice.value })}
-        />
-      ))}
+        {choices.map((choice, index) => (
+          <OptionButton
+            key={String(choice.value)}
+            index={index}
+            label={choice.label}
+            symbols={symbols}
+            large={large ?? false}
+            colourful={colourful ?? large ?? false}
+            selected={chosen === choice.value}
+            pending={(pending ?? false) && chosen === choice.value}
+            disabled={mode === 'display' || disabled}
+            className="animate-pop"
+            style={stagger(index, 70, 150)}
+            onClick={() => {
+              setChosen(choice.value)
+              onSubmit?.({ type: 'truefalse', value: choice.value })
+            }}
+          />
+        ))}
       </div>
     </div>
   )

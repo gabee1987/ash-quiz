@@ -11,7 +11,7 @@
 | Moderate | esbuild ≤ 0.24.2 | [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99): any website can send requests to esbuild's development server | `drizzle-kit` (migration generator) | Affects only `esbuild --serve`, which the project never runs. `drizzle-kit` is a developer tool and is not in the image. |
 | Low | esbuild 0.27.3 – 0.28.0 | [GHSA-g7r4-m6w7-qqqr](https://github.com/advisories/GHSA-g7r4-m6w7-qqqr): arbitrary file read through esbuild's development server on Windows | `vitest` → `vite` | Same: esbuild is used as a code transformer, its development server is never started. Test tooling only, not in the image. |
 
-Re-run both audits before every release and update this table. After the design system packages were added (below), `pnpm audit --prod` still reports no known vulnerabilities (2026-10-07).
+Re-run both audits before every release and update this table. After the design system and game screen packages were added (below), `pnpm audit --prod` still reports no known vulnerabilities (2026-10-07).
 
 ### Front-end packages
 
@@ -26,6 +26,8 @@ The web app bundles the following open-source packages. None of them calls a net
 | `sonner` | Toast notifications | phase 9 |
 | `@fontsource-variable/nunito` | Nunito font files, self-hosted (no font CDN) | phase 9 |
 | `@axe-core/playwright` | Accessibility checks in the end-to-end tests (development only, not in the image) | phase 9 |
+| `canvas-confetti` | Confetti on the podium, drawn on a canvas over the page; loaded only then. Used without its web worker, so the CSP keeps `script-src 'self'` (the worker would come from a blob URL) | phase 10 |
+| `jsqr` | Decodes the join QR code from the phone's camera, on the device; loaded only when the camera button is pressed | phase 10 |
 
 The shadcn/ui component code is copied into `apps/web/src/components/ui` rather than installed, so it is reviewed like the rest of the code.
 
@@ -37,6 +39,7 @@ The shadcn/ui component code is copied into `apps/web/src/components/ui` rather 
 - **Errors**: clients receive i18n keys only, never internal details; errors are logged server-side with request ids.
 - **CSV export**: values that Excel would run as formulas are neutralised.
 - **Data minimisation (GDPR)**: players give a nickname only. Finished games are deleted after `RESULTS_RETENTION_DAYS` (default 90).
+- **Camera**: the join page can read the projector's QR code with the phone's camera. Frames are decoded in the browser (`jsqr`) and are never sent anywhere; the camera stream stops when the dialog closes. Browsers allow camera access only in a secure context (HTTPS, or localhost), so the button is not offered on a plain-HTTP venue LAN deployment; players scan with the camera app there, as before.
 - **Results** are visible only to the game's host; the public projector screen never receives answers held back by the host.
 
 ## Known limitations

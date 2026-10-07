@@ -10,6 +10,16 @@
 - Errors from the server that no form field causes are shown as toasts.
 - Accessibility: visible focus rings, contrast checked automatically in both modes, reduced-motion setting respected.
 
+### Game screens
+- Motion everywhere players and the audience look: buttons lift and sink, a soft colour backdrop drifts behind every page, questions and answers pop in, the timer is a ring, points count up, the reveal bars grow, the scoreboard shows who moved up or down, the podium rises third, second, first with confetti.
+- Join page: one box per PIN digit (typing, pasting and SMS-style autofill all work), and a camera button that reads the projector's QR code inside the app (over HTTPS).
+- Answer colours and symbols are game settings: four palettes (Vivid, Candy, Neon, Earth) and four symbol sets (shapes, letters, numbers, icons), independent of the theme so answers stand out from the background. New quizzes get coloured answer buttons on phones by default; quizzes saved before the answer style existed now get them too.
+- Four more themes: Ocean, Berry, Forest and Graphite (a nearly neutral one for formal events).
+- Projector: the reveal shows the question's image, the correct answer in its colour, the bars and the figures in one layout; the podium adds a crown, confetti and the runners-up; the results summary has on-screen arrows and a progress bar; a projector opened by the host shows the next step as a button next to the keyboard shortcut.
+- Phones: rank change arrows on the reveal and the scoreboard, a "Well played" card for everyone outside the top three.
+- Results page: each question's image next to its statistics.
+- Editor: the phone preview renders in the quiz's theme and palette and shows a sample question when none is selected, so every visual setting is previewed at once.
+
 ### Fixes
 - Rate limiting applies to API requests only. Static files were counted too, so many phones sharing one public IP (venue wifi with a cloud deployment) could get errors and a blank page while loading the app.
 
