@@ -13,11 +13,7 @@ One file per phase. Each phase is one `feature/*` branch off `develop`, implemen
 | 7 | [Results, history, export, retention](phase-7-results.md) | `feature/results` | todo |
 | 8 | [Hardening: load test, end-to-end, release](phase-8-hardening.md) | `feature/hardening` | todo |
 
-Order matters: each phase builds on the previous one. Phase 1 is in the working tree, uncommitted, and should be the first commit on `develop`:
-
-```
-chore: scaffold pnpm workspace with shared schemas, server and web skeletons
-```
+Order matters: each phase builds on the previous one. Phase 1 and this planning material are the first two commits on `main` and `develop`.
 
 ## Conventions every plan follows
 
@@ -30,12 +26,11 @@ chore: scaffold pnpm workspace with shared schemas, server and web skeletons
 
 ## Git setup the user does once
 
+Local branches `main`, `develop` and `feature/game-engine` already exist. Remaining steps:
+
 ```
-git branch -M main
-git add -A && git commit -m "chore: scaffold pnpm workspace with shared schemas, server and web skeletons"
-git checkout -b develop
 gh repo create ash-quiz --private --source . --push
-git push -u origin main develop
+git push -u origin main develop feature/game-engine
 ```
 
 Then on GitHub: set `develop` as the default branch, protect `main` (require PR and the CI check), and open the project board with one card per phase.
