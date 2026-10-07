@@ -13,8 +13,14 @@ One file per phase. Each phase is one `feature/*` branch off `develop`, implemen
 | 6b | [Host flow options, sidebar, plain answer buttons](phase-6b-host-flow.md) | `feature/host-flow` | done |
 | 7 | [Results, history, export, retention](phase-7-results.md) | `feature/results` | done |
 | 8 | [Hardening: load test, end-to-end, release](phase-8-hardening.md) | `feature/hardening` | done |
+| 9 | [Design system, themes, light and dark mode](phase-9-design-system.md) | `feature/design-system` | planned |
+| 10 | [Game screens and animations](phase-10-game-screens.md) | `feature/game-screens` | planned |
+| 11 | [Quiz editor overhaul](phase-11-editor.md) | `feature/editor-v2` | planned |
+| 12 | [Connection resilience, status toasts and host messages](phase-12-resilience.md) | `feature/resilience` | planned |
 
 Order matters: each phase builds on the previous one. Phase 1 and this planning material are the first two commits on `main` and `develop`.
+
+Phases 1 to 8 are release 1.0.0. Phases 9 to 12 are the design and resilience overhaul: 9 first, then 10, 11 and 12 in any order (each branches from `develop` after 9 is merged). Features beyond those are collected in the [backlog](backlog.md) and get a plan once chosen.
 
 ## Conventions every plan follows
 
