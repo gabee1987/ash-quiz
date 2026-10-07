@@ -1,0 +1,35 @@
+---
+name: implement-phase
+description: Entry point for implementing one ASH Quiz phase from docs/plans. Use when asked to implement, continue or finish a phase (e.g. "/implement-phase 3"). Loads the plan, the relevant domain skills, drives the work to a verified state and produces the delivery report.
+argument-hint: <phase number>
+---
+
+# Implement a phase
+
+You are implementing one phase of ASH Quiz. The phase number is `$ARGUMENTS`.
+
+## Before writing code
+
+1. Read `AGENTS.md` in full. Its rules override this skill.
+2. Read `docs/plans/README.md`, then `docs/plans/phase-<N>-*.md` for your phase. The plan is the scope. Do not pull work in from later phases.
+3. Load the domain skills the plan lists under "Skills to load" (`game-engine`, `realtime`, `server-api`, `web-ui`, `i18n`). Always load `verification` and `git-workflow`.
+4. Read every existing file the plan says you will touch, and the files that import them.
+5. Post a numbered step list (from the plan's "Steps") with the verification check for each step, before editing anything.
+
+## While implementing
+
+- Work step by step in the plan's order. Each step ends with its check actually run, not assumed.
+- Keep the shared Zod schemas in `packages/shared` the single source of truth. If the plan requires a schema change, do it first and typecheck everything.
+- Every user-visible string goes through i18n with both `hu.json` and `en.json` updated in the same step.
+- No git commands. The user does all branching, committing and pushing. Do not run `git add`, `git commit`, `git checkout`, `git push` or `git init`.
+- If a step is blocked or the plan turns out to be wrong, stop, say what is wrong and propose the smallest change to the plan. Do not silently re-scope.
+
+## Finishing
+
+A phase is done only when all of these are true:
+
+- `pnpm typecheck`, `pnpm test` and `pnpm build` pass from the repo root, and you have read the output.
+- The plan's "Verification command" passes.
+- Every item in the plan's "Done when" list is met.
+- The delivery report (format in `git-workflow`) is written as the final message, with the manual test list, verification command, branch name and one-line commit message.
+- `docs/plans/README.md` status row for the phase is updated to `done`, and any deviations from the plan are noted in the plan file under a "Deviations" heading.

@@ -158,8 +158,15 @@ ASH Quiz: a browser-based, mobile-first live quiz (Kahoot-like) for company even
 - Package manager: pnpm 12 workspaces
 - Runtime / deployment target: one Node process serving both API, Socket.IO and the built SPA on the same origin. Docker image for Render/Railway or a laptop on the venue LAN. Postgres via docker-compose locally, Railway/Render/Supabase Postgres in the cloud.
 
+### Git and delivery
+- The user runs every git command. The agent never runs `git`.
+- Branches: `main` (production only), `develop` (integration), `feature/*`, `fix/*`, `chore/*` off `develop`.
+- Work is organised in phases under `docs/plans/`, implemented with the `implement-phase` skill. Every phase or task ends with the delivery report defined in the `git-workflow` skill: branch, one-line Conventional Commit message, verification command, tests added, manual test list.
+- Skills in `.claude/skills/`: `implement-phase`, `git-workflow`, `verification`, `game-engine`, `realtime`, `server-api`, `web-ui`, `i18n`.
+
 ### Commands
 - Install: `pnpm install`
+- Verify (typecheck + test + build): `pnpm verify`
 - Build: `pnpm build` (web: `vite build`, server: `tsup` bundle in `apps/server/dist`)
 - Test (all): `pnpm test`
 - Test (single file): `pnpm --filter @ash-quiz/server exec vitest run test/app.test.ts`

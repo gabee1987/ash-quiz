@@ -9,6 +9,7 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
+    "verify": "pnpm typecheck && pnpm test && pnpm build",
     "db:up": "docker compose up -d db"
   }
 }
