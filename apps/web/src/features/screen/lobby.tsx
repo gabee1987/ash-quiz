@@ -9,7 +9,7 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
     <div className="grid flex-1 items-center gap-10 lg:grid-cols-[auto_1fr]">
       {joinUrl && <QrCode value={joinUrl} className="mx-auto w-[min(60vh,80vw)]" />}
       <div className="flex flex-col gap-6">
-        <p className="text-3xl text-white/70">{host.quizTitle}</p>
+        <p className="text-3xl text-muted-foreground">{host.quizTitle}</p>
         <div>
           <p className="text-3xl">{t('screen.joinAt')}</p>
           <p className="text-4xl font-semibold break-all">{joinUrl}</p>
@@ -22,7 +22,7 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
         {teamMode ? (
           <div className="grid gap-4 md:grid-cols-2">
             {host.teams.map((team) => (
-              <div key={team.id} className="rounded-xl bg-white/10 p-4">
+              <div key={team.id} className="rounded-xl bg-card border p-4">
                 <p className="mb-2 text-3xl font-bold">{team.name}</p>
                 <Names names={host.players.filter((p) => p.teamId === team.id).map((p) => p.name)} />
               </div>
@@ -40,7 +40,7 @@ function Names({ names }: { names: string[] }) {
   return (
     <ul className="flex flex-wrap gap-3">
       {names.map((name) => (
-        <li key={name} className="rounded-full bg-white/15 px-4 py-1 text-2xl">
+        <li key={name} className="rounded-full bg-card border px-4 py-1 text-2xl">
           {name}
         </li>
       ))}

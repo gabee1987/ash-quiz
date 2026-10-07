@@ -11,20 +11,20 @@ export function ScreenReveal({ host }: { host: HostSnapshot }) {
   const isPoll = reveal.question.type === 'poll'
   return (
     <div className="flex flex-1 flex-col gap-8">
-      <p className="text-3xl text-white/70">
+      <p className="text-3xl text-muted-foreground">
         {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
       </p>
       <h1 className="text-5xl leading-tight font-bold wrap-break-word">{reveal.question.text}</h1>
       <div className="text-4xl">
         {host.awaitingGrading ? (
-          <p className="text-white/80">{t('play.awaitingGrading')}</p>
+          <p className="text-foreground">{t('play.awaitingGrading')}</p>
         ) : (
           <CorrectAnswer question={reveal.question} />
         )}
       </div>
       <DistributionBars reveal={reveal} large />
       {!isPoll && !host.awaitingGrading && (
-        <p className="text-3xl text-white/80">
+        <p className="text-3xl text-foreground">
           {t('screen.correctCount', { correct: reveal.correctCount, count: reveal.answeredCount })}
         </p>
       )}
@@ -41,14 +41,14 @@ function AnswersHidden({ host }: { host: HostSnapshot }) {
   const text = host.question?.text ?? host.reveal?.question.text ?? ''
   return (
     <div className="flex flex-1 flex-col gap-8">
-      <p className="text-3xl text-white/70">
+      <p className="text-3xl text-muted-foreground">
         {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
       </p>
       <h1 className="text-5xl leading-tight font-bold wrap-break-word">{text}</h1>
-      <p className="text-4xl text-white/80">
+      <p className="text-4xl text-foreground">
         {t('play.answeredSoFar', { answered: host.answeredCount, count: host.players.length })}
       </p>
-      <p className="text-3xl text-white/70">{t('play.resultsAtEnd')}</p>
+      <p className="text-3xl text-muted-foreground">{t('play.resultsAtEnd')}</p>
     </div>
   )
 }

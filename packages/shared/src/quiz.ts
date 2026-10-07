@@ -93,6 +93,10 @@ function checkQuestions(questions: Question[], ctx: z.RefinementCtx) {
 export const gameModes = ['classic', 'team'] as const
 export type GameMode = (typeof gameModes)[number]
 
+/** Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice. */
+export const gameThemes = ['classic', 'arcade', 'sunset', 'mint'] as const
+export type GameTheme = (typeof gameThemes)[number]
+
 export const gameSettingsSchema = z
   .object({
     mode: z.enum(gameModes).default('classic'),
@@ -110,6 +114,8 @@ export const gameSettingsSchema = z
     answerStyle: z.enum(['plain', 'colourful']).default('plain'),
     /** Final results (podium, ranks, answer review) on phones and the projector: as soon as the game ends, or when the host releases them. */
     finalResults: z.enum(['immediately', 'onRelease']).default('immediately'),
+    /** Colour theme of the game views. */
+    theme: z.enum(gameThemes).default('classic'),
   })
   .superRefine(checkTeams)
 export type GameSettings = z.infer<typeof gameSettingsSchema>

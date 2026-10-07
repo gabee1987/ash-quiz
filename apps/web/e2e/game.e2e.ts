@@ -43,7 +43,8 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
   })
 
   await test.step('host builds a quiz with three questions', async () => {
-    await page.getByRole('button', { name: 'New quiz' }).click()
+    // Exact: each quiz card also has a "More actions for <title>" button, and a quiz may be called "New quiz".
+    await page.getByRole('button', { name: 'New quiz', exact: true }).click()
     await page.getByLabel('Quiz title').fill(title)
 
     // An empty quiz opens with the type picker; later questions need "Add question" first.

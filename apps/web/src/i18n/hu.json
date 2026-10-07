@@ -1,7 +1,17 @@
 {
   "app": {
     "name": "ASH Quiz",
-    "language": "Nyelv"
+    "language": "Nyelv",
+    "mode": "Megjelenés",
+    "modes": {
+      "light": "Világos",
+      "dark": "Sötét",
+      "system": "Rendszer szerint"
+    },
+    "languages": {
+      "hu": "Magyar",
+      "en": "English"
+    }
   },
   "join": {
     "title": "Csatlakozás a játékhoz",
@@ -21,7 +31,9 @@
     "cancel": "Mégse",
     "add": "Hozzáadás",
     "delete": "Törlés",
-    "removeItem": "{{name}} eltávolítása"
+    "removeItem": "{{name}} eltávolítása",
+    "close": "Bezárás",
+    "actions": "Műveletek"
   },
   "auth": {
     "title": "Játékvezetői belépés",
@@ -151,14 +163,23 @@
         "immediately": "A játék végén",
         "onRelease": "Amikor közzéteszem"
       },
-      "finalResultsHelp": "A játék után a kivetítő és a telefonok várnak. A dobogót a kivetítőn és az eredményeket a telefonokon külön-külön teheti közzé."
+      "finalResultsHelp": "A játék után a kivetítő és a telefonok várnak. A dobogót a kivetítőn és az eredményeket a telefonokon külön-külön teheti közzé.",
+      "theme": "Téma",
+      "themeHelp": "Színvilág a telefonokon, a kivetítőn és a vezérlőn. A világos vagy sötét módot mindenki a saját eszközén választja.",
+      "themeOptions": {
+        "classic": "Klasszikus",
+        "arcade": "Játékterem",
+        "sunset": "Naplemente",
+        "mint": "Menta"
+      }
     },
     "newQuiz": "Új kvíz",
     "edit": "Szerkesztés",
     "duplicate": "Másolat",
     "copyTitle": "{{title}} (másolat)",
     "deleteTitle": "Törli ezt a kvízt?",
-    "deleteBody": "A(z) „{{title}}” véglegesen törlődik. A már lejátszott játékok eredményei megmaradnak."
+    "deleteBody": "A(z) „{{title}}” véglegesen törlődik. A már lejátszott játékok eredményei megmaradnak.",
+    "moreActions": "További műveletek: {{title}}"
   },
   "play": {
     "youAreIn": "Bent vagy, {{name}}!",
@@ -211,7 +232,8 @@
     "answerOnPhone": "Írd be a válaszod a telefonodon",
     "other": "Egyéb",
     "correctCount_one": "{{count}} válaszból {{correct}} helyes",
-    "correctCount_other": "{{count}} válaszból {{correct}} helyes"
+    "correctCount_other": "{{count}} válaszból {{correct}} helyes",
+    "qrCode": "QR-kód a csatlakozáshoz"
   },
   "questionTypes": {
     "single": "Egy helyes válasz",
@@ -341,7 +363,8 @@
     "label": "Szervezői menü",
     "quizzes": "Kvízek",
     "signedInAs": "Bejelentkezve mint",
-    "games": "Játékok"
+    "games": "Játékok",
+    "account": "Fiók"
   },
   "history": {
     "title": "Játékok",
@@ -351,7 +374,12 @@
     "results": "Eredmények",
     "control": "Vezérlés",
     "deleteTitle": "Törli a játékot?",
-    "deleteBody": "A(z) „{{title}}” ({{date}}) eredményei véglegesen törlődnek."
+    "deleteBody": "A(z) „{{title}}” ({{date}}) eredményei véglegesen törlődnek.",
+    "quiz": "Kvíz",
+    "date": "Időpont",
+    "mode": "Mód",
+    "playerCount": "Játékosok",
+    "status": "Állapot"
   },
   "results": {
     "title": "Eredmények",

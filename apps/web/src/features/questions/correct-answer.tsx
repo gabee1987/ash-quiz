@@ -33,8 +33,8 @@ export function CorrectAnswer({ question }: { question: Question }) {
   }
   if (text === null) return null
   return (
-    <p className="text-center text-white/80">
-      {t('play.correctAnswer')}: <span className="font-semibold text-white">{text}</span>
+    <p className="text-center text-foreground">
+      {t('play.correctAnswer')}: <span className="font-semibold text-foreground">{text}</span>
     </p>
   )
 }

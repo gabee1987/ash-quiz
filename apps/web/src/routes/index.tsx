@@ -4,7 +4,9 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
-import { Button } from '../components/button'
+import { ChoiceCards } from '@/components/choice-cards'
+import { FormAlert } from '@/components/form-alert'
+import { Button } from '@/components/ui/button'
 import { TextField } from '../components/text-field'
 import { apiFetch } from '../lib/api'
 import { getStoredPlayer, storePlayer } from '../lib/player-storage'
@@ -75,9 +77,9 @@ function JoinPage() {
   const infoError = info.error && 'code' in info.error ? (info.error as { code: string }).code : null
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-4">
-      <h1 className="text-center text-2xl font-bold">{t('join.title')}</h1>
-      <form className="flex flex-col gap-3" onSubmit={(e) => void onSubmit(e)} noValidate>
+    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-5">
+      <h1 className="text-center text-3xl font-black tracking-tight">{t('join.title')}</h1>
+      <form className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-soft" onSubmit={(e) => void onSubmit(e)} noValidate>
         <TextField
           label={t('join.pin')}
           name="pin"
@@ -90,7 +92,11 @@ function JoinPage() {
           placeholder={t('join.pinPlaceholder')}
           error={pinError ?? (infoError ? t(infoError) : undefined)}
         />
-        {info.data && <p className="text-center text-white/80">{info.data.quizTitle}</p>}
+        {info.data && (
+          <p className="rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
+            {info.data.quizTitle}
+          </p>
+        )}
         <TextField
           label={t('join.name')}
           name="name"
@@ -103,37 +109,24 @@ function JoinPage() {
           error={nameError}
         />
         {teamMode && (
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm">{t('join.team')}</legend>
-            {info.data?.teams.map((team) => (
-              <label
-                key={team.id}
-                className={`flex min-h-12 items-center gap-3 rounded-lg px-4 py-3 ${teamId === team.id ? 'bg-brand' : 'bg-white/10'}`}
-              >
-                <input
-                  type="radio"
-                  name="team"
-                  value={team.id}
-                  checked={teamId === team.id}
-                  onChange={() => setTeamId(team.id)}
-                  className="size-5"
-                />
-                {team.name}
-              </label>
-            ))}
-            {teamError && <p className="text-sm text-red-300">{teamError}</p>}
-          </fieldset>
+          <ChoiceCards
+            legend={t('join.team')}
+            value={teamId ?? ''}
+            columns={1}
+            choices={(info.data?.teams ?? []).map((team) => ({ value: team.id, label: team.name }))}
+            onChange={setTeamId}
+            help={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
+          />
         )}
-        {error && (
-          <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-3 text-red-200">
-            {t(error)}
-          </p>
-        )}
-        <Button type="submit" disabled={pending}>
+        {error && <FormAlert>{t(error)}</FormAlert>}
+        <Button type="submit" size="lg" disabled={pending}>
           {pending ? t('common.loading') : t('join.submit')}
         </Button>
       </form>
-      <Link to="/login" className="text-center text-sm text-white/60 underline">
+      <Link
+        to="/login"
+        className="self-center rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+      >
         {t('join.hostLogin')}
       </Link>
     </div>

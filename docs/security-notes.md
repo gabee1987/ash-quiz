@@ -11,12 +11,28 @@
 | Moderate | esbuild ≤ 0.24.2 | [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99): any website can send requests to esbuild's development server | `drizzle-kit` (migration generator) | Affects only `esbuild --serve`, which the project never runs. `drizzle-kit` is a developer tool and is not in the image. |
 | Low | esbuild 0.27.3 – 0.28.0 | [GHSA-g7r4-m6w7-qqqr](https://github.com/advisories/GHSA-g7r4-m6w7-qqqr): arbitrary file read through esbuild's development server on Windows | `vitest` → `vite` | Same: esbuild is used as a code transformer, its development server is never started. Test tooling only, not in the image. |
 
-Re-run both audits before every release and update this table.
+Re-run both audits before every release and update this table. After the design system packages were added (below), `pnpm audit --prod` still reports no known vulnerabilities (2026-10-07).
+
+### Front-end packages
+
+The web app bundles the following open-source packages. None of them calls a network service at runtime; everything, fonts included, is served from the app's own origin, so players' phones contact no third party.
+
+| Package | Purpose | Added in |
+|---|---|---|
+| `radix-ui` | Accessible primitives behind the shadcn/ui components (dialog, menu, select, switch, tooltip…) | phase 9 |
+| `class-variance-authority`, `clsx`, `tailwind-merge` | Component variants and class merging (shadcn/ui convention) | phase 9 |
+| `tw-animate-css` | CSS-only enter and exit transitions used by the primitives | phase 9 |
+| `lucide-react` | Icons, bundled as inline SVG | phase 9 |
+| `sonner` | Toast notifications | phase 9 |
+| `@fontsource-variable/nunito` | Nunito font files, self-hosted (no font CDN) | phase 9 |
+| `@axe-core/playwright` | Accessibility checks in the end-to-end tests (development only, not in the image) | phase 9 |
+
+The shadcn/ui component code is copied into `apps/web/src/components/ui` rather than installed, so it is reviewed like the rest of the code.
 
 ## Controls in place
 
 - **Headers** (`@fastify/helmet`): a strict Content Security Policy (same origin only, no inline scripts, no third-party resources), `frame-ancestors 'none'`, `nosniff`, `no-referrer`, same-origin opener and resource policies. HSTS and `upgrade-insecure-requests` are sent only when `APP_ORIGIN` is `https://`, so a laptop on the venue LAN keeps working over plain HTTP.
-- **Sessions**: random 32-byte tokens, stored hashed (SHA-256); `HttpOnly`, `SameSite=Lax` cookies, `Secure` behind HTTPS. Passwords hashed with Argon2. Login is rate limited.
+- **Sessions**: random 32-byte tokens, stored hashed (SHA-256); `HttpOnly`, `SameSite=Lax` cookies, `Secure` behind HTTPS. Passwords hashed with Argon2. Login is rate limited (10 attempts per minute per IP); all other API requests to 300 per minute per IP. Static files are not rate limited, because every phone on a venue wifi can share one public IP.
 - **Input**: every HTTP body and socket message is validated with the shared Zod schemas. JSON bodies are limited to 1 MB, socket messages to 64 KB, image uploads to 5 MB (re-encoded server-side).
 - **Errors**: clients receive i18n keys only, never internal details; errors are logged server-side with request ids.
 - **CSV export**: values that Excel would run as formulas are neutralised.

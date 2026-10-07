@@ -20,9 +20,9 @@ export function Timer({
   const fraction = totalMs > 0 ? Math.min(1, remaining / totalMs) : 0
   return (
     <div className="flex items-center gap-3" role="timer" aria-label={t('play.secondsLeft', { count: seconds })}>
-      <div className={`flex-1 overflow-hidden rounded-full bg-white/15 ${large ? 'h-6' : 'h-3'}`}>
+      <div className={`flex-1 overflow-hidden rounded-full bg-muted ${large ? 'h-6' : 'h-3'}`}>
         <div
-          className={`h-full rounded-full ${seconds <= 5 ? 'bg-red-500' : 'bg-white'}`}
+          className={`h-full rounded-full ${seconds <= 5 ? 'bg-destructive' : 'bg-primary'}`}
           style={{ width: `${fraction * 100}%` }}
         />
       </div>

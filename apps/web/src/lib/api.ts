@@ -9,6 +9,11 @@ export class ApiError extends Error {
   }
 }
 
+/** i18n key for any thrown error: the server's code for an ApiError, a generic one otherwise. */
+export function errorCode(error: unknown): string {
+  return error instanceof ApiError ? error.code : 'errors.internal'
+}
+
 /** JSON fetch against the same-origin API. Throws ApiError for non-2xx answers and network failures. */
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers)

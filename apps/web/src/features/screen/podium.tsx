@@ -19,7 +19,7 @@ export function ScreenPodium({ host }: { host: HostSnapshot }) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
         <h1 className="text-6xl font-bold">{t('play.gameOver')}</h1>
-        <p className="text-4xl text-white/80">{t('play.resultsComing')}</p>
+        <p className="text-4xl text-foreground">{t('play.resultsComing')}</p>
       </div>
     )
   }

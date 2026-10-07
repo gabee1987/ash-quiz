@@ -48,10 +48,19 @@ Answer option colours and shapes are fixed by index: red triangle, blue diamond,
 
 ## Components and style
 
-- Tailwind utility classes only, tokens in `styles.css` `@theme`. No CSS modules, no component library. Shared primitives in `src/components/`: `Button`, `Card`, `TextField`, `Timer`, `OptionButton`, `QrCode`, `Spinner`.
+- **Primitives** are shadcn/ui components (Radix underneath) copied into `src/components/ui/` and edited for our look: `Button` (variants `default`, `secondary`, `outline`, `ghost`, `destructive`, `success`, `link`; sizes `sm`, `default` (48 px), `lg`, `xl`, `icon`, `icon-sm`), `Card`, `Input`, `Textarea`, `Label`, `Select`, `Switch`, `Checkbox`, `RadioGroup`, `Dialog`, `Sheet`, `Tabs`, `Badge`, `Tooltip`, `DropdownMenu`, `Skeleton`, `Separator`, `Progress`, `Toaster` (Sonner). Add more with `pnpm dlx shadcn@latest add <name>` from `apps/web`, then run prettier on the file and replace any hard-coded English text (e.g. "Close") with `t()`.
+- **App components** live in `src/components/`: `TextField` (label + input + error), `ChoiceCards` (single choice as cards), `NativeSelect` (platform select styled like `Input`, best on phones), `ConfirmDialog`, `FormAlert` (inline error tied to a form), `Timer`, `OptionButton`, `QrCode`, `Spinner`, `AppHeader`, `HostNav`, `ModeToggle`.
+- **Imports**: `@/` points to `src/` (shadcn requires it). New code imports primitives and app components with `@/components/...`; existing relative imports may stay.
+- **Tokens only.** Colours come from semantic tokens in `styles.css` (`bg-background`, `bg-card`, `text-foreground`, `text-muted-foreground`, `bg-primary`/`text-primary-foreground`, `secondary`, `muted`, `accent`, `destructive`, `success`, `warning`, `border`, `input`, `ring`, plus `primary-edge` and friends for the chunky button edge). Never `bg-white/10`, `text-red-300` and similar. Exceptions: the six answer-option colours in `option-colours.ts`, the QR code's white background (cameras need dark on white) and the medal colours.
+- **Colour mode**: `light`, `dark` or `system` per device in localStorage `ash-quiz.mode`, applied as `data-mode` on `<html>` before first paint by `public/mode-init.js` (a file, not an inline script: the CSP allows scripts from `'self'` only). `lib/mode.ts` is the store (`useMode`, `setMode`). `dark:` variants follow `data-mode`. Tokens have light values under `:root` and dark values under `:root[data-mode='dark']`, so most components need no `dark:` class at all.
+- **Game themes**: `settings.theme` (`classic`, `arcade`, `sunset`, `mint`) is a quiz setting. `/play/$pin`, `/screen/$pin` and `/host/games/$pin` call `useGameTheme(snapshot.settings.theme)`, which sets `data-theme` on `<html>` (so dialogs and toasts in portals follow it). A theme only overrides `--hue`, `--hue-accent` and `--tint`; every token is computed from them, so both modes keep their contrast. Swatches for pickers come from `lib/themes.ts`, which mirrors the hues in `styles.css`.
+- **Look**: Nunito (self-hosted via `@fontsource-variable/nunito`, never a font CDN), headings `font-black`/`font-extrabold`, 12 to 24 px radii (`rounded-xl` to `rounded-2xl`), `shadow-soft` on cards, solid buttons with a darker bottom edge that sink when pressed.
+- **Errors**: a failed request where no field is at fault calls `toastError(error)` from `lib/toast.ts` (e.g. `useMutation({ onError: toastError })`); errors tied to a form use `FormAlert` or the field's own error.
+- **Accessibility**: every interactive element shows a focus ring (`focus-visible:ring-[3px] focus-visible:ring-ring`); text meets 4.5:1 in both modes (`e2e/a11y.e2e.ts` runs axe in both modes); `prefers-reduced-motion` ends all CSS animations and transitions immediately (global rule in `styles.css`).
+- Tailwind utility classes only. No CSS modules.
 - Function components, hooks for logic, no class components, no default exports except route files.
 - Files kebab-case, components PascalCase. One component per file unless a tiny private helper.
-- Icons: inline SVG in `src/components/icons.tsx`. No icon library.
+- Icons: `lucide-react` (`<PlayIcon aria-hidden="true" />` next to a text label, or an `aria-label` on an icon-only button). The answer shapes and the check/cross marks stay in `src/components/icons.tsx`.
 - Every text through `t('...')` (see `i18n` skill).
 
 ## Tests

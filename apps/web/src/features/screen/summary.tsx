@@ -37,7 +37,7 @@ export function ScreenSummary({ results }: { results: GameResults }) {
   const question = slide > 0 ? results.questions[slide - 1] : undefined
   return (
     <div className="flex flex-1 flex-col gap-8">
-      <p className="flex justify-between text-2xl text-white/60">
+      <p className="flex justify-between text-2xl text-muted-foreground">
         <span className="wrap-break-word">{results.quizTitle}</span>
         <span className="tabular-nums">
           {slide + 1} / {slides}
@@ -51,7 +51,7 @@ export function ScreenSummary({ results }: { results: GameResults }) {
           <PodiumStage key="podium" places={results.podium} />
         </>
       )}
-      <p className="text-center text-lg text-white/40">{t('results.screenHint')}</p>
+      <p className="text-center text-lg text-muted-foreground">{t('results.screenHint')}</p>
     </div>
   )
 }
@@ -61,13 +61,13 @@ function QuestionSlide({ question, playerCount }: { question: ResultQuestion; pl
   const figures = useQuestionFigures(question, playerCount)
   return (
     <div key={question.question.id} className="flex flex-1 flex-col gap-8">
-      <p className="text-3xl text-white/70">{t('results.questionNumber', { index: question.index + 1 })}</p>
+      <p className="text-3xl text-muted-foreground">{t('results.questionNumber', { index: question.index + 1 })}</p>
       <h1 className="text-5xl leading-tight font-bold wrap-break-word">{question.question.text}</h1>
       <div className="text-4xl">
         <CorrectAnswer question={question.question} />
       </div>
       <DistributionBars reveal={question} large />
-      <p className="text-3xl text-white/80">{figures.join(' · ')}</p>
+      <p className="text-3xl text-foreground">{figures.join(' · ')}</p>
     </div>
   )
 }

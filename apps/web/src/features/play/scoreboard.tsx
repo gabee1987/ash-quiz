@@ -7,7 +7,7 @@ export function RankList({ players, meId, limit }: { players: PlayerPublic[]; me
       {players.slice(0, limit).map((player) => (
         <li
           key={player.id}
-          className={`flex items-center gap-3 rounded-lg px-4 py-2 ${player.id === meId ? 'bg-brand' : 'bg-white/10'}`}
+          className={`flex items-center gap-3 rounded-lg px-4 py-2 ${player.id === meId ? 'bg-primary text-primary-foreground' : 'bg-card border'}`}
         >
           <span className="w-8 text-lg font-bold tabular-nums">{player.rank}.</span>
           <span className="flex-1 truncate">{player.name}</span>
@@ -24,7 +24,7 @@ export function TeamRankList({ teams, myTeamId }: { teams: TeamPublic[]; myTeamI
       {teams.map((team) => (
         <li
           key={team.id}
-          className={`flex items-center gap-3 rounded-lg px-4 py-2 ${team.id === myTeamId ? 'bg-brand' : 'bg-white/10'}`}
+          className={`flex items-center gap-3 rounded-lg px-4 py-2 ${team.id === myTeamId ? 'bg-primary text-primary-foreground' : 'bg-card border'}`}
         >
           <span className="w-8 text-lg font-bold tabular-nums">{team.rank}.</span>
           <span className="flex-1 truncate">{team.name}</span>
@@ -41,10 +41,10 @@ export function Scoreboard({ snapshot }: { snapshot: PlayerSnapshot }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-5">
       <div className="text-center">
-        <p className="text-white/70">{t('play.yourRank')}</p>
+        <p className="text-muted-foreground">{t('play.yourRank')}</p>
         <p className="text-6xl font-bold">{snapshot.me.rank}.</p>
         <p className="text-lg">{t('play.totalScore', { score: snapshot.me.score })}</p>
-        {myTeam && <p className="text-white/80">{t('play.teamRank', { team: myTeam.name, rank: myTeam.rank })}</p>}
+        {myTeam && <p className="text-foreground">{t('play.teamRank', { team: myTeam.name, rank: myTeam.rank })}</p>}
       </div>
       {snapshot.mode === 'team' && (
         <>

@@ -9,9 +9,9 @@ export function ScreenQuestion({ host, clockOffset }: { host: HostSnapshot; cloc
   if (!question) return null
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <div className="flex items-center justify-between text-3xl text-white/70">
+      <div className="flex items-center justify-between text-3xl text-muted-foreground">
         <span>{t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}</span>
-        <span className="font-semibold text-white">
+        <span className="font-semibold text-foreground">
           {t('host.game.answered', { answered: host.answeredCount, count: host.players.length })}
         </span>
       </div>

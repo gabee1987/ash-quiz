@@ -13,13 +13,13 @@ export function ReviewPanel({ host }: { host: HostSnapshot }) {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold">{t('host.review.title')}</h2>
+      <h2 className="text-lg font-extrabold">{t('host.review.title')}</h2>
 
-      <details open className="rounded-lg bg-white/5 p-3">
-        <summary className="cursor-pointer font-semibold">{t('host.review.standings')}</summary>
+      <details open className="rounded-2xl border bg-card p-3 shadow-soft">
+        <summary className="min-h-8 cursor-pointer rounded-md font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring">{t('host.review.standings')}</summary>
         <div className="mt-2 overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-left text-white/60">
+            <thead className="text-left text-muted-foreground">
               <tr>
                 <th className="py-1 pr-2">#</th>
                 <th className="py-1 pr-2">{t('host.review.name')}</th>
@@ -30,7 +30,7 @@ export function ReviewPanel({ host }: { host: HostSnapshot }) {
             </thead>
             <tbody>
               {host.players.map((p) => (
-                <tr key={p.id} className="border-t border-white/10">
+                <tr key={p.id} className="border-t">
                   <td className="py-1 pr-2 tabular-nums">{p.rank}.</td>
                   <td className="max-w-40 truncate py-1 pr-2">{p.name}</td>
                   {host.mode === 'team' && <td className="py-1 pr-2">{teamName(p.teamId)}</td>}
@@ -43,18 +43,18 @@ export function ReviewPanel({ host }: { host: HostSnapshot }) {
         </div>
       </details>
 
-      <details className="rounded-lg bg-white/5 p-3">
-        <summary className="cursor-pointer font-semibold">{t('host.review.questions')}</summary>
+      <details className="rounded-2xl border bg-card p-3 shadow-soft">
+        <summary className="min-h-8 cursor-pointer rounded-md font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring">{t('host.review.questions')}</summary>
         {host.questionStats.length === 0 ? (
-          <p className="mt-2 text-sm text-white/60">{t('host.review.noQuestionsYet')}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('host.review.noQuestionsYet')}</p>
         ) : (
           <ol className="mt-2 flex flex-col gap-2 text-sm">
             {host.questionStats.map((stat) => (
-              <li key={stat.questionId} className="flex flex-col gap-1 border-t border-white/10 pt-2">
+              <li key={stat.questionId} className="flex flex-col gap-1 border-t pt-2">
                 <span className="font-semibold wrap-break-word">
                   {stat.index + 1}. {stat.text}
                 </span>
-                <span className="text-white/70">
+                <span className="text-muted-foreground">
                   {stat.type === 'poll'
                     ? t('host.review.pollAnswers', { count: stat.answeredCount })
                     : t('host.review.correctOf', {
@@ -72,18 +72,18 @@ export function ReviewPanel({ host }: { host: HostSnapshot }) {
       </details>
 
       {host.currentAnswers && host.phase !== 'lobby' && host.phase !== 'finished' && (
-        <details className="rounded-lg bg-white/5 p-3">
-          <summary className="cursor-pointer font-semibold">
+        <details className="rounded-2xl border bg-card p-3 shadow-soft">
+          <summary className="min-h-8 cursor-pointer rounded-md font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
             {t('host.review.currentAnswers', { count: host.currentAnswers.length })}
           </summary>
           <ul className="mt-2 flex flex-col gap-1 text-sm">
             {host.currentAnswers.map((a) => (
-              <li key={a.playerId} className="flex items-center gap-2 border-t border-white/10 pt-1">
-                {a.correct === true && <CheckIcon className="size-4 text-green-400" />}
-                {a.correct === false && <CrossIcon className="size-4 text-red-400" />}
+              <li key={a.playerId} className="flex items-center gap-2 border-t pt-1">
+                {a.correct === true && <CheckIcon className="size-4 text-success" />}
+                {a.correct === false && <CrossIcon className="size-4 text-destructive" />}
                 <span className="w-28 truncate">{a.name}</span>
                 <span className="flex-1 truncate">{formatAnswer(a.answer, question, t, i18n.language)}</span>
-                <span className="text-white/60 tabular-nums">{seconds.format(a.timeMs / 1000)} s</span>
+                <span className="text-muted-foreground tabular-nums">{seconds.format(a.timeMs / 1000)} s</span>
               </li>
             ))}
           </ul>

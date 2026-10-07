@@ -17,7 +17,11 @@ export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams
     const ariaSort = active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'
     return (
       <th scope="col" aria-sort={ariaSort} className={`${cell} ${className}`}>
-        <button type="button" className="min-h-11 font-semibold underline-offset-4 hover:underline" onClick={() => setSort(toggleSort(sort, column))}>
+        <button
+          type="button"
+          className="min-h-11 rounded-md font-bold underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring"
+          onClick={() => setSort(toggleSort(sort, column))}
+        >
           {label}
           {active && (
             <span aria-hidden="true"> {sort.direction === 'asc' ? '▲' : '▼'}</span>
@@ -32,10 +36,10 @@ export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-xl font-semibold">{t('results.players')}</h2>
-      <div className="overflow-x-auto rounded-lg bg-white/10">
+      <h2 className="text-xl font-extrabold">{t('results.players')}</h2>
+      <div className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
         <table className="w-full text-left tabular-nums">
-          <thead className="border-b border-white/10 text-sm text-white/70">
+          <thead className="bg-muted text-sm text-muted-foreground">
             <tr>
               <th scope="col" className={`${cell} w-12`}>
                 {t('results.rank')}
@@ -54,7 +58,7 @@ export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams
           </thead>
           <tbody>
             {sorted.map((player) => (
-              <tr key={player.id} className="border-b border-white/5 last:border-0">
+              <tr key={player.id} className="border-t">
                 <td className={cell}>{player.rank}.</td>
                 <td className={`${cell} wrap-break-word`}>{player.name}</td>
                 {teams.length > 0 && <td className={cell}>{player.teamId ? teamNames.get(player.teamId) : ''}</td>}
@@ -73,10 +77,10 @@ export function TeamTable({ teams }: { teams: TeamPublic[] }) {
   const { t } = useTranslation()
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-xl font-semibold">{t('results.teams')}</h2>
-      <div className="overflow-x-auto rounded-lg bg-white/10">
+      <h2 className="text-xl font-extrabold">{t('results.teams')}</h2>
+      <div className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
         <table className="w-full text-left tabular-nums">
-          <thead className="border-b border-white/10 text-sm text-white/70">
+          <thead className="bg-muted text-sm text-muted-foreground">
             <tr>
               <th scope="col" className={`${cell} w-12`}>
                 {t('results.rank')}
@@ -94,7 +98,7 @@ export function TeamTable({ teams }: { teams: TeamPublic[] }) {
           </thead>
           <tbody>
             {teams.map((team) => (
-              <tr key={team.id} className="border-b border-white/5 last:border-0">
+              <tr key={team.id} className="border-t">
                 <td className={cell}>{team.rank}.</td>
                 <td className={`${cell} wrap-break-word`}>{team.name}</td>
                 <td className={`${cell} text-right`}>{team.memberCount}</td>

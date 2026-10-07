@@ -1,6 +1,9 @@
 import type { Question } from '@ash-quiz/shared'
-import { useState, type DragEvent } from 'react'
+import { useState, type DragEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ArrowDownIcon, ArrowUpIcon, CopyIcon, GripVerticalIcon, Trash2Icon } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '../../components/dialog'
 import { QuestionForm } from './question-form'
 import type { FieldErrors } from './validate'
@@ -60,51 +63,57 @@ export function QuestionCard({
       }}
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
-      className={`rounded-xl bg-white/5 ${selected ? 'ring-2 ring-brand' : ''} ${dragOver ? 'outline-2 outline-white/60 outline-dashed' : ''}`}
+      className={`rounded-2xl border-2 bg-card shadow-soft ${selected ? 'border-primary' : ''} ${dragOver ? 'outline-2 outline-ring outline-dashed' : ''}`}
     >
       <div className="flex items-center gap-2 p-2">
         <span
           draggable
           onDragStart={onDragStart}
-          className="hidden cursor-grab px-1 text-white/40 select-none sm:block"
+          className="hidden cursor-grab px-1 text-muted-foreground select-none sm:block"
           aria-hidden="true"
           title={t('editor.dragToReorder')}
         >
-          ⋮⋮
+          <GripVerticalIcon className="size-5" />
         </span>
-        <button type="button" onClick={onSelect} aria-expanded={selected} className="flex min-h-12 min-w-0 flex-1 items-center gap-3 text-left">
-          <span className="w-6 font-bold tabular-nums">{index + 1}.</span>
+        <button type="button" onClick={onSelect} aria-expanded={selected} className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
+          <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-secondary font-extrabold text-secondary-foreground tabular-nums">
+            {index + 1}
+          </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate font-semibold">{question.text || t('editor.untitledQuestion')}</span>
-            <span className="block text-xs text-white/60">
+            <span className="block truncate font-bold">{question.text || t('editor.untitledQuestion')}</span>
+            <span className="block text-xs text-muted-foreground">
               {t(`questionTypes.${question.type}`)} · {t('editor.seconds', { count: question.timeLimitSec })}
               {question.type !== 'poll' && ` · ${t('editor.pointsValue', { count: question.points })}`}
             </span>
           </span>
           {hasErrors && (
-            <span className="shrink-0 rounded bg-red-600 px-2 py-0.5 text-xs font-semibold">{t('editor.needsFixing')}</span>
+            <Badge variant="destructive" className="shrink-0">
+              {t('editor.needsFixing')}
+            </Badge>
           )}
         </button>
         <div className="flex shrink-0 items-center">
           <IconButton label={t('editor.moveUp')} disabled={index === 0} onClick={() => onMove(index - 1)}>
-            ↑
+            <ArrowUpIcon className="size-5" aria-hidden="true" />
           </IconButton>
           <IconButton label={t('editor.moveDown')} disabled={index === count - 1} onClick={() => onMove(index + 1)}>
-            ↓
+            <ArrowDownIcon className="size-5" aria-hidden="true" />
           </IconButton>
         </div>
       </div>
 
       {selected && (
-        <div className="flex flex-col gap-4 border-t border-white/10 p-3">
+        <div className="flex flex-col gap-4 border-t p-4">
           <QuestionForm question={question} onChange={onChange} errors={errors} path={`questions.${index}`} />
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="min-h-10 rounded-lg bg-white/10 px-3 text-sm" onClick={onDuplicate}>
+            <Button type="button" variant="secondary" size="sm" onClick={onDuplicate}>
+              <CopyIcon aria-hidden="true" />
               {t('editor.duplicateQuestion')}
-            </button>
-            <button type="button" className="min-h-10 rounded-lg px-3 text-sm text-red-300 underline" onClick={() => setConfirmDelete(true)}>
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={() => setConfirmDelete(true)}>
+              <Trash2Icon aria-hidden="true" />
               {t('editor.deleteQuestion')}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -136,7 +145,7 @@ function IconButton({
   label: string
   disabled?: boolean
   onClick: () => void
-  children: string
+  children: ReactNode
 }) {
   return (
     <button
@@ -145,7 +154,7 @@ function IconButton({
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className="flex size-11 items-center justify-center rounded-lg text-lg hover:bg-white/10 disabled:opacity-30"
+      className="flex size-11 items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring disabled:opacity-30"
     >
       {children}
     </button>

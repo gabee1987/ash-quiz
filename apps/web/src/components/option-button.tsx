@@ -28,21 +28,21 @@ export function OptionButton({
 }) {
   const size = large ? 'min-h-28 px-8 py-5 text-4xl' : 'min-h-16 px-4 py-3 text-lg'
   const look = colourful
-    ? `shadow-md ${optionColour(index)} ${selected ? 'ring-4 ring-white' : ''}`
-    : `border ${selected ? 'border-white bg-brand text-white' : 'border-white/25 bg-white/10 text-white enabled:hover:bg-white/15'}`
+    ? `shadow-soft ${optionColour(index)} ${selected ? 'ring-4 ring-foreground ring-offset-2 ring-offset-background' : ''}`
+    : `border-2 ${selected ? 'border-primary bg-primary text-primary-foreground' : 'bg-card text-card-foreground enabled:hover:border-ring'}`
   return (
     <button
       type="button"
       aria-pressed={selected}
       {...props}
-      className={`flex items-center gap-3 rounded-xl text-left font-semibold active:scale-[0.98] disabled:cursor-default ${size} ${look} ${dimmed ? 'opacity-40' : ''} ${className}`}
+      className={`flex items-center gap-3 rounded-2xl text-left font-bold transition-transform outline-none focus-visible:ring-[3px] focus-visible:ring-ring active:scale-[0.98] disabled:cursor-default ${size} ${look} ${dimmed ? 'opacity-40' : ''} ${className}`}
     >
       {colourful ? (
         <ShapeIcon index={index} className="size-[1.4em] shrink-0" />
       ) : (
         <span
           aria-hidden="true"
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-base font-bold"
+          className={`flex size-8 shrink-0 items-center justify-center rounded-lg text-base font-extrabold ${selected ? 'bg-primary-foreground/20' : 'bg-secondary text-secondary-foreground'}`}
         >
           {String.fromCharCode(65 + index)}
         </span>

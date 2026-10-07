@@ -1,7 +1,9 @@
 import type { GameSettings } from '@ash-quiz/shared'
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { ChevronDownIcon, PlayIcon } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../components/button'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { GameSettingsForm, settingsError, settingsSummary } from './game-settings-form'
 
 /** Starts a game with the quiz's settings; they can be changed for this game only in a collapsible section. */
@@ -9,25 +11,18 @@ export function CreateGameDialog({
   quizTitle,
   quizSettings,
   pending,
-  error,
   onCreate,
   onCancel,
 }: {
   quizTitle: string
   quizSettings: GameSettings
   pending: boolean
-  error: string | null
   onCreate: (settings: GameSettings) => void
   onCancel: () => void
 }) {
   const { t } = useTranslation()
   const [settings, setSettings] = useState(quizSettings)
-  const dialog = useRef<HTMLDialogElement>(null)
   const invalid = settingsError(settings) !== null
-
-  useEffect(() => {
-    dialog.current?.showModal()
-  }, [])
 
   function submit(e: FormEvent) {
     e.preventDefault()
@@ -35,42 +30,36 @@ export function CreateGameDialog({
   }
 
   return (
-    <dialog
-      ref={dialog}
-      onCancel={onCancel}
-      aria-labelledby="create-game-title"
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-2xl bg-brand-dark p-0 text-white backdrop:bg-black/70"
-    >
-      <form className="flex flex-col gap-4 p-5" onSubmit={submit}>
-        <div>
-          <h2 id="create-game-title" className="text-xl font-bold">
-            {t('host.create.title')}
-          </h2>
-          <p className="text-sm text-white/70 wrap-break-word">{quizTitle}</p>
-        </div>
+    <Dialog open onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
+        <form className="flex flex-col gap-5" onSubmit={submit}>
+          <DialogHeader>
+            <DialogTitle>{t('host.create.title')}</DialogTitle>
+            <DialogDescription className="wrap-break-word">{quizTitle}</DialogDescription>
+          </DialogHeader>
 
-        <p className="rounded-lg bg-white/10 px-3 py-2 text-sm">{settingsSummary(settings, t)}</p>
-        <details className="rounded-lg bg-white/5 px-3 py-2">
-          <summary className="flex min-h-10 cursor-pointer items-center font-semibold">{t('host.create.changeForGame')}</summary>
-          <div className="pt-3">
-            <GameSettingsForm value={settings} onChange={setSettings} />
+          <p className="rounded-xl bg-muted px-4 py-3 text-sm">{settingsSummary(settings, t)}</p>
+          <details className="group rounded-xl border-2">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-4 font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+              {t('host.create.changeForGame')}
+              <ChevronDownIcon className="size-5 transition-transform group-open:rotate-180" aria-hidden="true" />
+            </summary>
+            <div className="px-4 pt-2 pb-4">
+              <GameSettingsForm value={settings} onChange={setSettings} />
+            </div>
+          </details>
+
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" className="flex-1" disabled={pending || invalid}>
+              <PlayIcon aria-hidden="true" />
+              {t('host.create.submit')}
+            </Button>
           </div>
-        </details>
-
-        {error && (
-          <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-3 text-red-200">
-            {t(error)}
-          </p>
-        )}
-        <div className="flex gap-2">
-          <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
-            {t('common.cancel')}
-          </Button>
-          <Button type="submit" className="flex-1" disabled={pending || invalid}>
-            {t('host.create.submit')}
-          </Button>
-        </div>
-      </form>
-    </dialog>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Spinner } from '../components/spinner'
 import { ScreenSummary } from '../features/screen/summary'
-import { ApiError, apiFetch } from '../lib/api'
+import { apiFetch, errorCode } from '../lib/api'
 
 export const Route = createFileRoute('/screen/results/$gameId')({
   component: SummaryPage,
@@ -25,8 +25,7 @@ function SummaryPage() {
 
   if (results.isPending) return <Spinner />
   if (results.isError) {
-    const code = results.error instanceof ApiError ? results.error.code : 'errors.internal'
-    return <p className="flex flex-1 items-center justify-center text-4xl">{t(code)}</p>
+    return <p className="flex flex-1 items-center justify-center text-4xl font-bold">{t(errorCode(results.error))}</p>
   }
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col px-4 py-4 lg:px-12">

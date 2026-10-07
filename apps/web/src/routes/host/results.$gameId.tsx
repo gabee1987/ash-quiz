@@ -2,18 +2,19 @@ import type { GameResults } from '@ash-quiz/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../components/button'
+import { DownloadIcon, MonitorIcon } from 'lucide-react'
+import { FormAlert } from '@/components/form-alert'
+import { Button } from '@/components/ui/button'
+import { toastError } from '@/lib/toast'
 import { Spinner } from '../../components/spinner'
 import { PlayerTable, TeamTable } from '../../features/results/player-table'
 import { QuestionStats } from '../../features/results/question-stats'
 import { ResultsPodium } from '../../features/results/results-podium'
-import { ApiError, apiFetch } from '../../lib/api'
+import { apiFetch, errorCode } from '../../lib/api'
 
 export const Route = createFileRoute('/host/results/$gameId')({
   component: ResultsPage,
 })
-
-const link = 'flex min-h-12 items-center rounded-lg px-4 font-semibold'
 
 type Audience = 'screen' | 'players'
 
@@ -25,6 +26,7 @@ function ReleaseButtons({ gameId, pending }: { gameId: string; pending: GameResu
     mutationFn: (audience: Audience) =>
       apiFetch(`/api/games/${gameId}/release`, { method: 'POST', body: JSON.stringify({ audience }) }),
     onSettled: () => void queryClient.invalidateQueries({ queryKey: ['results', gameId] }),
+    onError: toastError,
   })
   if (!pending.screen && !pending.players) return null
   const hint =
@@ -34,8 +36,8 @@ function ReleaseButtons({ gameId, pending }: { gameId: string; pending: GameResu
         ? 'host.game.playersWaitingHint'
         : 'host.game.podiumPendingHint'
   return (
-    <div className="flex flex-col gap-2 rounded-lg bg-yellow-400/10 px-4 py-3">
-      <p className="text-yellow-200">{t(hint)}</p>
+    <div className="flex flex-col gap-3 rounded-2xl bg-warning px-4 py-3 text-warning-foreground">
+      <p className="font-semibold">{t(hint)}</p>
       <div className="flex flex-wrap gap-2">
         {pending.screen && (
           <Button disabled={release.isPending} onClick={() => release.mutate('screen')}>
@@ -48,11 +50,6 @@ function ReleaseButtons({ gameId, pending }: { gameId: string; pending: GameResu
           </Button>
         )}
       </div>
-      {release.error && (
-        <p role="alert" className="text-red-200">
-          {t(release.error instanceof ApiError ? release.error.code : 'errors.internal')}
-        </p>
-      )}
     </div>
   )
 }
@@ -70,10 +67,10 @@ function ResultsPage() {
   if (results.isError) {
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-        <p role="alert">{t(results.error instanceof ApiError ? results.error.code : 'errors.internal')}</p>
-        <Link to="/host/games" className="underline">
-          {t('results.backToGames')}
-        </Link>
+        <FormAlert>{t(errorCode(results.error))}</FormAlert>
+        <Button asChild variant="secondary" className="self-start">
+          <Link to="/host/games">{t('results.backToGames')}</Link>
+        </Button>
       </div>
     )
   }
@@ -85,26 +82,35 @@ function ResultsPage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <header className="flex flex-col gap-3">
-        <Link to="/host/games" className="text-sm text-white/70 underline">
+        <Link
+          to="/host/games"
+          className="self-start rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
           {t('results.backToGames')}
         </Link>
         <div>
-          <h1 className="text-2xl font-bold wrap-break-word">{data.quizTitle}</h1>
-          <p className="text-sm text-white/70">
+          <h1 className="text-3xl font-black tracking-tight wrap-break-word">{data.quizTitle}</h1>
+          <p className="text-sm text-muted-foreground">
             {t('results.title')} · {date} · {t('screen.pin')} {data.pin} · {t(`host.create.modes.${data.mode}`)}
           </p>
         </div>
         {data.phase !== 'finished' && (
-          <p className="rounded-lg bg-yellow-400/15 px-4 py-3 text-yellow-100">{t('results.running')}</p>
+          <p className="rounded-2xl bg-warning px-4 py-3 font-semibold text-warning-foreground">{t('results.running')}</p>
         )}
         <ReleaseButtons gameId={gameId} pending={data.pendingRelease} />
         <div className="flex flex-wrap gap-2">
-          <a href={`/api/games/${gameId}/results.csv?lang=${lang}`} download className={`${link} bg-brand text-white`}>
-            {t('results.exportCsv')}
-          </a>
-          <a href={`/screen/results/${gameId}`} target="_blank" rel="noreferrer" className={`${link} bg-white/10`}>
-            {t('results.showOnScreen')}
-          </a>
+          <Button asChild>
+            <a href={`/api/games/${gameId}/results.csv?lang=${lang}`} download>
+              <DownloadIcon aria-hidden="true" />
+              {t('results.exportCsv')}
+            </a>
+          </Button>
+          <Button asChild variant="secondary">
+            <a href={`/screen/results/${gameId}`} target="_blank" rel="noreferrer">
+              <MonitorIcon aria-hidden="true" />
+              {t('results.showOnScreen')}
+            </a>
+          </Button>
         </div>
       </header>
 
@@ -115,9 +121,9 @@ function ResultsPage() {
           <PlayerTable players={data.players} teams={data.mode === 'team' ? data.teams : []} />
         </div>
         <section className="flex min-w-0 flex-col gap-2">
-          <h2 className="text-xl font-semibold">{t('results.questions')}</h2>
+          <h2 className="text-xl font-extrabold">{t('results.questions')}</h2>
           {data.questions.length === 0 ? (
-            <p className="text-white/70">{t('results.noQuestions')}</p>
+            <p className="text-muted-foreground">{t('results.noQuestions')}</p>
           ) : (
             <ol className="flex flex-col gap-3">
               {data.questions.map((question) => (

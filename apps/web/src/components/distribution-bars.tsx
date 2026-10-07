@@ -28,12 +28,12 @@ export function DistributionBars({ reveal, large = false }: { reveal: RevealInfo
           </span>
           <span className="flex flex-1 items-center gap-3">
             <span
-              className={`rounded-md ${large ? 'h-12' : 'h-6'} ${bucket.index !== null ? optionColour(bucket.index) : 'bg-white/70'} ${bucket.correct ? 'ring-4 ring-green-400' : ''}`}
+              className={`rounded-md ${large ? 'h-12' : 'h-6'} ${bucket.index !== null ? optionColour(bucket.index) : 'bg-muted-foreground'} ${bucket.correct ? 'ring-4 ring-success' : ''}`}
               style={{ width: `${Math.max(2, (bucket.count / max) * 100)}%` }}
             />
             <span className="font-bold tabular-nums">{bucket.count}</span>
             {bucket.correct && (
-              <CheckIcon className={`${large ? 'size-10' : 'size-5'} text-green-400`} aria-label={t('play.correct')} />
+              <CheckIcon className={`${large ? 'size-10' : 'size-5'} text-success`} aria-label={t('play.correct')} />
             )}
           </span>
         </li>

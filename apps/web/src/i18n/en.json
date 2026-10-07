@@ -1,7 +1,17 @@
 {
   "app": {
     "name": "ASH Quiz",
-    "language": "Language"
+    "language": "Language",
+    "mode": "Appearance",
+    "modes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "languages": {
+      "hu": "Magyar",
+      "en": "English"
+    }
   },
   "join": {
     "title": "Join a game",
@@ -21,7 +31,9 @@
     "cancel": "Cancel",
     "add": "Add",
     "delete": "Delete",
-    "removeItem": "Remove {{name}}"
+    "removeItem": "Remove {{name}}",
+    "close": "Close",
+    "actions": "Actions"
   },
   "auth": {
     "title": "Host login",
@@ -151,14 +163,23 @@
         "immediately": "When the game ends",
         "onRelease": "When I release them"
       },
-      "finalResultsHelp": "After the game, the projector and the phones wait. You show the podium on the projector and the results on the phones separately."
+      "finalResultsHelp": "After the game, the projector and the phones wait. You show the podium on the projector and the results on the phones separately.",
+      "theme": "Theme",
+      "themeHelp": "Colours on the phones, the projector and the host control. Light or dark mode is each device's own choice.",
+      "themeOptions": {
+        "classic": "Classic",
+        "arcade": "Arcade",
+        "sunset": "Sunset",
+        "mint": "Mint"
+      }
     },
     "newQuiz": "New quiz",
     "edit": "Edit",
     "duplicate": "Duplicate",
     "copyTitle": "{{title}} (copy)",
     "deleteTitle": "Delete this quiz?",
-    "deleteBody": "“{{title}}” will be deleted permanently. Results of games already played are kept."
+    "deleteBody": "“{{title}}” will be deleted permanently. Results of games already played are kept.",
+    "moreActions": "More actions for {{title}}"
   },
   "play": {
     "youAreIn": "You're in, {{name}}!",
@@ -211,7 +232,8 @@
     "answerOnPhone": "Type your answer on your phone",
     "other": "Other",
     "correctCount_one": "{{correct}} of {{count}} answered correctly",
-    "correctCount_other": "{{correct}} of {{count}} answered correctly"
+    "correctCount_other": "{{correct}} of {{count}} answered correctly",
+    "qrCode": "QR code to join the game"
   },
   "questionTypes": {
     "single": "Single choice",
@@ -341,7 +363,8 @@
     "label": "Host menu",
     "quizzes": "Quizzes",
     "signedInAs": "Signed in as",
-    "games": "Games"
+    "games": "Games",
+    "account": "Account"
   },
   "history": {
     "title": "Games",
@@ -351,7 +374,12 @@
     "results": "Results",
     "control": "Control",
     "deleteTitle": "Delete game?",
-    "deleteBody": "The results of \"{{title}}\" ({{date}}) will be deleted permanently."
+    "deleteBody": "The results of \"{{title}}\" ({{date}}) will be deleted permanently.",
+    "quiz": "Quiz",
+    "date": "Date",
+    "mode": "Mode",
+    "playerCount": "Players",
+    "status": "Status"
   },
   "results": {
     "title": "Results",

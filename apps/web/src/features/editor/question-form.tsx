@@ -1,7 +1,10 @@
 import type { Question } from '@ash-quiz/shared'
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { ChipsInput } from '../../components/chips'
+import { NativeSelect } from '../../components/native-select'
 import { withImage } from './draft'
 import { ImageField } from './image-field'
 import { NumberField } from './number-field'
@@ -33,9 +36,11 @@ export function QuestionForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1 text-sm">
-        <label htmlFor={textId}>{t('editor.questionText')}</label>
-        <textarea
+      <div className="flex flex-col gap-2">
+        <Label htmlFor={textId} className="font-semibold">
+          {t('editor.questionText')}
+        </Label>
+        <Textarea
           id={textId}
           value={question.text}
           maxLength={500}
@@ -43,10 +48,10 @@ export function QuestionForm({
           onChange={(e) => onChange({ ...question, text: e.target.value })}
           aria-invalid={textError ? true : undefined}
           aria-describedby={textError ? `${textId}-error` : undefined}
-          className={`rounded-lg bg-white px-3 py-2 text-lg text-black ${textError ? 'ring-2 ring-red-400' : ''}`}
+          className="text-lg font-semibold"
         />
         {textError && (
-          <span id={`${textId}-error`} className="text-red-300">
+          <span id={`${textId}-error`} className="text-sm font-semibold text-destructive">
             {t(textError)}
           </span>
         )}
@@ -93,17 +98,17 @@ export function QuestionForm({
       )}
       {question.type === 'truefalse' && (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 text-sm">{t('editor.correctAnswer')}</legend>
+          <legend className="mb-2 font-semibold">{t('editor.correctAnswer')}</legend>
           <div className="grid grid-cols-2 gap-2">
             {[true, false].map((value) => (
               <label
                 key={String(value)}
-                className={`flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg ${question.correct === value ? 'bg-green-700 ring-2 ring-green-400' : 'bg-white/10'}`}
+                className={`flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 font-bold transition-colors has-focus-visible:ring-[3px] has-focus-visible:ring-ring ${question.correct === value ? 'border-success bg-success text-success-foreground' : 'bg-card hover:border-ring'}`}
               >
                 <input
                   type="radio"
                   name={`${path}-truefalse`}
-                  className="size-5"
+                  className="size-5 accent-current"
                   checked={question.correct === value}
                   onChange={() => onChange({ ...question, correct: value })}
                 />
@@ -121,7 +126,7 @@ export function QuestionForm({
             onChange={(acceptedAnswers) => onChange({ ...question, acceptedAnswers })}
             placeholder={t('editor.acceptedAnswerPlaceholder')}
           />
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-muted-foreground">
             {question.acceptedAnswers.length === 0 ? t('editor.hostGradedHint') : t('editor.acceptedAnswersHint')}
           </p>
         </div>
@@ -145,34 +150,32 @@ export function QuestionForm({
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-2 text-sm font-semibold">
           {t('editor.timeLimit')}
-          <select
+          <NativeSelect
             value={question.timeLimitSec}
             onChange={(e) => onChange({ ...question, timeLimitSec: Number(e.target.value) })}
-            className="min-h-12 rounded-lg bg-white px-3 text-black"
           >
             {timeOptions.map((s) => (
               <option key={s} value={s}>
                 {t('editor.seconds', { count: s })}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         {question.type !== 'poll' && (
-          <label className="flex flex-col gap-1 text-sm">
+          <label className="flex flex-col gap-2 text-sm font-semibold">
             {t('editor.points')}
-            <select
+            <NativeSelect
               value={question.points}
               onChange={(e) => onChange({ ...question, points: Number(e.target.value) })}
-              className="min-h-12 rounded-lg bg-white px-3 text-black"
             >
               {pointsOptions.map((p) => (
                 <option key={p} value={p}>
                   {t('editor.pointsValue', { count: p })}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
         )}
       </div>

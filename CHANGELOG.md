@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Design
+- New design system: shadcn/ui components on Radix, design tokens for colours, radii and shadows, the Nunito font (served by the app itself), icons.
+- Light, dark and system colour mode on every screen, chosen per device and remembered, applied before the page is drawn (no flash).
+- Four game themes (Classic, Arcade, Sunset, Mint), set per quiz and overridable per game; phones, the projector and the host control follow the game's theme.
+- New layout for hosts: sidebar on laptops, bottom tab bar on phones; restyled login, quiz list (cards), game history (table on laptops, cards on phones), results, users, password, editor forms and host control.
+- Errors from the server that no form field causes are shown as toasts.
+- Accessibility: visible focus rings, contrast checked automatically in both modes, reduced-motion setting respected.
+
+### Fixes
+- Rate limiting applies to API requests only. Static files were counted too, so many phones sharing one public IP (venue wifi with a cloud deployment) could get errors and a blank page while loading the app.
+
 ## 1.0.0 – 2026-10-07
 
 First release.

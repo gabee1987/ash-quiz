@@ -1,8 +1,149 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
-@theme {
-  --color-brand: #4f46e5;
-  --color-brand-dark: #1e1b4b;
+/* `dark:` follows the resolved colour mode on <html data-mode>, set before first paint by public/mode-init.js. */
+@custom-variant dark (&:where([data-mode='dark'], [data-mode='dark'] *));
+
+/*
+ * Design tokens. Components use only the semantic names below (bg-card, text-muted-foreground…).
+ * Colours are built from a theme hue (--hue) and an accent hue (--hue-accent), so a game theme
+ * only overrides hues and both colour modes keep their contrast.
+ */
+:root {
+  --hue: 277;
+  --hue-accent: 330;
+  --tint: 0.012;
+  --radius: 1rem;
+
+  --background: oklch(0.975 var(--tint) var(--hue));
+  --foreground: oklch(0.22 0.045 var(--hue));
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.51 0.22 var(--hue));
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-edge: oklch(0.38 0.18 var(--hue));
+  --secondary: oklch(0.93 0.035 var(--hue));
+  --secondary-foreground: oklch(0.3 0.12 var(--hue));
+  --secondary-edge: oklch(0.85 0.05 var(--hue));
+  --muted: oklch(0.945 0.018 var(--hue));
+  --muted-foreground: oklch(0.46 0.04 var(--hue));
+  --accent: oklch(0.93 0.05 var(--hue-accent));
+  --accent-foreground: oklch(0.32 0.14 var(--hue-accent));
+  --destructive: oklch(0.55 0.21 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --destructive-edge: oklch(0.42 0.17 27);
+  --success: oklch(0.5 0.14 150);
+  --success-foreground: oklch(0.99 0 0);
+  --success-edge: oklch(0.4 0.12 150);
+  --warning: oklch(0.8 0.15 80);
+  --warning-foreground: oklch(0.25 0.06 60);
+  --border: oklch(0.89 0.02 var(--hue));
+  --input: oklch(0.86 0.025 var(--hue));
+  --ring: oklch(0.55 0.22 var(--hue));
+  --surface-wash: linear-gradient(
+    180deg,
+    oklch(0.96 0.03 var(--hue)) 0%,
+    var(--background) 22rem
+  );
+  --shadow-color: oklch(0.3 0.08 var(--hue) / 0.12);
+  color-scheme: light;
+}
+
+:root[data-mode='dark'] {
+  --background: oklch(0.21 0.07 var(--hue));
+  --foreground: oklch(0.97 0.01 var(--hue));
+  --card: oklch(0.27 0.08 var(--hue));
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.29 0.08 var(--hue));
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.55 0.22 var(--hue));
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-edge: oklch(0.4 0.19 var(--hue));
+  --secondary: oklch(0.34 0.08 var(--hue));
+  --secondary-foreground: oklch(0.96 0.02 var(--hue));
+  --secondary-edge: oklch(0.25 0.07 var(--hue));
+  --muted: oklch(0.3 0.07 var(--hue));
+  --muted-foreground: oklch(0.8 0.04 var(--hue));
+  --accent: oklch(0.36 0.1 var(--hue-accent));
+  --accent-foreground: oklch(0.95 0.03 var(--hue-accent));
+  --destructive: oklch(0.7 0.18 25);
+  --destructive-foreground: oklch(0.2 0.06 25);
+  --destructive-edge: oklch(0.55 0.17 25);
+  --success: oklch(0.75 0.17 150);
+  --success-foreground: oklch(0.2 0.05 150);
+  --success-edge: oklch(0.58 0.15 150);
+  --warning: oklch(0.82 0.15 80);
+  --warning-foreground: oklch(0.22 0.06 60);
+  --border: oklch(0.36 0.07 var(--hue));
+  --input: oklch(0.42 0.07 var(--hue));
+  --ring: oklch(0.72 0.17 var(--hue));
+  --surface-wash: linear-gradient(
+    180deg,
+    oklch(0.26 0.09 var(--hue)) 0%,
+    var(--background) 22rem
+  );
+  --shadow-color: oklch(0.05 0.04 var(--hue) / 0.45);
+  color-scheme: dark;
+}
+
+/* Game themes: chosen per quiz, applied with data-theme on the game views. Only hues change. */
+[data-theme='arcade'] {
+  --hue: 305;
+  --hue-accent: 195;
+  --tint: 0.02;
+}
+[data-theme='sunset'] {
+  --hue: 35;
+  --hue-accent: 350;
+  --tint: 0.015;
+}
+[data-theme='mint'] {
+  --hue: 170;
+  --hue-accent: 230;
+  --tint: 0.014;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-edge: var(--primary-edge);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-edge: var(--secondary-edge);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-edge: var(--destructive-edge);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-edge: var(--success-edge);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --shadow-soft: 0 1px 2px var(--shadow-color), 0 8px 24px -8px var(--shadow-color);
+
   --animate-rise: rise 0.9s ease-out both;
 
   @keyframes rise {
@@ -17,20 +158,31 @@
   }
 }
 
+/* Reduced motion: primitives and app animations end immediately in their final state. */
 @media (prefers-reduced-motion: reduce) {
-  .animate-rise {
-    animation: none;
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
-
-body {
-  @apply bg-brand-dark text-white antialiased;
-  /* Phones: avoid rubber-band scrolling on full-screen game views. */
-  overscroll-behavior: none;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    background-image: var(--surface-wash);
+    background-repeat: no-repeat;
+    /* Phones: avoid rubber-band scrolling on full-screen game views. */
+    overscroll-behavior: none;
+  }
 }

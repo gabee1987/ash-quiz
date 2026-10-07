@@ -1,6 +1,7 @@
 import type { Answer, PlayerSnapshot } from '@ash-quiz/shared'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { FormAlert } from '@/components/form-alert'
 import { Timer } from '../../components/timer'
 import { emitAck } from '../../lib/socket'
 import { QuestionInput } from '../questions/question-input'
@@ -32,7 +33,7 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <p className="text-sm text-white/60">
+      <p className="text-sm text-muted-foreground">
         {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })}
       </p>
       {snapshot.questionEndsAt !== null && (
@@ -43,9 +44,7 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
         <img src={`/api/images/${question.imageId}`} alt="" className="max-h-48 self-center rounded-lg object-contain" />
       )}
       {error && (
-        <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-2 text-red-200">
-          {t(error)}
-        </p>
+        <FormAlert>{t(error)}</FormAlert>
       )}
       <QuestionInput
         question={question}

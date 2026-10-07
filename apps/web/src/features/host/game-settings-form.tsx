@@ -1,8 +1,13 @@
-import { gameSettingsSchema, type GameSettings } from '@ash-quiz/shared'
+import { gameSettingsSchema, gameThemes, type GameSettings } from '@ash-quiz/shared'
 import type { TFunction } from 'i18next'
-import { useId, useState } from 'react'
+import { XIcon } from 'lucide-react'
+import { useId, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../components/button'
+import { ChoiceCards } from '@/components/choice-cards'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { themeSwatches } from '@/lib/themes'
 
 /** i18n key of the first settings problem (team names), or null when the settings are valid. */
 export function settingsError(settings: GameSettings): string | null {
@@ -21,6 +26,7 @@ export function settingsSummary(settings: GameSettings, t: TFunction): string {
       : null,
     `${t('host.create.finalResults')}: ${t(`host.create.finalResultsOptions.${settings.finalResults}`)}`,
     t(`host.create.answerStyleOptions.${settings.answerStyle}`),
+    `${t('host.create.theme')}: ${t(`host.create.themeOptions.${settings.theme}`)}`,
     settings.speedBonus ? t('host.create.speedBonus') : null,
     settings.shuffleOptions ? t('host.create.shuffle') : null,
   ]
@@ -31,7 +37,6 @@ export function settingsSummary(settings: GameSettings, t: TFunction): string {
 /** Every game setting. Used in the quiz editor (the quiz's defaults) and when starting a game (overrides). */
 export function GameSettingsForm({ value, onChange }: { value: GameSettings; onChange: (settings: GameSettings) => void }) {
   const { t } = useTranslation()
-  const id = useId()
   const [newTeam, setNewTeam] = useState('')
   const set = (patch: Partial<GameSettings>) => onChange({ ...value, ...patch })
   const error = settingsError(value)
@@ -44,52 +49,49 @@ export function GameSettingsForm({ value, onChange }: { value: GameSettings; onC
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 font-semibold">{t('host.create.mode')}</legend>
-        {(['classic', 'team'] as const).map((mode) => (
-          <label key={mode} className={`flex min-h-12 items-center gap-3 rounded-lg px-3 ${value.mode === mode ? 'bg-brand' : 'bg-white/10'}`}>
-            <input
-              type="radio"
-              name={`${id}-mode`}
-              className="size-5"
-              checked={value.mode === mode}
-              onChange={() =>
-                set(
-                  mode === 'team' && value.teamNames.length === 0
-                    ? { mode, teamNames: [t('host.create.defaultTeam', { n: 1 }), t('host.create.defaultTeam', { n: 2 })] }
-                    : { mode },
-                )
-              }
-            />
-            <span>
-              <span className="block">{t(`host.create.modes.${mode}`)}</span>
-              <span className="block text-xs text-white/70">{t(`host.create.modes.${mode}Help`)}</span>
-            </span>
-          </label>
-        ))}
-      </fieldset>
+    <div className="flex flex-col gap-6">
+      <ChoiceCards
+        legend={t('host.create.mode')}
+        value={value.mode}
+        choices={(['classic', 'team'] as const).map((mode) => ({
+          value: mode,
+          label: t(`host.create.modes.${mode}`),
+          description: t(`host.create.modes.${mode}Help`),
+        }))}
+        onChange={(mode) =>
+          set(
+            mode === 'team' && value.teamNames.length === 0
+              ? { mode, teamNames: [t('host.create.defaultTeam', { n: 1 }), t('host.create.defaultTeam', { n: 2 })] }
+              : { mode },
+          )
+        }
+      />
 
       {value.mode === 'team' && (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 font-semibold">{t('host.create.teams')}</legend>
+          <legend className="mb-2 font-bold">{t('host.create.teams')}</legend>
           <ul className="flex flex-wrap gap-2">
             {value.teamNames.map((name, i) => (
-              <li key={`${name}-${i}`} className="flex items-center gap-1 rounded-full bg-white/15 py-1 pr-1 pl-3">
+              <li
+                key={`${name}-${i}`}
+                className="flex items-center gap-1 rounded-full bg-secondary py-1 pr-1 pl-3 font-semibold text-secondary-foreground"
+              >
                 <span>{name}</span>
-                <button
+                <Button
                   type="button"
-                  className="flex size-8 items-center justify-center rounded-full hover:bg-white/20"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="size-8 rounded-full"
                   aria-label={t('host.create.removeTeam', { name })}
                   onClick={() => set({ teamNames: value.teamNames.filter((_, j) => j !== i) })}
                 >
-                  ×
-                </button>
+                  <XIcon className="size-4" />
+                </Button>
               </li>
             ))}
           </ul>
           <div className="flex gap-2">
-            <input
+            <Input
               value={newTeam}
               onChange={(e) => setNewTeam(e.target.value)}
               onKeyDown={(e) => {
@@ -101,109 +103,107 @@ export function GameSettingsForm({ value, onChange }: { value: GameSettings; onC
               maxLength={40}
               aria-label={t('host.create.teamName')}
               placeholder={t('host.create.teamName')}
-              className="min-h-12 min-w-0 flex-1 rounded-lg bg-white px-3 text-black"
+              className="flex-1"
             />
             <Button type="button" variant="secondary" onClick={addTeam}>
               {t('host.create.addTeam')}
             </Button>
           </div>
-          {error && <p className="text-sm text-red-300">{t(error)}</p>}
+          {error && <p className="text-sm font-semibold text-destructive">{t(error)}</p>}
         </fieldset>
       )}
 
-      <RadioGroup
+      <ChoiceCards
+        legend={t('host.create.theme')}
+        value={value.theme}
+        choices={gameThemes.map((theme) => ({
+          value: theme,
+          label: t(`host.create.themeOptions.${theme}`),
+          adornment: <ThemeSwatch colours={themeSwatches(theme)} />,
+        }))}
+        onChange={(theme) => set({ theme })}
+        help={t('host.create.themeHelp')}
+      />
+      <ChoiceCards
         legend={t('host.create.revealAnswers')}
-        name={`${id}-reveal`}
         value={value.revealAnswers}
-        options={['afterQuestion', 'atEnd'] as const}
-        labelKey={(v) => `host.create.revealAnswersOptions.${v}`}
+        choices={choices(['afterQuestion', 'atEnd'] as const, (v) => t(`host.create.revealAnswersOptions.${v}`))}
         // Scores would give the answers away, so results at the end means no scoreboard until then.
         onChange={(revealAnswers) => set(revealAnswers === 'atEnd' ? { revealAnswers, scoreboard: 'onDemand' } : { revealAnswers })}
       />
-      <RadioGroup
+      <ChoiceCards
         legend={t('host.create.scoreboard')}
-        name={`${id}-scoreboard`}
         value={value.scoreboard}
-        options={['afterQuestion', 'onDemand'] as const}
-        labelKey={(v) => `host.create.scoreboardOptions.${v}`}
+        choices={choices(['afterQuestion', 'onDemand'] as const, (v) => t(`host.create.scoreboardOptions.${v}`))}
         onChange={(scoreboard) => set({ scoreboard })}
         disabled={value.revealAnswers === 'atEnd'}
         help={value.revealAnswers === 'atEnd' ? t('host.create.scoreboardAtEnd') : undefined}
       />
-      <RadioGroup
+      <ChoiceCards
         legend={t('host.create.finalResults')}
-        name={`${id}-final-results`}
         value={value.finalResults}
-        options={['immediately', 'onRelease'] as const}
-        labelKey={(v) => `host.create.finalResultsOptions.${v}`}
+        choices={choices(['immediately', 'onRelease'] as const, (v) => t(`host.create.finalResultsOptions.${v}`))}
         onChange={(finalResults) => set({ finalResults })}
         help={value.finalResults === 'onRelease' ? t('host.create.finalResultsHelp') : undefined}
       />
-      <RadioGroup
+      <ChoiceCards
         legend={t('host.create.answerStyle')}
-        name={`${id}-answer-style`}
         value={value.answerStyle}
-        options={['plain', 'colourful'] as const}
-        labelKey={(v) => `host.create.answerStyleOptions.${v}`}
+        choices={choices(['plain', 'colourful'] as const, (v) => t(`host.create.answerStyleOptions.${v}`))}
         onChange={(answerStyle) => set({ answerStyle })}
         help={t('host.create.answerStyleHelp')}
       />
 
-      <label className="flex min-h-12 items-center gap-3">
-        <input type="checkbox" className="size-5" checked={value.speedBonus} onChange={(e) => set({ speedBonus: e.target.checked })} />
-        <span>
-          <span className="block">{t('host.create.speedBonus')}</span>
-          <span className="block text-xs text-white/70">{t('host.create.speedBonusHelp')}</span>
-        </span>
-      </label>
-      <label className="flex min-h-12 items-center gap-3">
-        <input
-          type="checkbox"
-          className="size-5"
-          checked={value.shuffleOptions}
-          onChange={(e) => set({ shuffleOptions: e.target.checked })}
+      <div className="flex flex-col">
+        <SwitchRow
+          label={t('host.create.speedBonus')}
+          description={t('host.create.speedBonusHelp')}
+          checked={value.speedBonus}
+          onChange={(speedBonus) => set({ speedBonus })}
         />
-        <span>{t('host.create.shuffle')}</span>
-      </label>
+        <SwitchRow
+          label={t('host.create.shuffle')}
+          checked={value.shuffleOptions}
+          onChange={(shuffleOptions) => set({ shuffleOptions })}
+        />
+      </div>
     </div>
   )
 }
 
-function RadioGroup<T extends string>({
-  legend,
-  name,
-  value,
-  options,
-  labelKey,
-  onChange,
-  disabled = false,
-  help,
-}: {
-  legend: string
-  name: string
-  value: T
-  options: readonly T[]
-  labelKey: (value: T) => string
-  onChange: (value: T) => void
-  disabled?: boolean
-  help?: string | undefined
-}) {
-  const { t } = useTranslation()
+function choices<T extends string>(values: readonly T[], label: (value: T) => string) {
+  return values.map((value) => ({ value, label: label(value) }))
+}
+
+function ThemeSwatch({ colours }: { colours: readonly string[] }) {
   return (
-    <fieldset className="flex flex-col gap-2" disabled={disabled}>
-      <legend className="mb-1 font-semibold">{legend}</legend>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {options.map((option) => (
-          <label
-            key={option}
-            className={`flex min-h-12 items-center gap-3 rounded-lg px-3 ${value === option ? 'bg-brand' : 'bg-white/10'} ${disabled ? 'opacity-60' : ''}`}
-          >
-            <input type="radio" name={name} className="size-5" checked={value === option} onChange={() => onChange(option)} />
-            <span>{t(labelKey(option))}</span>
-          </label>
-        ))}
-      </div>
-      {help && <p className="text-xs text-white/70">{help}</p>}
-    </fieldset>
+    <span aria-hidden="true" className="flex shrink-0 -space-x-1.5">
+      {colours.map((colour) => (
+        <span key={colour} className="size-6 rounded-full border-2 border-card" style={{ background: colour }} />
+      ))}
+    </span>
+  )
+}
+
+function SwitchRow({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  label: string
+  description?: ReactNode
+  checked: boolean
+  onChange: (checked: boolean) => void
+}) {
+  const id = useId()
+  return (
+    <div className="flex min-h-14 items-center justify-between gap-4 py-2">
+      <label htmlFor={id} className="cursor-pointer">
+        <span className="block font-semibold">{label}</span>
+        {description && <span className="block text-sm text-muted-foreground">{description}</span>}
+      </label>
+      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+    </div>
   )
 }

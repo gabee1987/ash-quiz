@@ -1,4 +1,7 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import type { AddressInfo } from 'node:net'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import { io as ioClient } from 'socket.io-client'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../src/app.js'
@@ -78,6 +81,22 @@ describe('app', () => {
     expect(Date.now() - started).toBeLessThan(2000)
     await disconnected
     client.close()
+  })
+
+  it('rate limits the API but not page loads (phones behind one venue IP fetch many assets)', async () => {
+    const webDist = mkdtempSync(path.join(tmpdir(), 'ash-quiz-web-'))
+    mkdirSync(path.join(webDist, 'assets'))
+    writeFileSync(path.join(webDist, 'index.html'), '<!doctype html><title>test</title>')
+    writeFileSync(path.join(webDist, 'assets', 'index.js'), 'export {}')
+    const limited = await buildApp(config, { db: { execute: async () => [] } as unknown as Db, manager: newManager(), webDist })
+    const get = (url: string) => limited.app.inject({ method: 'GET', url, remoteAddress: '10.0.0.1' })
+    const assets = await Promise.all(Array.from({ length: 320 }, () => get('/assets/index.js')))
+    expect(assets.filter((res) => res.statusCode !== 200)).toHaveLength(0)
+    expect((await get('/play/123456')).statusCode).toBe(200)
+    const api = await Promise.all(Array.from({ length: 320 }, () => get('/api/health')))
+    expect(api.filter((res) => res.statusCode === 429).length).toBeGreaterThan(0)
+    await limited.app.close()
+    rmSync(webDist, { recursive: true })
   })
 
   it('rejects JSON bodies over 1 MB', async () => {

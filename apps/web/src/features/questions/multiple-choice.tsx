@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../components/button'
+import { Button } from '@/components/ui/button'
 import { OptionButton } from '../../components/option-button'
 import type { QuestionProps } from './types'
 
@@ -13,7 +13,7 @@ export function MultipleChoice({ question, mode, disabled, large, colourful, onS
 
   return (
     <div className="@container flex flex-1 flex-col gap-3">
-      {mode === 'answer' && <p className="text-center text-sm text-white/70">{t('play.selectAll')}</p>}
+      {mode === 'answer' && <p className="text-center text-sm text-muted-foreground">{t('play.selectAll')}</p>}
       <div className="grid flex-1 auto-rows-fr gap-3 @md:grid-cols-2">
         {question.options.map((option, index) => (
           <OptionButton

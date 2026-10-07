@@ -1,6 +1,6 @@
 import type { HostCommand, HostSnapshot } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../components/button'
+import { Button } from '@/components/ui/button'
 import { alternativeAction, primaryAction } from './primary-action'
 
 /** Phase-aware primary button plus the secondary actions of the current phase. */
@@ -14,15 +14,15 @@ export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (
   return (
     <div className="flex flex-col gap-2">
       {primary && (
-        <Button className="w-full text-xl" onClick={() => onCommand(primary.command)}>
+        <Button size="xl" className="w-full" onClick={() => onCommand(primary.command)}>
           {t(primary.label)}
         </Button>
       )}
       {host.phase === 'lobby' && host.players.length === 0 && (
-        <p className="text-center text-white/60">{t('host.game.waitingForPlayers')}</p>
+        <p className="text-center text-muted-foreground">{t('host.game.waitingForPlayers')}</p>
       )}
       {(host.resultsPending || host.playersWaiting) && (
-        <p className="text-center text-yellow-300">
+        <p className="rounded-xl bg-warning px-4 py-2 text-center font-semibold text-warning-foreground">
           {t(
             host.resultsPending && host.playersWaiting
               ? 'host.game.resultsPendingHint'
@@ -33,7 +33,9 @@ export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (
         </p>
       )}
       {host.phase === 'reveal' && host.awaitingGrading && (
-        <p className="text-center text-yellow-300">{t('host.game.gradeFirst')}</p>
+        <p className="rounded-xl bg-warning px-4 py-2 text-center font-semibold text-warning-foreground">
+          {t('host.game.gradeFirst')}
+        </p>
       )}
       <div className="flex flex-wrap gap-2">
         {alternative && (
@@ -52,7 +54,7 @@ export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (
           </>
         )}
         {host.phase !== 'finished' && (
-          <Button variant="secondary" className="flex-1" onClick={endGame}>
+          <Button variant="outline" className="flex-1" onClick={endGame}>
             {t('host.game.end')}
           </Button>
         )}

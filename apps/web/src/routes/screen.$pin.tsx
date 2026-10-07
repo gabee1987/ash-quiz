@@ -14,6 +14,7 @@ import { ScreenScoreboard } from '../features/screen/scoreboard'
 import { apiFetch } from '../lib/api'
 import { meQueryOptions } from '../lib/auth'
 import { closeSession, emitAck, startSession, useGameStore } from '../lib/socket'
+import { useGameTheme } from '../lib/themes'
 
 export const Route = createFileRoute('/screen/$pin')({
   component: ScreenPage,
@@ -27,6 +28,7 @@ function ScreenPage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
   const { status, host, clockOffset, closed } = useGameStore()
+  useGameTheme(host?.settings.theme)
   const me = useQuery({ ...meQueryOptions, throwOnError: false })
   const info = useQuery({
     queryKey: ['gamePublic', pin],

@@ -45,9 +45,13 @@ export function ImageField({
         <img
           src={`/api/images/${imageId}`}
           alt={label}
-          className={`rounded-lg bg-white/10 object-contain ${compact ? 'h-12 w-16' : 'h-24 w-36'}`}
+          className={`rounded-xl border bg-muted object-contain ${compact ? 'h-12 w-16' : 'h-24 w-36'}`}
         />
-        <button type="button" className="min-h-10 px-2 text-sm text-red-300 underline" onClick={() => onChange(undefined)}>
+        <button
+          type="button"
+          className="min-h-10 rounded-lg px-2 text-sm font-semibold text-destructive underline underline-offset-4 outline-none hover:bg-destructive/10 focus-visible:ring-[3px] focus-visible:ring-ring"
+          onClick={() => onChange(undefined)}
+        >
           {t('editor.removeImage')}
         </button>
       </div>
@@ -56,17 +60,12 @@ export function ImageField({
 
   return (
     <div className="flex flex-col gap-1">
-      <label
-        htmlFor={id}
-        className={`flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/30 text-sm text-white/70 hover:bg-white/5 ${compact ? 'min-h-12 px-3' : 'min-h-12 px-4'}`}
-      >
-        {uploading ? t('common.loading') : compact ? t('editor.addImageShort') : t('editor.addImage')}
-      </label>
+      {/* Before its label so the label can show the input's keyboard focus (peer). */}
       <input
         id={id}
         type="file"
         accept={ACCEPT.join(',')}
-        className="sr-only"
+        className="peer sr-only"
         aria-label={label}
         disabled={uploading}
         onChange={(e) => {
@@ -75,7 +74,13 @@ export function ImageField({
           if (file) void upload(file)
         }}
       />
-      {error && <p className="text-sm text-red-300">{t(error)}</p>}
+      <label
+        htmlFor={id}
+        className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-input text-sm font-semibold text-muted-foreground transition-colors peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring hover:border-ring hover:text-foreground ${compact ? 'min-h-12 px-3' : 'min-h-12 px-4'}`}
+      >
+        {uploading ? t('common.loading') : compact ? t('editor.addImageShort') : t('editor.addImage')}
+      </label>
+      {error && <p className="text-sm font-semibold text-destructive">{t(error)}</p>}
     </div>
   )
 }

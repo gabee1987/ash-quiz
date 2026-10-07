@@ -60,6 +60,7 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     scoreboard: 'afterQuestion',
     answerStyle: 'plain',
     finalResults: 'immediately',
+    theme: 'classic',
     ...overrides,
   }
 }

@@ -105,3 +105,28 @@ $env:LOAD_TEST_USERNAME="admin"; $env:LOAD_TEST_PASSWORD="..."; pnpm load-test -
 6. On a 375 px wide phone, open every host page. Expect no horizontal scroll and a bottom tab bar.
 7. Enter a wrong password. Expect a toast with the translated error.
 8. Run the Chrome Lighthouse accessibility audit on the join page in both modes. Expect no contrast failures.
+
+## Results
+
+Sizes are gzip, measured with `vite build` and a script that sums a route chunk, its static imports, the entry chunk and the CSS (what a phone downloads to show that route).
+
+| Measure | Before (1.0.0) | After |
+|---|---|---|
+| Entry chunk with its imports | 151.3 KB | 175.4 KB |
+| CSS | 6.0 KB | 12.4 KB |
+| `/play/$pin` total | 177.5 KB | 210.2 KB (+32.7 KB, budget +60 KB) |
+| `/screen/$pin` total | 187.0 KB | 219.2 KB |
+
+Not counted above: the Nunito font. A Hungarian page loads the Latin and Latin Extended subsets (38 KB and 35 KB woff2), once per device thanks to the browser cache; `font-display: swap` shows text in the fallback font until they arrive.
+
+Load test (60 players, 20% flapping, production bundle): PASS, fan-out max 8 ms, no answers missed.
+
+## Deviations
+
+- **No-flash script is a file, not inline.** The CSP allows scripts from `'self'` only, so the colour mode is applied by `public/mode-init.js`, loaded as a blocking classic script in `<head>`, instead of an inline script. Same effect, CSP unchanged.
+- **`radix-ui` instead of separate `@radix-ui/*` packages.** The current shadcn CLI installs the combined `radix-ui` package; only the imported primitives end up in the bundle. `tw-animate-css` (CSS only) was added too: the primitives' enter and exit transitions depend on it.
+- **Header switches are buttons, not menus.** The first build used Radix dropdown menus for language and colour mode in the header and put the player route at +64.8 KB, over budget. The header now has a two-button HU/EN switch and a mode button that cycles light, dark and system; `TooltipProvider` is not mounted until a page uses tooltips. Result: +32.7 KB.
+- **Themes are applied on `<html>`, not on a route wrapper**, so dialogs and toasts rendered in portals follow the theme. The game routes set and remove `data-theme` with `useGameTheme`.
+- **Dropdown, dialog and tooltip primitives** had hard-coded English "Close" labels; they now use `common.close`.
+- **Rate limiting no longer covers static files** (`apps/server/src/app.ts`, test in `apps/server/test/app.test.ts`). Found while running the new accessibility spec: the global limit of 300 requests per minute per IP also counted the app's static files, so the end-to-end suite started getting 429s. The same limit would have hit an event using a cloud deployment, where all phones on the venue wifi share one public IP (60 phones × about 25 files per page load). Only `/api/` is limited now; the stricter login limit is unchanged. `buildApp` accepts an optional `webDist` so the test can serve a fixture directory. This is a fix to 1.0.0 behaviour, not part of the design work, and can be committed separately.
+- **Duplicating a quiz already exists**: phase 11's plan lists `POST /api/quizzes/:quizId/duplicate` as new, but it is already implemented (with a translated "(copy)" title). Phase 11 should drop that item.
