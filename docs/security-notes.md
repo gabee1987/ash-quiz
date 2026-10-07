@@ -1,0 +1,29 @@
+# Security notes
+
+## Dependency audit
+
+`pnpm audit --prod` (the packages shipped in the Docker image): **no known vulnerabilities** (checked 2026-10-07, v1.0.0).
+
+`pnpm audit` including development tools reports two findings. Both are documented exceptions:
+
+| Severity | Package | Advisory | Path | Why it does not apply |
+|---|---|---|---|---|
+| Moderate | esbuild ≤ 0.24.2 | [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99): any website can send requests to esbuild's development server | `drizzle-kit` (migration generator) | Affects only `esbuild --serve`, which the project never runs. `drizzle-kit` is a developer tool and is not in the image. |
+| Low | esbuild 0.27.3 – 0.28.0 | [GHSA-g7r4-m6w7-qqqr](https://github.com/advisories/GHSA-g7r4-m6w7-qqqr): arbitrary file read through esbuild's development server on Windows | `vitest` → `vite` | Same: esbuild is used as a code transformer, its development server is never started. Test tooling only, not in the image. |
+
+Re-run both audits before every release and update this table.
+
+## Controls in place
+
+- **Headers** (`@fastify/helmet`): a strict Content Security Policy (same origin only, no inline scripts, no third-party resources), `frame-ancestors 'none'`, `nosniff`, `no-referrer`, same-origin opener and resource policies. HSTS and `upgrade-insecure-requests` are sent only when `APP_ORIGIN` is `https://`, so a laptop on the venue LAN keeps working over plain HTTP.
+- **Sessions**: random 32-byte tokens, stored hashed (SHA-256); `HttpOnly`, `SameSite=Lax` cookies, `Secure` behind HTTPS. Passwords hashed with Argon2. Login is rate limited.
+- **Input**: every HTTP body and socket message is validated with the shared Zod schemas. JSON bodies are limited to 1 MB, socket messages to 64 KB, image uploads to 5 MB (re-encoded server-side).
+- **Errors**: clients receive i18n keys only, never internal details; errors are logged server-side with request ids.
+- **CSV export**: values that Excel would run as formulas are neutralised.
+- **Data minimisation (GDPR)**: players give a nickname only. Finished games are deleted after `RESULTS_RETENTION_DAYS` (default 90).
+- **Results** are visible only to the game's host; the public projector screen never receives answers held back by the host.
+
+## Known limitations
+
+- On the venue LAN the app runs over plain HTTP: host passwords travel unencrypted on that network. Use a dedicated host account (see `docs/deploy.md`).
+- `GET /api/health` is public and reports whether the database is reachable and how many games are running (no game details).

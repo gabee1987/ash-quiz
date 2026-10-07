@@ -44,7 +44,7 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | Command | Allowed in | Effect |
 |---|---|---|
 | `createGame(quiz, settings, pin, id, now)` | - | lobby state, teams created from `settings.teamNames` in team mode |
-| `joinPlayer({ id, name, teamId, token })` | lobby only (reconnect allowed any time via token) | adds player; name unique case-insensitively, max 50 players; team mode requires a known `teamId` |
+| `joinPlayer({ id, name, teamId, token })` | lobby only (reconnect allowed any time via token) | adds player; name unique case-insensitively, max 60 players (`MAX_PLAYERS` in `packages/shared`); team mode requires a known `teamId` |
 | `reconnectPlayer(token)` / `disconnectPlayer(playerId)` | any | flips `connected` only |
 | `kickPlayer(playerId)` | any except finished | removes player, recomputes nothing (their past points stay out of team totals from then on) |
 | `startGame()` | lobby, at least 1 player, at least 1 question | goes to question 0 |

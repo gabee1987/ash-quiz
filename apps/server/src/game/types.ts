@@ -1,6 +1,6 @@
 import type { Answer, GamePhase, GameSettings, Quiz } from '@ash-quiz/shared'
 
-export const MAX_PLAYERS = 50
+export { MAX_PLAYERS } from '@ash-quiz/shared'
 
 export interface PlayerAnswerRecord {
   answer: Answer

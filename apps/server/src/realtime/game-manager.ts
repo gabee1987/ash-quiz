@@ -37,6 +37,7 @@ export const PENDING_RELEASE_TTL_MS = 12 * 60 * 60 * 1000
 export class GameManager {
   private readonly games = new Map<string, Entry>()
   private readonly listeners = new Set<Listener>()
+  private stopped = false
 
   constructor(
     private readonly store: GameStore,
@@ -123,6 +124,24 @@ export class GameManager {
     }
   }
 
+  /** Games in memory that are not finished (health check). */
+  activeCount(): number {
+    let count = 0
+    for (const entry of this.games.values()) if (entry.game.state.phase !== 'finished') count += 1
+    return count
+  }
+
+  /**
+   * Shutdown: stops every timer (no more transitions on their own), waits for every queued
+   * save and empties the registry. Commands still arriving are applied and saved, but arm no timers.
+   */
+  async stop(): Promise<void> {
+    this.stopped = true
+    for (const entry of this.games.values()) if (entry.timer) clearTimeout(entry.timer)
+    await this.flush()
+    this.games.clear()
+  }
+
   /** Resolves when every queued save has finished (tests, shutdown). */
   async flush(): Promise<void> {
     await Promise.all([...this.games.values()].map((entry) => entry.saving))
@@ -136,6 +155,7 @@ export class GameManager {
   private schedule(pin: string, entry: Entry) {
     if (entry.timer) clearTimeout(entry.timer)
     entry.timer = null
+    if (this.stopped) return
     const { state } = entry.game
     if (state.phase === 'question' && state.questionEndsAt !== null) {
       entry.timer = setTimeout(() => this.onDeadline(pin), Math.max(0, state.questionEndsAt - this.now()))

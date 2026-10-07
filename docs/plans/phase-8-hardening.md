@@ -70,3 +70,30 @@ git checkout develop && git pull
 git checkout main && git merge --no-ff develop -m "release: v1.0.0"
 git tag v1.0.0 && git push origin main --tags
 ```
+
+## Results
+
+Load test, 60 players, 5 questions of 12 s, 20% of players dropping and reconnecting during each question (local machine, 2026-10-07):
+
+| Run | Server | Answered (all questions) | Reconnects | Answer ack p95 | Fan-out max | Result |
+|---|---|---|---|---|---|---|
+| 1 | production build | 300/300 | 61 | 14 ms | 7 ms | pass |
+| 2 | production build | 300/300 | 56 | 13 ms | 8 ms | pass |
+| 3 | production build | 300/300 | 59 | 11 ms | 7 ms | pass |
+| restart | production build, process killed and restarted mid-game | 300/300 | 111 | 12 ms | 9 ms | pass |
+| restart | Docker image, `docker restart` mid-game | 0 missed | 110 | 64 ms | 25 ms | pass |
+| final | Docker image | 0 missed | 62 | – | 14 ms | pass |
+
+Fan-out is the time from a host command to the last connected player's snapshot. "Answered" counts answers the server recorded; a player who was disconnected while a question closed is allowed to miss it (none did).
+
+## Deviations
+
+- **Player cap raised from 50 to 60** (user decision), so the 60-player load test runs real players. `MAX_PLAYERS` moved to `packages/shared`; the host grading limit follows it.
+- **Soak findings fixed:**
+  - Shutdown cleared the games from memory before waiting for their saves, and closed the database while sockets could still send commands. Now: Socket.IO closes first, timers stop, queued saves finish, then the database closes.
+  - Shutdown hung while players were connected: Fastify closes the HTTP server before its `onClose` hooks and waits for every open connection, and websockets never end on their own. Docker then killed the process after the grace period (exit 137). Socket.IO now closes in the `preClose` hook; with 60 players, shutdown takes about 0.7 s. A test with a connected client guards it.
+- **Structured logging:** the game manager now logs through the app's logger (it used `console`); request logs already carry request ids.
+- **End-to-end files** are `e2e/*.e2e.ts` (not `*.spec.ts`), so Vitest does not pick them up. Locally they use the installed Chrome; CI installs Playwright's Chromium (`E2E_CHANNEL=chromium`).
+- **CI e2e job** builds and starts the Docker image with Compose (which now has a health check on `/api/health`), seeds a CI-only host account and runs `pnpm e2e`.
+- **Root scripts:** `pnpm e2e` and `pnpm load-test`. The load test needs `LOAD_TEST_USERNAME` / `LOAD_TEST_PASSWORD`; the e2e test needs `E2E_USERNAME` / `E2E_PASSWORD`. Both create their own quiz and delete what they created.
+- **Audit:** no production vulnerabilities; two development-only esbuild advisories (moderate, low) are documented exceptions in `docs/security-notes.md`.
