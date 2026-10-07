@@ -72,6 +72,7 @@ describeDb('game routes (database)', () => {
     const { pin } = (await create(alice, { quizId: 'quiz-test_alice' })).json()
     const res = await built.app.inject({ method: 'GET', url: `/api/games/${pin}`, headers: { cookie: alice } })
     expect(res.json()).toEqual({
+      gameId: built.manager.get(pin)!.state.id,
       pin,
       quizTitle: 'Quiz test_alice',
       mode: 'classic',

@@ -52,6 +52,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     if (game.hostId !== request.user!.id) return reply.code(403).send({ error: 'errors.forbidden' })
     const { state } = game
     const info: GameHostInfo = {
+      gameId: state.id,
       pin: state.pin,
       quizTitle: state.quiz.title,
       mode: state.settings.mode,

@@ -1,6 +1,14 @@
 import type { Answer, GameSettings, Question } from '@ash-quiz/shared'
 import { isCorrect, pointsFor } from './scoring.js'
-import { EngineError, MAX_PLAYERS, type GameQuiz, type GameState, type Player, type Team } from './types.js'
+import {
+  EngineError,
+  MAX_PLAYERS,
+  type GameQuiz,
+  type GameState,
+  type Player,
+  type ResultsAudience,
+  type Team,
+} from './types.js'
 
 // Pure commands: (state, input, now) => new state. No I/O, no timers, no clock.
 
@@ -38,6 +46,7 @@ export function createGame(
     awaitingGrading: false,
     createdAt: now,
     finishedAt: null,
+    released: { screen: false, players: false },
   }
 }
 
@@ -168,7 +177,7 @@ export function next(state: GameState, now: number): GameState {
 
 /** From the reveal to the scoreboard. Not available while scores are held back until the end. */
 export function showScoreboard(state: GameState): GameState {
-  if (state.phase !== 'reveal' || state.awaitingGrading || answersHidden(state)) {
+  if (state.phase !== 'reveal' || state.awaitingGrading || answersHidden(state, 'screen')) {
     throw new EngineError('errors.invalidTransition')
   }
   return { ...state, phase: 'scoreboard' }
@@ -200,9 +209,31 @@ export function endGame(state: GameState, now: number): GameState {
   return { ...state, phase: 'finished', finishedAt: now, awaitingGrading: false }
 }
 
-/** Correctness and scores are held back from players and the public screen until the game is finished. */
-export function answersHidden(state: GameState): boolean {
-  return state.settings.revealAnswers === 'atEnd' && state.phase !== 'finished'
+/** Shows the held-back final results to one audience: the projector or the players. Each once, in any order. */
+export function releaseResults(state: GameState, audience: ResultsAudience): GameState {
+  if (!resultsPendingFor(state, audience)) throw new EngineError('errors.invalidTransition')
+  const released = { screen: false, players: false, ...state.released }
+  return { ...state, released: { ...released, [audience]: true } }
+}
+
+/**
+ * Correctness and scores are held back from an audience (players, or the public screen):
+ * until the game is finished (`revealAnswers: 'atEnd'`), and after it until the host
+ * releases them to that audience.
+ */
+export function answersHidden(state: GameState, audience: ResultsAudience): boolean {
+  if (state.phase === 'finished') return resultsPendingFor(state, audience)
+  return state.settings.revealAnswers === 'atEnd'
+}
+
+/** The game is over and its final results still wait for the host's release to `audience`. */
+export function resultsPendingFor(state: GameState, audience: ResultsAudience): boolean {
+  return state.phase === 'finished' && state.settings.finalResults === 'onRelease' && !state.released?.[audience]
+}
+
+/** Some audience still waits for the final results. */
+export function resultsPending(state: GameState): boolean {
+  return resultsPendingFor(state, 'screen') || resultsPendingFor(state, 'players')
 }
 
 // ---- helpers ---------------------------------------------------------------

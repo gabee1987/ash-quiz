@@ -1,5 +1,5 @@
 import { gameSettingsSchema, type GameSettings } from '@ash-quiz/shared'
-import { EngineError, createGame, endQuestion, type GameQuiz, type GameState } from '../game/index.js'
+import { EngineError, createGame, endQuestion, resultsPending, type GameQuiz, type GameState } from '../game/index.js'
 import { generatePin } from './pin.js'
 
 export interface ManagedGame {
@@ -27,6 +27,8 @@ interface Entry {
 
 /** A finished game stays in memory this long so late reconnects still see the podium. */
 export const FINISHED_TTL_MS = 60 * 60 * 1000
+/** A finished game whose results the host has not released to everyone yet stays this long. */
+export const PENDING_RELEASE_TTL_MS = 12 * 60 * 60 * 1000
 
 /**
  * Registry of running games. Wraps engine commands with timers, snapshot
@@ -85,7 +87,10 @@ export class GameManager {
     return next
   }
 
-  /** Loads unfinished games after a restart; everyone starts disconnected and timers are re-armed. */
+  /**
+   * Loads unfinished games, and finished ones whose results wait for release, after a restart;
+   * everyone starts disconnected and timers are re-armed.
+   */
   async restore(): Promise<number> {
     const loaded = await this.store.loadActive(this.now())
     for (const game of loaded) {
@@ -105,6 +110,19 @@ export class GameManager {
     return loaded.length
   }
 
+  /**
+   * Drops a game from memory once its row is to be deleted, so no later transition
+   * (a reconnect, say) saves it again. Resolves after its queued saves.
+   */
+  async discard(gameId: string): Promise<void> {
+    for (const [pin, entry] of this.games) {
+      if (entry.game.state.id !== gameId) continue
+      if (entry.timer) clearTimeout(entry.timer)
+      this.games.delete(pin)
+      await entry.saving
+    }
+  }
+
   /** Resolves when every queued save has finished (tests, shutdown). */
   async flush(): Promise<void> {
     await Promise.all([...this.games.values()].map((entry) => entry.saving))
@@ -122,9 +140,11 @@ export class GameManager {
     if (state.phase === 'question' && state.questionEndsAt !== null) {
       entry.timer = setTimeout(() => this.onDeadline(pin), Math.max(0, state.questionEndsAt - this.now()))
     } else if (state.phase === 'finished' && state.finishedAt !== null) {
+      // Kept longer while its results wait for the host, so a late release still reaches everyone.
+      const ttl = resultsPending(state) ? PENDING_RELEASE_TTL_MS : FINISHED_TTL_MS
       entry.timer = setTimeout(() => {
         if (this.games.get(pin) === entry) this.games.delete(pin)
-      }, Math.max(0, state.finishedAt + FINISHED_TTL_MS - this.now()))
+      }, Math.max(0, state.finishedAt + ttl - this.now()))
     }
   }
 

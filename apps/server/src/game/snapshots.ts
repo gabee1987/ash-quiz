@@ -13,9 +13,9 @@ import type {
   TeamPublic,
 } from '@ash-quiz/shared'
 import { normalise } from './normalise.js'
-import { answersHidden } from './engine.js'
+import { answersHidden, resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
-import { EngineError, type GameState, type Player } from './types.js'
+import { EngineError, type GameState, type Player, type ResultsAudience } from './types.js'
 
 /** Strips every correct-answer field. Built per type so a new field is never leaked by accident. */
 export function toPublicQuestion(question: Question): PublicQuestion {
@@ -48,18 +48,20 @@ export function toPublicQuestion(question: Question): PublicQuestion {
 /**
  * Snapshot for the host control and the projector. `includeAnswers` adds the live
  * answer list; only the host room gets it, the public screen never does. Without it,
- * results held back until the end are concealed as for players.
+ * results held back are concealed as for players. The release flags are the projector's
+ * (a host-attached projector hides what it may not show yet itself).
  */
 export function toHostSnapshot(state: GameState, now: number, { includeAnswers = false } = {}): HostSnapshot {
-  const base = baseSnapshot(state, now)
+  const base = baseSnapshot(state, now, 'screen')
   return {
     ...(includeAnswers ? base : conceal(state, base)),
     currentAnswers: includeAnswers ? currentAnswers(state) : null,
+    playersWaiting: includeAnswers && resultsPendingFor(state, 'players'),
   }
 }
 
 export function toPlayerSnapshot(state: GameState, playerId: string, now: number): PlayerSnapshot {
-  const base = conceal(state, baseSnapshot(state, now))
+  const base = conceal(state, baseSnapshot(state, now, 'players'))
   const me = base.players.find((p) => p.id === playerId)
   const player = state.players[playerId]
   if (!me || !player) throw new EngineError('errors.playerNotFound')
@@ -71,7 +73,7 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     myAnswer: record?.answer ?? null,
     lastPoints: base.reveal ? (record?.points ?? 0) : null,
     lastCorrect: base.reveal ? (record?.correct ?? null) : null,
-    myResults: state.phase === 'finished' ? playerResults(state, player) : null,
+    myResults: state.phase === 'finished' && !base.answersHidden ? playerResults(state, player) : null,
   }
 }
 
@@ -118,11 +120,11 @@ export function distributionKeys(answer: Answer): string[] {
   }
 }
 
-function isRevealed(state: GameState): boolean {
+export function isRevealed(state: GameState): boolean {
   return state.phase === 'reveal' || state.phase === 'scoreboard' || state.phase === 'finished'
 }
 
-function baseSnapshot(state: GameState, now: number): GameSnapshotBase {
+function baseSnapshot(state: GameState, now: number, audience: ResultsAudience): GameSnapshotBase {
   const question = state.quiz.questions[state.questionIndex] ?? null
   const inQuestion = state.phase === 'question' && question !== null
   const revealed = question !== null && isRevealed(state)
@@ -163,11 +165,13 @@ function baseSnapshot(state: GameState, now: number): GameSnapshotBase {
     awaitingGrading: state.awaitingGrading,
     questionStats: questionStats(state, players),
     settings: state.settings,
-    answersHidden: answersHidden(state),
+    answersHidden: answersHidden(state, audience),
+    resultsPending: resultsPendingFor(state, audience),
   }
 }
 
-function revealInfo(state: GameState, question: Question): RevealInfo {
+/** Distribution and correctness of one question over every player's recorded answer. */
+export function revealInfo(state: GameState, question: Question): RevealInfo {
   const distribution: Record<string, number> = {}
   if ('options' in question) for (const option of question.options) distribution[option.id] = 0
   if (question.type === 'truefalse') Object.assign(distribution, { true: 0, false: 0 })

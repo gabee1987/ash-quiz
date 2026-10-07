@@ -78,7 +78,13 @@
       "gradeFirst": "Grade the answers below to continue.",
       "onlineCount_one": "{{count}} online",
       "onlineCount_other": "{{count}} online",
-      "openScreen": "Open screen"
+      "openScreen": "Open screen",
+      "results": "Results",
+      "resultsPendingHint": "The projector and the players do not see the results yet.",
+      "showPodium": "Show podium",
+      "releaseToPlayers": "Show results on phones",
+      "podiumPendingHint": "The projector does not show the results yet.",
+      "playersWaitingHint": "The players do not see their results yet."
     },
     "review": {
       "title": "Review",
@@ -139,7 +145,13 @@
         "plain": "Plain",
         "colourful": "Colourful"
       },
-      "answerStyleHelp": "The projector always shows the colours."
+      "answerStyleHelp": "The projector always shows the colours.",
+      "finalResults": "Final results",
+      "finalResultsOptions": {
+        "immediately": "When the game ends",
+        "onRelease": "When I release them"
+      },
+      "finalResultsHelp": "After the game, the projector and the phones wait. You show the podium on the projector and the results on the phones separately."
     },
     "newQuiz": "New quiz",
     "edit": "Edit",
@@ -190,7 +202,8 @@
     "resultsAtEnd": "Correct answers are revealed at the end of the game.",
     "backToHome": "Back to home",
     "yourAnswers": "Your answers",
-    "yourAnswer": "Your answer"
+    "yourAnswer": "Your answer",
+    "resultsComing": "The results will be shown soon."
   },
   "screen": {
     "joinAt": "Join at",
@@ -321,11 +334,50 @@
     "passwordChangeRequired": "Change your initial password first.",
     "usernameTaken": "This username is already taken.",
     "wrongCurrentPassword": "The current password is wrong.",
-    "samePassword": "The new password must differ from the current one."
+    "samePassword": "The new password must differ from the current one.",
+    "gameNotFinished": "End the game before deleting it."
   },
   "nav": {
     "label": "Host menu",
     "quizzes": "Quizzes",
-    "signedInAs": "Signed in as"
+    "signedInAs": "Signed in as",
+    "games": "Games"
+  },
+  "history": {
+    "title": "Games",
+    "empty": "No games yet. Start one from a quiz.",
+    "players_one": "{{count}} player",
+    "players_other": "{{count}} players",
+    "results": "Results",
+    "control": "Control",
+    "deleteTitle": "Delete game?",
+    "deleteBody": "The results of \"{{title}}\" ({{date}}) will be deleted permanently."
+  },
+  "results": {
+    "title": "Results",
+    "backToGames": "Back to games",
+    "running": "This game is still running. These are the results so far.",
+    "exportCsv": "Export CSV",
+    "showOnScreen": "Show on screen",
+    "podium": "Podium",
+    "questions": "Questions",
+    "noQuestions": "No question has been revealed yet.",
+    "questionNumber": "Question {{index}}",
+    "correctPercent": "{{percent}}% correct",
+    "answered_one": "{{answered}} of {{count}} answered",
+    "answered_other": "{{answered}} of {{count}} answered",
+    "averageTime": "Average time: {{seconds}} s",
+    "noAnswers": "No answers",
+    "players": "Players",
+    "teams": "Teams",
+    "rank": "Rank",
+    "name": "Name",
+    "team": "Team",
+    "score": "Score",
+    "correct": "Correct",
+    "members": "Members",
+    "sortedAscending": "sorted ascending",
+    "sortedDescending": "sorted descending",
+    "screenHint": "Space or → next, ← back"
   }
 }

@@ -30,12 +30,27 @@ export function primaryAction(host: HostSnapshot): PrimaryAction | null {
     case 'scoreboard':
       return nextQuestion(host)
     case 'finished':
-      return null
+      // Held results: the podium on the projector first, then (or never) the phones.
+      if (host.resultsPending) return showPodium
+      return host.playersWaiting ? releaseToPlayers : null
   }
 }
 
-/** The other way on from the reveal: straight to the next question, or the scoreboard on demand. */
+const showPodium: PrimaryAction = {
+  command: { type: 'releaseResults', audience: 'screen' },
+  label: 'host.game.showPodium',
+}
+const releaseToPlayers: PrimaryAction = {
+  command: { type: 'releaseResults', audience: 'players' },
+  label: 'host.game.releaseToPlayers',
+}
+
+/**
+ * The other way on from the reveal: straight to the next question, or the scoreboard on demand.
+ * After a game with held results: the phones' release while the podium is still held.
+ */
 export function alternativeAction(host: HostSnapshot): PrimaryAction | null {
+  if (host.phase === 'finished') return host.resultsPending && host.playersWaiting ? releaseToPlayers : null
   if (host.phase !== 'reveal' || host.awaitingGrading) return null
   if (scoreboardAfterEachQuestion(host)) return nextQuestion(host)
   return host.settings.revealAnswers === 'afterQuestion' ? showScoreboard : null

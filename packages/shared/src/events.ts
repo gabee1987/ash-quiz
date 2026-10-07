@@ -28,6 +28,8 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('next') }),
   /** From the reveal to the scoreboard. */
   z.object({ type: z.literal('scoreboard') }),
+  /** Final results held for release: to the projector (podium) or to the players' phones. */
+  z.object({ type: z.literal('releaseResults'), audience: z.enum(['screen', 'players']) }),
   z.object({ type: z.literal('skip') }),
   z.object({ type: z.literal('extendTime'), seconds: z.number().int().min(1).max(120) }),
   z.object({ type: z.literal('endQuestion') }),

@@ -6,6 +6,7 @@ import {
   gradeText,
   joinPlayer,
   next,
+  releaseResults,
   showScoreboard,
   skipQuestion,
   startGame,
@@ -266,5 +267,60 @@ describe('results held back until the end', () => {
     const snap = toPlayerSnapshot(endQuestion(atQuestion(0)), 'p1', T0)
     expect(snap.answersHidden).toBe(false)
     expect(snap.reveal).not.toBeNull()
+  })
+})
+
+describe('final results held until the host releases them', () => {
+  function finishedPending(): GameState {
+    let state = createGame(fixtureQuiz(), fixtureSettings({ finalResults: 'onRelease' }), '123456', 'g', T0)
+    state = joinPlayer(joinPlayer(state, { id: 'p1', name: 'Anna', token: 't1' }), { id: 'p2', name: 'Bela', token: 't2' })
+    state = startGame(state, T0)
+    state = submitAnswer(state, { playerId: 'p1', questionId: 'q-single', answer: { type: 'single', optionId: 'a' } }, T0)
+    return endGame(endQuestion(state), T0 + 1)
+  }
+
+  it('during the game, answers are revealed after each question as usual', () => {
+    let state = createGame(fixtureQuiz(), fixtureSettings({ finalResults: 'onRelease' }), '123456', 'g', T0)
+    state = endQuestion(startGame(joinPlayer(state, { id: 'p1', name: 'Anna', token: 't1' }), T0))
+    expect(toPlayerSnapshot(state, 'p1', T0)).toMatchObject({ answersHidden: false, resultsPending: false })
+  })
+
+  it('after the game, players and the public screen get no podium, scores or answer review', () => {
+    const state = finishedPending()
+    const player = toPlayerSnapshot(state, 'p1', T0)
+    const screen = toHostSnapshot(state, T0)
+    for (const snap of [player, screen]) {
+      expect(snap).toMatchObject({ phase: 'finished', resultsPending: true, answersHidden: true, reveal: null })
+      expect(snap.players.every((p) => p.score === 0 && p.rank === 1)).toBe(true)
+    }
+    expect(player.myResults).toBeNull()
+    expect(player.lastPoints).toBeNull()
+  })
+
+  it('the host room sees everything and what is still pending for the projector and the players', () => {
+    const host = toHostSnapshot(finishedPending(), T0, { includeAnswers: true })
+    expect(host).toMatchObject({ resultsPending: true, playersWaiting: true })
+    expect(host.players.find((p) => p.id === 'p1')?.score).toBe(1000)
+    expect(toHostSnapshot(finishedPending(), T0).playersWaiting).toBe(false)
+  })
+
+  it('releasing the podium shows the projector everything while phones keep waiting', () => {
+    const state = releaseResults(finishedPending(), 'screen')
+    const screen = toHostSnapshot(state, T0)
+    expect(screen).toMatchObject({ resultsPending: false, answersHidden: false })
+    expect(screen.players.find((p) => p.id === 'p1')?.score).toBe(1000)
+    expect(toHostSnapshot(state, T0, { includeAnswers: true })).toMatchObject({ resultsPending: false, playersWaiting: true })
+    const player = toPlayerSnapshot(state, 'p1', T0)
+    expect(player).toMatchObject({ resultsPending: true, answersHidden: true, myResults: null })
+    expect(player.me.score).toBe(0)
+  })
+
+  it('releasing to the players shows each phone its rank and answer review', () => {
+    const state = releaseResults(releaseResults(finishedPending(), 'screen'), 'players')
+    const player = toPlayerSnapshot(state, 'p1', T0)
+    expect(player).toMatchObject({ resultsPending: false, answersHidden: false })
+    expect(player.me.score).toBe(1000)
+    expect(player.myResults![0]).toMatchObject({ correct: true, points: 1000 })
+    expect(toHostSnapshot(state, T0, { includeAnswers: true }).playersWaiting).toBe(false)
   })
 })

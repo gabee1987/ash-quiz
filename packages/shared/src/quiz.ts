@@ -108,6 +108,8 @@ export const gameSettingsSchema = z
     scoreboard: z.enum(['afterQuestion', 'onDemand']).default('afterQuestion'),
     /** Answer buttons on phones: neutral with letters, or coloured like the projector. */
     answerStyle: z.enum(['plain', 'colourful']).default('plain'),
+    /** Final results (podium, ranks, answer review) on phones and the projector: as soon as the game ends, or when the host releases them. */
+    finalResults: z.enum(['immediately', 'onRelease']).default('immediately'),
   })
   .superRefine(checkTeams)
 export type GameSettings = z.infer<typeof gameSettingsSchema>
