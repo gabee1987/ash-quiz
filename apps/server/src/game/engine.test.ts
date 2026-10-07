@@ -129,10 +129,10 @@ describe('lobby commands', () => {
     expect(state.players.x!.name).toBe('Anna')
   })
 
-  it('accepts 50 players and rejects the 51st', () => {
-    const state = withPlayers(50)
-    expect(Object.keys(state.players)).toHaveLength(50)
-    expectCode(() => join(state, 51), 'errors.gameFull')
+  it('accepts 60 players and rejects the 61st', () => {
+    const state = withPlayers(60)
+    expect(Object.keys(state.players)).toHaveLength(60)
+    expectCode(() => join(state, 61), 'errors.gameFull')
   })
 
   it('requires a known team in team mode', () => {

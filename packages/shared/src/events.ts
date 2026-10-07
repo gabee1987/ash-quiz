@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { answerSchema } from './game.js'
+import { MAX_PLAYERS, answerSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
@@ -35,7 +35,7 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('endQuestion') }),
   z.object({ type: z.literal('kick'), playerId: z.string().min(1) }),
   /** Host grading of a text question without accepted answers: listed players are correct. */
-  z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(50) }),
+  z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(MAX_PLAYERS) }),
   z.object({ type: z.literal('end') }),
 ])
 export type HostCommand = z.infer<typeof hostCommandSchema>

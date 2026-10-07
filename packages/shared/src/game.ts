@@ -1,7 +1,10 @@
 import { z } from 'zod'
 import { gameModes, type GameMode, type GameSettings, type Question, type QuestionType } from './quiz.js'
 
-export const gamePhases = ['lobby', 'question', 'reveal', 'scoreboard', 'finished'] as const
+/** Players per game: about 50 expected at an event, plus headroom. */
+export const MAX_PLAYERS = 60
+
+export const gamePhases =['lobby', 'question', 'reveal', 'scoreboard', 'finished'] as const
 export type GamePhase = (typeof gamePhases)[number]
 
 // ---- Answers --------------------------------------------------------------

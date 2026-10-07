@@ -12,7 +12,7 @@ One file per phase. Each phase is one `feature/*` branch off `develop`, implemen
 | 6 | [Quiz editor, images, user management](phase-6-editor.md) | `feature/editor` | done |
 | 6b | [Host flow options, sidebar, plain answer buttons](phase-6b-host-flow.md) | `feature/host-flow` | done |
 | 7 | [Results, history, export, retention](phase-7-results.md) | `feature/results` | done |
-| 8 | [Hardening: load test, end-to-end, release](phase-8-hardening.md) | `feature/hardening` | todo |
+| 8 | [Hardening: load test, end-to-end, release](phase-8-hardening.md) | `feature/hardening` | done |
 
 Order matters: each phase builds on the previous one. Phase 1 and this planning material are the first two commits on `main` and `develop`.
 

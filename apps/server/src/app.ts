@@ -1,7 +1,9 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { sql } from 'drizzle-orm'
 import Fastify from 'fastify'
 import cookie from '@fastify/cookie'
+import helmet from '@fastify/helmet'
 import multipart from '@fastify/multipart'
 import rateLimit from '@fastify/rate-limit'
 import fastifyStatic from '@fastify/static'
@@ -29,8 +31,34 @@ export async function buildApp(config: Config, { db, manager }: AppDeps) {
         ? { level: 'info', transport: { target: 'pino-pretty' } }
         : { level: config.NODE_ENV === 'test' ? 'silent' : 'info' },
     trustProxy: true,
+    // JSON bodies (quizzes) stay small; image uploads have their own 5 MB multipart limit.
+    bodyLimit: 1024 * 1024,
   })
 
+  // Secure cookies need HTTPS; a laptop on the venue LAN serves plain http://<ip>:3000.
+  const secureCookies = config.APP_ORIGIN.startsWith('https://')
+
+  // Everything is same-origin: no CDN, no third-party scripts. Inline style attributes stay
+  // allowed (React sets widths and animation delays); inline scripts do not.
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'", config.APP_ORIGIN.replace(/^http/, 'ws')],
+        fontSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        // Plain-http LAN deployments must not be told to upgrade to https.
+        upgradeInsecureRequests: secureCookies ? [] : null,
+      },
+    },
+    strictTransportSecurity: secureCookies ? { maxAge: 31_536_000 } : false,
+  })
   await app.register(cookie, { secret: config.SESSION_SECRET })
   await app.register(rateLimit, {
     max: 300,
@@ -50,10 +78,17 @@ export async function buildApp(config: Config, { db, manager }: AppDeps) {
 
   app.decorateRequest('user', null)
 
-  // Secure cookies need HTTPS; a laptop on the venue LAN serves plain http://<ip>:3000.
-  const secureCookies = config.APP_ORIGIN.startsWith('https://')
-
-  app.get('/api/health', async () => ({ ok: true }))
+  // For uptime checks and the host's pre-event check: is the database reachable, how many games run.
+  app.get('/api/health', async (_request, reply) => {
+    const dbOk = await Promise.race([
+      db.execute(sql`select 1`).then(
+        () => true,
+        () => false,
+      ),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 2000).unref()),
+    ])
+    return reply.code(dbOk ? 200 : 503).send({ ok: dbOk, db: dbOk, activeGames: manager.activeCount() })
+  })
   await app.register(authRoutes, { db, secureCookies })
   await app.register(multipart)
   await app.register(quizRoutes, { db })
@@ -78,10 +113,14 @@ export async function buildApp(config: Config, { db, manager }: AppDeps) {
     // Always same-origin: Vite proxies /socket.io in development, Fastify serves the SPA in production.
     pingInterval: 10_000,
     pingTimeout: 20_000,
+    // Socket messages are answers and host commands: a few hundred bytes.
+    maxHttpBufferSize: 64 * 1024,
   })
   registerSocketHandlers(io, { manager, db, parseCookie: (header) => app.parseCookie(header), log: app.log })
-  app.addHook('onClose', async () => {
-    io.close()
+  // Before the HTTP server closes: it waits for every open connection, and websockets never end
+  // on their own. Clients reconnect to the next server; their disconnects are saved as usual.
+  app.addHook('preClose', async () => {
+    await io.close()
   })
 
   return { app, io }

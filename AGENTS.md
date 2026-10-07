@@ -150,7 +150,7 @@ Boris Cherny (creator of Claude Code) keeps his team's file around 100 lines. Un
 
 **Fill this in per project. Keep it specific. Delete sections that don't apply.**
 
-ASH Quiz: a browser-based, mobile-first live quiz (Kahoot-like) for company events. Players join with a 6-digit PIN or QR code and a nickname only; no accounts, no personal data. Hosts (HR) log in with username + password to create quizzes and run games. Up to ~50 players, individual or team mode. UI in Hungarian and English.
+ASH Quiz: a browser-based, mobile-first live quiz (Kahoot-like) for company events. Players join with a 6-digit PIN or QR code and a nickname only; no accounts, no personal data. Hosts (HR) log in with username + password to create quizzes and run games. About 50 players expected, 60 allowed, individual or team mode. UI in Hungarian and English.
 
 ### Stack
 - Language and version: TypeScript 5.9, Node 22+ (ESM everywhere)
