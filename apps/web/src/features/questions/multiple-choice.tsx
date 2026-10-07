@@ -5,7 +5,7 @@ import { OptionButton } from '../../components/option-button'
 import type { QuestionProps } from './types'
 
 /** Toggle options, then confirm. */
-export function MultipleChoice({ question, mode, disabled, onSubmit }: QuestionProps<'multiple'>) {
+export function MultipleChoice({ question, mode, disabled, large, onSubmit }: QuestionProps<'multiple'>) {
   const { t } = useTranslation()
   const [selected, setSelected] = useState<string[]>([])
   const toggle = (id: string) =>
@@ -20,6 +20,8 @@ export function MultipleChoice({ question, mode, disabled, onSubmit }: QuestionP
             key={option.id}
             index={index}
             label={option.text}
+            imageId={option.imageId}
+            large={large ?? false}
             selected={selected.includes(option.id)}
             disabled={mode === 'display' || disabled}
             onClick={() => toggle(option.id)}

@@ -1,7 +1,10 @@
+import type { GameSettings } from '@ash-quiz/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../components/button'
+import { CreateGameDialog } from '../../features/host/create-game-dialog'
 import { ApiError, apiFetch } from '../../lib/api'
 
 interface QuizSummary {
@@ -27,9 +30,10 @@ function HostHome() {
   const queryClient = useQueryClient()
   const quizzes = useQuery(quizzesQueryOptions)
 
+  const [creating, setCreating] = useState<QuizSummary | null>(null)
   const play = useMutation({
-    mutationFn: (quizId: string) =>
-      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId }) }),
+    mutationFn: ({ quizId, settings }: { quizId: string; settings: GameSettings }) =>
+      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId, settings }) }),
     onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
   })
 
@@ -58,10 +62,17 @@ function HostHome() {
       {quizzes.isPending && <p className="text-white/70">{t('common.loading')}</p>}
       {quizzes.isError && <p role="alert">{t('errors.internal')}</p>}
       {quizzes.data?.length === 0 && <p className="text-white/70">{t('host.empty')}</p>}
-      {play.error && (
-        <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-3 text-red-200">
-          {t(play.error instanceof ApiError ? play.error.code : 'errors.internal')}
-        </p>
+      {creating && (
+        <CreateGameDialog
+          quizTitle={creating.title}
+          pending={play.isPending}
+          error={play.error ? (play.error instanceof ApiError ? play.error.code : 'errors.internal') : null}
+          onCreate={(settings) => play.mutate({ quizId: creating.id, settings })}
+          onCancel={() => {
+            setCreating(null)
+            play.reset()
+          }}
+        />
       )}
 
       <ul className="flex flex-col gap-2">
@@ -75,7 +86,7 @@ function HostHome() {
                 {t('host.updated', { date: dateFormat.format(new Date(quiz.updatedAt)) })}
               </p>
             </div>
-            <Button disabled={play.isPending || quiz.questionCount === 0} onClick={() => play.mutate(quiz.id)}>
+            <Button disabled={quiz.questionCount === 0} onClick={() => setCreating(quiz)}>
               {t('host.play')}
             </Button>
           </li>

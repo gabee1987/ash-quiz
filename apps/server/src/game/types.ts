@@ -6,6 +6,8 @@ export interface PlayerAnswerRecord {
   answer: Answer
   /** Unix ms when the answer was received. */
   at: number
+  /** Milliseconds from question start to the answer. */
+  timeMs: number
   points: number
   /** null for polls and for host-graded text until `gradeText`. */
   correct: boolean | null

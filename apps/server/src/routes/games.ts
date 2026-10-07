@@ -70,6 +70,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       mode: state.settings.mode,
       phase: state.phase,
       teams: Object.values(state.teams).map((t) => ({ id: t.id, name: t.name })),
+      joinUrl: `${appOrigin}/?pin=${state.pin}`,
     }
     return info
   })

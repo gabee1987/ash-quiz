@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { gameModes, type GameMode, type Question } from './quiz.js'
+import { gameModes, type GameMode, type GameSettings, type Question, type QuestionType } from './quiz.js'
 
 export const gamePhases = ['lobby', 'question', 'reveal', 'scoreboard', 'finished'] as const
 export type GamePhase = (typeof gamePhases)[number]
@@ -27,6 +27,10 @@ export interface PlayerPublic {
   connected: boolean
   score: number
   rank: number
+  /** Answers marked correct so far. */
+  correctCount: number
+  /** Points earned on the current question once it is revealed, otherwise 0. */
+  roundPoints: number
 }
 
 export interface TeamPublic {
@@ -53,6 +57,33 @@ export interface RevealInfo {
   distribution: Record<string, number>
   correctCount: number
   answeredCount: number
+  /** Distribution keys that count as correct (empty for polls and ungraded text). */
+  correctKeys: string[]
+}
+
+/** How one revealed question went, for the review panel. */
+export interface QuestionStat {
+  questionId: string
+  index: number
+  text: string
+  type: QuestionType
+  answeredCount: number
+  correctCount: number
+  /** Mean answer time in ms over everyone who answered; null when nobody did. */
+  averageTimeMs: number | null
+}
+
+/** One player's answer to the current question (host only, never sent to the public screen). */
+export interface CurrentAnswer {
+  playerId: string
+  name: string
+  teamId: string | null
+  answer: Answer
+  /** Distribution key: option id, 'true'/'false', normalised text or the number. */
+  key: string
+  correct: boolean | null
+  points: number
+  timeMs: number
 }
 
 export interface GameSnapshotBase {
@@ -73,10 +104,18 @@ export interface GameSnapshotBase {
   teams: TeamPublic[]
   /** Present in 'reveal', 'scoreboard' and 'finished'. */
   reveal: RevealInfo | null
+  /** A text question without accepted answers waits for the host to grade it. */
+  awaitingGrading: boolean
+  /** Every question revealed so far, in order. */
+  questionStats: QuestionStat[]
 }
 
 /** What the host control and projector screens receive. */
-export type HostSnapshot = GameSnapshotBase
+export interface HostSnapshot extends GameSnapshotBase {
+  settings: GameSettings
+  /** Answers to the current question. Host room only; null on the public screen. */
+  currentAnswers: CurrentAnswer[] | null
+}
 
 /** What a player's phone receives. */
 export interface PlayerSnapshot extends GameSnapshotBase {
@@ -97,6 +136,8 @@ export const gamePublicInfoSchema = z.object({
   mode: z.enum(gameModes),
   phase: z.enum(gamePhases),
   teams: z.array(z.object({ id: z.string(), name: z.string() })),
+  /** Link players open, also encoded in the QR code. */
+  joinUrl: z.string(),
 })
 export type GamePublicInfo = z.infer<typeof gamePublicInfoSchema>
 

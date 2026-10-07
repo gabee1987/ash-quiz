@@ -200,6 +200,8 @@ describeDb('sockets (database)', () => {
     const host = await createUser(db, 'test_host', 'test-password-123')
     quizId = 'quiz-rt'
     await db.insert(quizzes).values({ id: quizId, ownerId: host.id, title: 'RT', questions: fixtureQuiz().questions })
+    const ungraded = { ...fixtureQuiz().questions[3]!, acceptedAnswers: [] } as ReturnType<typeof fixtureQuiz>['questions'][number]
+    await db.insert(quizzes).values({ id: 'quiz-grade', ownerId: host.id, title: 'Grade', questions: [ungraded] })
     const login = await built.app.inject({
       method: 'POST',
       url: '/api/auth/login',
@@ -335,6 +337,50 @@ describeDb('sockets (database)', () => {
     const closed = new Promise((resolve) => a.socket.once('game:closed', resolve))
     expect(await command(hostSocket, { type: 'kick', playerId: a.snapshot.me.id })).toEqual({ ok: true })
     expect(await closed).toEqual({ error: 'errors.kicked' })
+  })
+
+  it('gradeText: the host grades a text question and phones see the result', async () => {
+    const res = await built.app.inject({ method: 'POST', url: '/api/games', headers: { cookie: hostCookie }, payload: { quizId: 'quiz-grade' } })
+    const pin = res.json().pin
+    const hostSocket = await host(pin)
+    const a = await player(pin, 'Anna')
+    const b = await player(pin, 'Bence')
+    const question = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'question')
+    await command(hostSocket, { type: 'start' })
+    const q = (await question).question!
+
+    const awaiting = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.awaitingGrading)
+    await a.socket.emitWithAck('player:answer', { questionId: q.id, answer: { type: 'text', value: 'Győr' } })
+    await b.socket.emitWithAck('player:answer', { questionId: q.id, answer: { type: 'text', value: 'Pécs' } })
+    const pending = await awaiting
+    expect(pending.currentAnswers!.map((x) => x.key).sort()).toEqual(['gyor', 'pecs'])
+    expect(await command(hostSocket, { type: 'next' })).toEqual({ error: 'errors.invalidTransition' })
+
+    const gradedA = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.lastCorrect !== null)
+    const gradedB = nextSnapshot<PlayerSnapshot>(b.socket, 'game:player', (s) => s.lastCorrect !== null)
+    expect(await command(hostSocket, { type: 'gradeText', correctPlayerIds: [a.snapshot.me.id] })).toEqual({ ok: true })
+    expect((await gradedA).lastCorrect).toBe(true)
+    expect((await gradedA).lastPoints).toBeGreaterThan(0)
+    expect((await gradedB).lastCorrect).toBe(false)
+  })
+
+  it('never sends the live answer list to the public screen', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const screen = await connect()
+    await screen.emitWithAck('screen:attach', { pin })
+    const a = await player(pin, 'Anna')
+    await player(pin, 'Bence')
+    const screenSnaps: HostSnapshot[] = []
+    screen.on('game:host', (s: HostSnapshot) => screenSnaps.push(s))
+    const question = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'question')
+    await command(hostSocket, { type: 'start' })
+    const q = (await question).question!
+    const hostSaw = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => (s.currentAnswers?.length ?? 0) === 1)
+    await a.socket.emitWithAck('player:answer', { questionId: q.id, answer: { type: 'single', optionId: 'b' } })
+    await hostSaw
+    expect(screenSnaps.length).toBeGreaterThan(0)
+    expect(screenSnaps.every((s) => s.currentAnswers === null)).toBe(true)
   })
 
   it('screen:attach is public and receives host snapshots', async () => {

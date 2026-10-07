@@ -4,7 +4,19 @@ import { EngineError, MAX_PLAYERS, type GameState, type Player, type Team } from
 
 // Pure commands: (state, input, now) => new state. No I/O, no timers, no clock.
 
-export function createGame(quiz: Quiz, settings: GameSettings, pin: string, id: string, now: number): GameState {
+/**
+ * New lobby. With `settings.shuffleOptions` the option order of choice questions is
+ * shuffled once here and frozen into the game's quiz copy; correctness is id-based,
+ * so nothing else changes. `random` is injectable for tests.
+ */
+export function createGame(
+  quiz: Quiz,
+  settings: GameSettings,
+  pin: string,
+  id: string,
+  now: number,
+  random: () => number = Math.random,
+): GameState {
   const teams: Record<string, Team> = {}
   if (settings.mode === 'team') {
     settings.teamNames.forEach((name, i) => {
@@ -15,7 +27,7 @@ export function createGame(quiz: Quiz, settings: GameSettings, pin: string, id: 
   return {
     id,
     pin,
-    quiz,
+    quiz: settings.shuffleOptions ? shuffleOptions(quiz, random) : quiz,
     settings,
     phase: 'lobby',
     questionIndex: -1,
@@ -111,7 +123,16 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
 
   return withPlayer(state, {
     ...player,
-    answers: { ...player.answers, [question.id]: { answer: input.answer, at: now, points: 0, correct: null } },
+    answers: {
+      ...player.answers,
+      [question.id]: {
+        answer: input.answer,
+        at: now,
+        timeMs: Math.max(0, now - (state.questionStartedAt ?? now)),
+        points: 0,
+        correct: null,
+      },
+    },
   })
 }
 
@@ -172,6 +193,20 @@ export function endGame(state: GameState, now: number): GameState {
 }
 
 // ---- helpers ---------------------------------------------------------------
+
+function shuffleOptions(quiz: Quiz, random: () => number): Quiz {
+  const questions = quiz.questions.map((question) => {
+    if (question.type !== 'single' && question.type !== 'multiple' && question.type !== 'poll') return question
+    // Fisher-Yates on a copy.
+    const options = [...question.options]
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1))
+      ;[options[i], options[j]] = [options[j]!, options[i]!]
+    }
+    return { ...question, options }
+  })
+  return { ...quiz, questions }
+}
 
 export function currentQuestion(state: GameState): Question {
   const question = state.quiz.questions[state.questionIndex]

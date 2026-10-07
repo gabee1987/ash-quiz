@@ -78,3 +78,13 @@ pnpm verify && TEST_DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashqu
 10. Press Space on the laptop while not logged in. Expect nothing. Log in on the laptop, press Space. Expect next.
 11. Finish. Expect team podium on the screen and phones.
 12. Resize the host control to phone width. Expect every control reachable without horizontal scroll.
+
+## Deviations
+
+- The host snapshot is sent in two variants: the host room gets `currentAnswers` (live answer list with names), the public screen room gets `null`. Anyone with the PIN can open the screen, so live answers must not reach it. Covered by a realtime test.
+- Snapshot additions beyond `questionStats`: `awaitingGrading`, `settings` (host), `reveal.correctKeys` (server decides which bars are correct, including numbers within tolerance and host-graded text), and per-player `correctCount` and `roundPoints` (scoreboard deltas).
+- Answers now record `timeMs` (time from question start) for the average-time statistic.
+- `createGame` takes an optional `random` (defaults to `Math.random`) for the shuffle; the engine only calls it when `shuffleOptions` is on.
+- Space / Right arrow on a logged-in screen trigger the phase's primary action (start, end question, show scoreboard, next question, finish), not only `next`, so the projector laptop can run the whole game.
+- Option colours now carry their own text colour (black on yellow and orange) for contrast.
+- Grading groups identical answers (same normalised text) under one toggle, so 50 answers of "Győr" / "gyor" are one tick.

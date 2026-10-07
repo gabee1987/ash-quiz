@@ -17,7 +17,8 @@
   },
   "common": {
     "loading": "Betöltés…",
-    "next": "Tovább"
+    "next": "Tovább",
+    "cancel": "Mégse"
   },
   "auth": {
     "title": "Játékvezetői belépés",
@@ -55,7 +56,57 @@
       "online": "Kapcsolódva",
       "offline": "Nincs kapcsolat",
       "waitingForPlayers": "Még nincs játékos. Ossza meg a PIN-t vagy a QR-kódot.",
-      "backToQuizzes": "Vissza a kvízekhez"
+      "backToQuizzes": "Vissza a kvízekhez",
+      "showScoreboard": "Eredménytábla",
+      "nextQuestion": "Következő kérdés",
+      "finish": "Befejezés",
+      "gradeFirst": "A folytatáshoz értékelje az alábbi válaszokat.",
+      "onlineCount_one": "{{count}} kapcsolódva",
+      "onlineCount_other": "{{count}} kapcsolódva",
+      "openScreen": "Kivetítő megnyitása"
+    },
+    "review": {
+      "title": "Áttekintés",
+      "standings": "Állás",
+      "name": "Név",
+      "correct": "Helyes",
+      "score": "Pont",
+      "questions": "Eddigi kérdések",
+      "noQuestionsYet": "Még nem volt felfedett kérdés.",
+      "pollAnswers_one": "{{count}} szavazat",
+      "pollAnswers_other": "{{count}} szavazat",
+      "correctOf_one": "{{count}} válaszból {{correct}} helyes ({{percent}})",
+      "correctOf_other": "{{count}} válaszból {{correct}} helyes ({{percent}})",
+      "averageTime": "átlagosan {{seconds}} mp",
+      "currentAnswers_one": "Válaszok erre a kérdésre ({{count}})",
+      "currentAnswers_other": "Válaszok erre a kérdésre ({{count}})"
+    },
+    "grading": {
+      "title": "Válaszok értékelése",
+      "help": "Jelölje be az összes helyesnek elfogadott választ. Az azonos válaszok egy csoportban szerepelnek.",
+      "noAnswers": "Erre a kérdésre senki sem válaszolt.",
+      "apply": "Értékelés mentése"
+    },
+    "create": {
+      "title": "Új játék",
+      "mode": "Játékmód",
+      "modes": {
+        "classic": "Klasszikus",
+        "classicHelp": "Mindenki önállóan játszik.",
+        "team": "Csapat",
+        "teamHelp": "A játékosok csapatot választanak; a csapat pontszáma a tagok átlaga."
+      },
+      "teams": "Csapatok",
+      "teamName": "Csapatnév",
+      "addTeam": "Hozzáadás",
+      "removeTeam": "{{name}} eltávolítása",
+      "defaultTeam": "{{n}}. csapat",
+      "needTwoTeams": "Adjon meg legalább két csapatot.",
+      "duplicateTeams": "A csapatneveknek különbözniük kell.",
+      "speedBonus": "Gyorsasági bónusz",
+      "speedBonusHelp": "A gyorsabb helyes válasz több pontot ér.",
+      "shuffle": "Válaszlehetőségek keverése",
+      "submit": "Játék létrehozása"
     }
   },
   "play": {
@@ -93,7 +144,17 @@
     "gameOver": "Vége a játéknak!",
     "finalRank": "Végső helyezés",
     "podium": "Dobogó",
-    "backToJoin": "Csatlakozás játékhoz"
+    "backToJoin": "Csatlakozás játékhoz",
+    "teamRank": "{{team}} csapat: {{rank}}. hely",
+    "teamLeaderboard": "Csapatok"
+  },
+  "screen": {
+    "joinAt": "Csatlakozás itt",
+    "pin": "Játék PIN",
+    "answerOnPhone": "Írd be a válaszod a telefonodon",
+    "other": "Egyéb",
+    "correctCount_one": "{{count}} válaszból {{correct}} helyes",
+    "correctCount_other": "{{count}} válaszból {{correct}} helyes"
   },
   "errors": {
     "gameNotFound": "Nincs ilyen játék. Ellenőrizd a PIN-t.",

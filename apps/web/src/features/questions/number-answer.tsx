@@ -11,10 +11,12 @@ export function parseNumber(input: string): number | null {
   return Number.isFinite(value) ? value : null
 }
 
-export function NumberAnswer({ mode, disabled, onSubmit }: QuestionProps<'number'>) {
+export function NumberAnswer({ mode, disabled, large, onSubmit }: QuestionProps<'number'>) {
   const { t } = useTranslation()
   const [value, setValue] = useState('')
-  if (mode === 'display') return <p className="text-center text-white/70">{t('play.typeNumber')}</p>
+  if (mode === 'display') {
+    return <p className={`text-center text-white/70 ${large ? 'text-4xl' : ''}`}>{t('screen.answerOnPhone')}</p>
+  }
   const parsed = parseNumber(value)
 
   function submit(e: FormEvent) {

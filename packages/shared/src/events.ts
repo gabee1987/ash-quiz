@@ -29,6 +29,8 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('extendTime'), seconds: z.number().int().min(1).max(120) }),
   z.object({ type: z.literal('endQuestion') }),
   z.object({ type: z.literal('kick'), playerId: z.string().min(1) }),
+  /** Host grading of a text question without accepted answers: listed players are correct. */
+  z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(50) }),
   z.object({ type: z.literal('end') }),
 ])
 export type HostCommand = z.infer<typeof hostCommandSchema>

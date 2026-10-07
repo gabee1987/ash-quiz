@@ -7,5 +7,7 @@ export interface QuestionProps<Q extends PublicQuestion['type']> {
   question: Extract<PublicQuestion, { type: Q }>
   mode: QuestionMode
   disabled?: boolean
+  /** Projector size (display mode on the screen). */
+  large?: boolean
   onSubmit?: (answer: Answer) => void
 }

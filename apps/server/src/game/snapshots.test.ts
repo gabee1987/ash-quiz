@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createGame, endGame, endQuestion, joinPlayer, next, skipQuestion, startGame, submitAnswer } from './engine.js'
+import { createGame, endGame, endQuestion, gradeText, joinPlayer, next, skipQuestion, startGame, submitAnswer } from './engine.js'
 import { fixtureQuiz, fixtureSettings } from './fixtures.js'
 import { toHostSnapshot, toPlayerSnapshot, toPublicQuestion } from './snapshots.js'
 import { EngineError, type GameState } from './types.js'
@@ -137,5 +137,63 @@ describe('toPlayerSnapshot', () => {
 
   it('throws playerNotFound for an unknown player', () => {
     expect(() => toPlayerSnapshot(lobby(), 'ghost', T0)).toThrow(EngineError)
+  })
+})
+
+describe('review and grading data', () => {
+  const answerSingle = (state: GameState, playerId: string, optionId: string, at: number) =>
+    submitAnswer(state, { playerId, questionId: 'q-single', answer: { type: 'single', optionId } }, at)
+
+  it('includes live answers only when asked (host room), never by default (screen)', () => {
+    const state = answerSingle(atQuestion(0), 'p1', 'b', T0 + 3_000)
+    expect(toHostSnapshot(state, T0).currentAnswers).toBeNull()
+    const answers = toHostSnapshot(state, T0, { includeAnswers: true }).currentAnswers!
+    expect(answers).toEqual([
+      { playerId: 'p1', name: 'Anna', teamId: null, answer: { type: 'single', optionId: 'b' }, key: 'b', correct: null, points: 0, timeMs: 3_000 },
+    ])
+    expect(toHostSnapshot(state, T0).settings).toEqual(fixtureSettings())
+  })
+
+  it('reports correct keys per question type', () => {
+    expect(toHostSnapshot(endQuestion(atQuestion(0)), T0).reveal!.correctKeys).toEqual(['a'])
+    expect(toHostSnapshot(endQuestion(atQuestion(2)), T0).reveal!.correctKeys).toEqual(['true'])
+    expect(toHostSnapshot(endQuestion(atQuestion(3)), T0).reveal!.correctKeys).toEqual(['gyor'])
+    let num = atQuestion(4)
+    num = submitAnswer(num, { playerId: 'p1', questionId: 'q-number', answer: { type: 'number', value: 1850 } }, T0)
+    num = submitAnswer(num, { playerId: 'p2', questionId: 'q-number', answer: { type: 'number', value: 1900 } }, T0)
+    expect(toHostSnapshot(endQuestion(num), T0).reveal!.correctKeys).toEqual(['1850'])
+    expect(toHostSnapshot(endQuestion(atQuestion(5)), T0).reveal!.correctKeys).toEqual([])
+  })
+
+  it('builds question stats for revealed questions and per-player correct counts and round points', () => {
+    let state = answerSingle(atQuestion(0), 'p1', 'a', T0 + 2_000)
+    state = answerSingle(state, 'p2', 'b', T0 + 4_000)
+    expect(toHostSnapshot(state, T0).questionStats).toEqual([])
+    state = endQuestion(state)
+    const snap = toHostSnapshot(state, T0)
+    expect(snap.questionStats).toEqual([
+      { questionId: 'q-single', index: 0, text: 'Capital of Hungary?', type: 'single', answeredCount: 2, correctCount: 1, averageTimeMs: 3_000 },
+    ])
+    expect(snap.players.find((p) => p.id === 'p1')).toMatchObject({ correctCount: 1, roundPoints: 950 })
+    expect(snap.players.find((p) => p.id === 'p3')).toMatchObject({ correctCount: 0, roundPoints: 0 })
+    // On the next question the previous stats stay and round points reset.
+    const nextQ = toHostSnapshot(next(next(state, T0), T0), T0)
+    expect(nextQ.questionStats).toHaveLength(1)
+    expect(nextQ.players.every((p) => p.roundPoints === 0)).toBe(true)
+  })
+
+  it('exposes awaitingGrading and marks graded text keys correct', () => {
+    const quiz = fixtureQuiz()
+    quiz.questions = [{ ...quiz.questions[3]!, type: 'text', acceptedAnswers: [] } as (typeof quiz.questions)[number]]
+    let state = createGame(quiz, fixtureSettings(), '123456', 'g', T0)
+    state = joinPlayer(joinPlayer(state, { id: 'p1', name: 'Anna', token: 't1' }), { id: 'p2', name: 'Bela', token: 't2' })
+    state = startGame(state, T0)
+    state = submitAnswer(state, { playerId: 'p1', questionId: 'q-text', answer: { type: 'text', value: 'Győr' } }, T0)
+    state = submitAnswer(state, { playerId: 'p2', questionId: 'q-text', answer: { type: 'text', value: 'Pécs' } }, T0)
+    state = endQuestion(state)
+    expect(toHostSnapshot(state, T0).awaitingGrading).toBe(true)
+    const graded = toHostSnapshot(gradeText(state, ['p1']), T0)
+    expect(graded.awaitingGrading).toBe(false)
+    expect(graded.reveal!.correctKeys).toEqual(['gyor'])
   })
 })

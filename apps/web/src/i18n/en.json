@@ -17,7 +17,8 @@
   },
   "common": {
     "loading": "Loading…",
-    "next": "Next"
+    "next": "Next",
+    "cancel": "Cancel"
   },
   "auth": {
     "title": "Host login",
@@ -55,7 +56,57 @@
       "online": "Connected",
       "offline": "Disconnected",
       "waitingForPlayers": "No players yet. Share the PIN or the QR code.",
-      "backToQuizzes": "Back to quizzes"
+      "backToQuizzes": "Back to quizzes",
+      "showScoreboard": "Show scoreboard",
+      "nextQuestion": "Next question",
+      "finish": "Finish",
+      "gradeFirst": "Grade the answers below to continue.",
+      "onlineCount_one": "{{count}} online",
+      "onlineCount_other": "{{count}} online",
+      "openScreen": "Open screen"
+    },
+    "review": {
+      "title": "Review",
+      "standings": "Standings",
+      "name": "Name",
+      "correct": "Correct",
+      "score": "Score",
+      "questions": "Questions so far",
+      "noQuestionsYet": "No question has been revealed yet.",
+      "pollAnswers_one": "{{count}} vote",
+      "pollAnswers_other": "{{count}} votes",
+      "correctOf_one": "{{correct}} of {{count}} correct ({{percent}})",
+      "correctOf_other": "{{correct}} of {{count}} correct ({{percent}})",
+      "averageTime": "average {{seconds}} s",
+      "currentAnswers_one": "Answers to this question ({{count}})",
+      "currentAnswers_other": "Answers to this question ({{count}})"
+    },
+    "grading": {
+      "title": "Grade the answers",
+      "help": "Tick every answer that counts as correct. Identical answers are grouped.",
+      "noAnswers": "Nobody answered this question.",
+      "apply": "Apply grading"
+    },
+    "create": {
+      "title": "New game",
+      "mode": "Mode",
+      "modes": {
+        "classic": "Classic",
+        "classicHelp": "Everyone plays for themselves.",
+        "team": "Teams",
+        "teamHelp": "Players pick a team; the team score is the average of its members."
+      },
+      "teams": "Teams",
+      "teamName": "Team name",
+      "addTeam": "Add",
+      "removeTeam": "Remove {{name}}",
+      "defaultTeam": "Team {{n}}",
+      "needTwoTeams": "Add at least two teams.",
+      "duplicateTeams": "Team names must be different.",
+      "speedBonus": "Speed bonus",
+      "speedBonusHelp": "Faster correct answers earn more points.",
+      "shuffle": "Shuffle answer options",
+      "submit": "Create game"
     }
   },
   "play": {
@@ -93,7 +144,17 @@
     "gameOver": "Game over!",
     "finalRank": "Final rank",
     "podium": "Podium",
-    "backToJoin": "Join a game"
+    "backToJoin": "Join a game",
+    "teamRank": "Team {{team}}: rank {{rank}}.",
+    "teamLeaderboard": "Teams"
+  },
+  "screen": {
+    "joinAt": "Join at",
+    "pin": "Game PIN",
+    "answerOnPhone": "Type your answer on your phone",
+    "other": "Other",
+    "correctCount_one": "{{correct}} of {{count}} answered correctly",
+    "correctCount_other": "{{correct}} of {{count}} answered correctly"
   },
   "errors": {
     "gameNotFound": "No such game. Check the PIN.",

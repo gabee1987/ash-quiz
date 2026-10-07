@@ -19,6 +19,7 @@ import {
   endGame,
   endQuestion,
   extendTime,
+  gradeText,
   joinPlayer,
   kickPlayer,
   next,
@@ -67,7 +68,9 @@ const invalidInput: ErrorPayload = { error: 'errors.invalidInput' }
 export function registerSocketHandlers(io: AppSocketServer, { manager, db, parseCookie, log }: SocketDeps) {
   manager.subscribe(({ state }) => {
     const now = Date.now()
-    io.to([rooms.host(state.pin), rooms.screen(state.pin)]).emit('game:host', toHostSnapshot(state, now))
+    // The public screen never receives the live answer list.
+    io.to(rooms.host(state.pin)).emit('game:host', toHostSnapshot(state, now, { includeAnswers: true }))
+    io.to(rooms.screen(state.pin)).emit('game:host', toHostSnapshot(state, now))
     for (const playerId of Object.keys(state.players)) {
       io.to(rooms.player(state.pin, playerId)).emit('game:player', toPlayerSnapshot(state, playerId, now))
     }
@@ -101,7 +104,7 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
     if (role === 'player' && playerId && game.state.players[playerId]) {
       socket.emit('game:player', toPlayerSnapshot(game.state, playerId, Date.now()))
     } else if (role === 'host' || role === 'screen') {
-      socket.emit('game:host', toHostSnapshot(game.state, Date.now()))
+      socket.emit('game:host', toHostSnapshot(game.state, Date.now(), { includeAnswers: role === 'host' }))
     }
   }
 
@@ -236,6 +239,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return endQuestion(state)
     case 'kick':
       return kickPlayer(state, command.playerId)
+    case 'gradeText':
+      return gradeText(state, command.correctPlayerIds)
     case 'end':
       return endGame(state, now)
   }

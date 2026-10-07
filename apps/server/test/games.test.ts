@@ -78,6 +78,7 @@ describeDb('game routes (database)', () => {
         { id: 'team-1', name: 'Red' },
         { id: 'team-2', name: 'Blue' },
       ],
+      joinUrl: `http://localhost:3000/?pin=${pin}`,
     })
     const missing = await built.app.inject({ method: 'GET', url: '/api/games/999999/public' })
     expect(missing.statusCode).toBe(404)

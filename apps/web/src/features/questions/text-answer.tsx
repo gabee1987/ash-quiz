@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../components/button'
 import type { QuestionProps } from './types'
 
-export function TextAnswer({ mode, disabled, onSubmit }: QuestionProps<'text'>) {
+export function TextAnswer({ mode, disabled, large, onSubmit }: QuestionProps<'text'>) {
   const { t } = useTranslation()
   const [value, setValue] = useState('')
-  if (mode === 'display') return <p className="text-center text-white/70">{t('play.typeAnswer')}</p>
+  if (mode === 'display') {
+    return <p className={`text-center text-white/70 ${large ? 'text-4xl' : ''}`}>{t('screen.answerOnPhone')}</p>
+  }
 
   function submit(e: FormEvent) {
     e.preventDefault()

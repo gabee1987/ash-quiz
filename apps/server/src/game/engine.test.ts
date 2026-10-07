@@ -88,6 +88,31 @@ describe('createGame', () => {
   })
 })
 
+describe('shuffleOptions', () => {
+  it('shuffles choice options once at createGame and keeps correctness id-based', () => {
+    // random() = 0 moves every element to the front in turn: [a, b, c] -> [b, c, a]
+    const state = createGame(fixtureQuiz(), fixtureSettings({ shuffleOptions: true }), '123456', 'g', T0, () => 0)
+    const single = state.quiz.questions[0]!
+    expect('options' in single && single.options.map((o) => o.id)).toEqual(['b', 'c', 'a'])
+    expect(single).toMatchObject({ correctOptionId: 'a' })
+    const tf = state.quiz.questions[2]!
+    expect(tf).toEqual(fixtureQuiz().questions[2])
+    let played = startGame(joinPlayer(state, { id: 'p1', name: 'A', token: 't' }), T0)
+    played = endQuestion(answer(played, 'p1', { type: 'single', optionId: 'a' }, T0))
+    expect(played.players.p1!.score).toBe(1000)
+  })
+
+  it('leaves the order alone without the setting', () => {
+    const state = createGame(fixtureQuiz(), fixtureSettings(), '123456', 'g', T0, () => 0)
+    expect(state.quiz).toEqual(fixtureQuiz())
+  })
+
+  it('records the answer time from question start', () => {
+    const state = answer(startGame(withPlayers(1), T0), 'p1', correctAnswers[0]!, T0 + 4_200)
+    expect(state.players.p1!.answers['q-single']!.timeMs).toBe(4_200)
+  })
+})
+
 describe('lobby commands', () => {
   it('rejects a duplicate name case-insensitively and after trimming', () => {
     const state = join(newGame(), 1)

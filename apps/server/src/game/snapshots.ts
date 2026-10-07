@@ -1,17 +1,19 @@
 import type {
   Answer,
+  CurrentAnswer,
   GameSnapshotBase,
   HostSnapshot,
   PlayerPublic,
   PlayerSnapshot,
   PublicQuestion,
   Question,
+  QuestionStat,
   RevealInfo,
   TeamPublic,
 } from '@ash-quiz/shared'
 import { normalise } from './normalise.js'
 import { denseRank } from './scoring.js'
-import { EngineError, type GameState } from './types.js'
+import { EngineError, type GameState, type Player } from './types.js'
 
 /** Strips every correct-answer field. Built per type so a new field is never leaked by accident. */
 export function toPublicQuestion(question: Question): PublicQuestion {
@@ -41,8 +43,16 @@ export function toPublicQuestion(question: Question): PublicQuestion {
   }
 }
 
-export function toHostSnapshot(state: GameState, now: number): HostSnapshot {
-  return baseSnapshot(state, now)
+/**
+ * Snapshot for the host control and the projector. `includeAnswers` adds the live
+ * answer list; only the host room gets it, the public screen never does.
+ */
+export function toHostSnapshot(state: GameState, now: number, { includeAnswers = false } = {}): HostSnapshot {
+  return {
+    ...baseSnapshot(state, now),
+    settings: state.settings,
+    currentAnswers: includeAnswers ? currentAnswers(state) : null,
+  }
 }
 
 export function toPlayerSnapshot(state: GameState, playerId: string, now: number): PlayerSnapshot {
@@ -61,10 +71,31 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
   }
 }
 
+/** Distribution bucket of an answer: option id, 'true'/'false', normalised text, or the number. */
+export function distributionKeys(answer: Answer): string[] {
+  switch (answer.type) {
+    case 'single':
+    case 'poll':
+      return [answer.optionId]
+    case 'multiple':
+      return answer.optionIds
+    case 'truefalse':
+      return [String(answer.value)]
+    case 'text':
+      return [normalise(answer.value)]
+    case 'number':
+      return [String(answer.value)]
+  }
+}
+
+function isRevealed(state: GameState): boolean {
+  return state.phase === 'reveal' || state.phase === 'scoreboard' || state.phase === 'finished'
+}
+
 function baseSnapshot(state: GameState, now: number): GameSnapshotBase {
   const question = state.quiz.questions[state.questionIndex] ?? null
   const inQuestion = state.phase === 'question' && question !== null
-  const revealed = question !== null && (state.phase === 'reveal' || state.phase === 'scoreboard' || state.phase === 'finished')
+  const revealed = question !== null && isRevealed(state)
   const players = Object.values(state.players)
 
   const rankedPlayers: PlayerPublic[] = denseRank(players).map((p) => ({
@@ -74,6 +105,8 @@ function baseSnapshot(state: GameState, now: number): GameSnapshotBase {
     connected: p.connected,
     score: p.score,
     rank: p.rank,
+    correctCount: Object.values(p.answers).filter((a) => a.correct === true).length,
+    roundPoints: revealed && question ? (p.answers[question.id]?.points ?? 0) : 0,
   }))
   const rankedTeams: TeamPublic[] = denseRank(Object.values(state.teams)).map((t) => ({
     id: t.id,
@@ -97,6 +130,8 @@ function baseSnapshot(state: GameState, now: number): GameSnapshotBase {
     players: rankedPlayers,
     teams: rankedTeams,
     reveal: revealed ? revealInfo(state, question) : null,
+    awaitingGrading: state.awaitingGrading,
+    questionStats: questionStats(state, players),
   }
 }
 
@@ -107,28 +142,75 @@ function revealInfo(state: GameState, question: Question): RevealInfo {
 
   let correctCount = 0
   let answeredCount = 0
+  const correctKeys = new Set<string>(staticCorrectKeys(question))
   for (const player of Object.values(state.players)) {
     const record = player.answers[question.id]
     if (!record) continue
     answeredCount += 1
     if (record.correct === true) correctCount += 1
-    for (const key of distributionKeys(record.answer)) distribution[key] = (distribution[key] ?? 0) + 1
+    const keys = distributionKeys(record.answer)
+    for (const key of keys) distribution[key] = (distribution[key] ?? 0) + 1
+    // Number answers within tolerance and host-graded text are correct per answer, not per key list.
+    if (record.correct === true && (question.type === 'number' || question.type === 'text')) {
+      for (const key of keys) correctKeys.add(key)
+    }
   }
-  return { question, distribution, correctCount, answeredCount }
+  return { question, distribution, correctCount, answeredCount, correctKeys: [...correctKeys] }
 }
 
-function distributionKeys(answer: Answer): string[] {
-  switch (answer.type) {
+function staticCorrectKeys(question: Question): string[] {
+  switch (question.type) {
     case 'single':
-    case 'poll':
-      return [answer.optionId]
+      return [question.correctOptionId]
     case 'multiple':
-      return answer.optionIds
+      return question.correctOptionIds
     case 'truefalse':
-      return [String(answer.value)]
+      return [String(question.correct)]
     case 'text':
-      return [normalise(answer.value)]
+      return question.acceptedAnswers.map(normalise)
     case 'number':
-      return [String(answer.value)]
+    case 'poll':
+      return []
   }
+}
+
+/** Stats for every question revealed so far (the current one once it is revealed). */
+function questionStats(state: GameState, players: Player[]): QuestionStat[] {
+  const lastRevealed = isRevealed(state) ? state.questionIndex : state.questionIndex - 1
+  return state.quiz.questions.slice(0, Math.max(0, lastRevealed + 1)).map((question, index) => {
+    const records = players.flatMap((p) => (p.answers[question.id] ? [p.answers[question.id]!] : []))
+    const totalTime = records.reduce((sum, r) => sum + r.timeMs, 0)
+    return {
+      questionId: question.id,
+      index,
+      text: question.text,
+      type: question.type,
+      answeredCount: records.length,
+      correctCount: records.filter((r) => r.correct === true).length,
+      averageTimeMs: records.length > 0 ? Math.round(totalTime / records.length) : null,
+    }
+  })
+}
+
+function currentAnswers(state: GameState): CurrentAnswer[] {
+  const question = state.quiz.questions[state.questionIndex]
+  if (!question) return []
+  return Object.values(state.players)
+    .flatMap((player) => {
+      const record = player.answers[question.id]
+      if (!record) return []
+      return [
+        {
+          playerId: player.id,
+          name: player.name,
+          teamId: player.teamId,
+          answer: record.answer,
+          key: distributionKeys(record.answer).join(','),
+          correct: record.correct,
+          points: record.points,
+          timeMs: record.timeMs,
+        },
+      ]
+    })
+    .sort((a, b) => a.timeMs - b.timeMs)
 }

@@ -14,6 +14,7 @@ import { Route as HostRouteRouteImport } from './routes/host/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HostIndexRouteImport } from './routes/host/index'
 import { Route as PlayPinRouteImport } from './routes/play.$pin'
+import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
 import { Route as HostGamesPinRouteImport } from './routes/host/games.$pin'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const PlayPinRoute = PlayPinRouteImport.update({
   path: '/play/$pin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScreenPinRoute = ScreenPinRouteImport.update({
+  id: '/screen/$pin',
+  path: '/screen/$pin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostGamesPinRoute = HostGamesPinRouteImport.update({
   id: '/games/$pin',
   path: '/games/$pin',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/host': typeof HostRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/play/$pin': typeof PlayPinRoute
+  '/screen/$pin': typeof ScreenPinRoute
   '/host/': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
 }
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/play/$pin': typeof PlayPinRoute
+  '/screen/$pin': typeof ScreenPinRoute
   '/host': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
 }
@@ -68,21 +76,35 @@ export interface FileRoutesById {
   '/host': typeof HostRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/play/$pin': typeof PlayPinRoute
+  '/screen/$pin': typeof ScreenPinRoute
   '/host/': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/host' | '/login' | '/play/$pin' | '/host/' | '/host/games/$pin'
+    | '/'
+    | '/host'
+    | '/login'
+    | '/play/$pin'
+    | '/screen/$pin'
+    | '/host/'
+    | '/host/games/$pin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/play/$pin' | '/host' | '/host/games/$pin'
+  to:
+    | '/'
+    | '/login'
+    | '/play/$pin'
+    | '/screen/$pin'
+    | '/host'
+    | '/host/games/$pin'
   id:
     | '__root__'
     | '/'
     | '/host'
     | '/login'
     | '/play/$pin'
+    | '/screen/$pin'
     | '/host/'
     | '/host/games/$pin'
   fileRoutesById: FileRoutesById
@@ -92,6 +114,7 @@ export interface RootRouteChildren {
   HostRouteRoute: typeof HostRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   PlayPinRoute: typeof PlayPinRoute
+  ScreenPinRoute: typeof ScreenPinRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -131,6 +154,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayPinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/screen/$pin': {
+      id: '/screen/$pin'
+      path: '/screen/$pin'
+      fullPath: '/screen/$pin'
+      preLoaderRoute: typeof ScreenPinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/host/games/$pin': {
       id: '/host/games/$pin'
       path: '/games/$pin'
@@ -160,6 +190,7 @@ const rootRouteChildren: RootRouteChildren = {
   HostRouteRoute: HostRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   PlayPinRoute: PlayPinRoute,
+  ScreenPinRoute: ScreenPinRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

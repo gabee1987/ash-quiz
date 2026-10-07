@@ -12,6 +12,7 @@ export function QuestionInput(props: {
   question: PublicQuestion
   mode: QuestionMode
   disabled?: boolean
+  large?: boolean
   onSubmit?: (answer: Answer) => void
 }) {
   const { question, ...rest } = props
