@@ -1,6 +1,8 @@
 import { buildApp } from '../../src/app.js'
 import { loadConfig } from '../../src/config.js'
 import type { Db } from '../../src/db/index.js'
+import { GameManager, type GameStore } from '../../src/realtime/game-manager.js'
+import { createGameStore } from '../../src/realtime/persist.js'
 
 export const testConfig = loadConfig({
   NODE_ENV: 'test',
@@ -8,8 +10,17 @@ export const testConfig = loadConfig({
   SESSION_SECRET: 'x'.repeat(32),
 })
 
-export function buildTestApp(db: Db) {
-  return buildApp(testConfig, { db })
+/** Silent logger for managers in tests. */
+export const quietLog = { error: () => {}, warn: () => {} }
+
+export async function buildTestApp(db: Db, store: GameStore = createGameStore(db)) {
+  const manager = new GameManager(store, quietLog)
+  const built = await buildApp(testConfig, { db, manager })
+  built.app.addHook('onClose', async () => {
+    manager.close()
+    await manager.flush()
+  })
+  return { ...built, manager }
 }
 
 type InjectResponse = { cookies: { name: string; value: string }[] }

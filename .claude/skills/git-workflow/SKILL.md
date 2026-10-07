@@ -25,16 +25,16 @@ Each plan in `docs/plans` names its branch. If a phase spans several commits, pr
 
 ## Commit messages
 
-One line, imperative, under 72 characters, Conventional Commits prefix:
+One line, imperative mood, sentence case, under 72 characters. No type prefix, no scope, no trailing period:
 
 ```
-feat(engine): add pure game state machine with scoring
-fix(realtime): keep player score on reconnect with stale token
-chore(ci): run typecheck, test and build on pull requests
-docs(plans): mark phase 2 done
+Add pure game state machine with scoring
+Keep player score on reconnect with stale token
+Run typecheck, test and build on pull requests
+Mark phase 2 done
 ```
 
-Scopes in use: `engine`, `realtime`, `api`, `auth`, `db`, `web`, `player`, `host`, `editor`, `i18n`, `ci`, `deploy`, `plans`. No "Co-Authored-By" lines.
+The verb says what kind of change it is: Add, Fix, Update, Remove, Rename, Refactor. No "Co-Authored-By" lines.
 
 ## Delivery report (required at the end of every phase or task)
 
@@ -44,7 +44,7 @@ Write this as the final message, in this order, nothing else after it:
 ## Delivery: <phase or task name>
 
 **Branch:** feature/<slug> (from develop)
-**Commit:** feat(scope): one-line message
+**Commit:** One-line message
 
 **Verification command**
 pnpm verify            # or the plan's specific command

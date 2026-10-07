@@ -1,5 +1,6 @@
 import { pgTable, text, timestamp, jsonb, integer, customType } from 'drizzle-orm/pg-core'
 import type { GameSettings, Question } from '@ash-quiz/shared'
+import type { GameState } from '../game/types.js'
 
 const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' })
 
@@ -66,7 +67,7 @@ export const games = pgTable('games', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   settings: jsonb('settings').$type<GameSettings>().notNull(),
-  state: jsonb('state').notNull(),
+  state: jsonb('state').$type<GameState>().notNull(),
   phase: text('phase').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   finishedAt: timestamp('finished_at', { withTimezone: true }),

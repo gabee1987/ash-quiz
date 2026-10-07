@@ -2,7 +2,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/r
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../components/button'
-import { apiFetch } from '../../lib/api'
+import { ApiError, apiFetch } from '../../lib/api'
 
 interface QuizSummary {
   id: string
@@ -26,6 +26,12 @@ function HostHome() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const quizzes = useQuery(quizzesQueryOptions)
+
+  const play = useMutation({
+    mutationFn: (quizId: string) =>
+      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId }) }),
+    onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
+  })
 
   const logout = useMutation({
     mutationFn: () => apiFetch<void>('/api/auth/logout', { method: 'POST' }),
@@ -52,16 +58,26 @@ function HostHome() {
       {quizzes.isPending && <p className="text-white/70">{t('common.loading')}</p>}
       {quizzes.isError && <p role="alert">{t('errors.internal')}</p>}
       {quizzes.data?.length === 0 && <p className="text-white/70">{t('host.empty')}</p>}
+      {play.error && (
+        <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-3 text-red-200">
+          {t(play.error instanceof ApiError ? play.error.code : 'errors.internal')}
+        </p>
+      )}
 
       <ul className="flex flex-col gap-2">
         {quizzes.data?.map((quiz) => (
-          <li key={quiz.id} className="rounded-lg bg-white/10 px-4 py-3">
-            <p className="text-lg font-semibold break-words">{quiz.title}</p>
-            <p className="text-sm text-white/70">
-              {t('host.questionCount', { count: quiz.questionCount })}
-              {' · '}
-              {t('host.updated', { date: dateFormat.format(new Date(quiz.updatedAt)) })}
-            </p>
+          <li key={quiz.id} className="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-semibold break-words">{quiz.title}</p>
+              <p className="text-sm text-white/70">
+                {t('host.questionCount', { count: quiz.questionCount })}
+                {' · '}
+                {t('host.updated', { date: dateFormat.format(new Date(quiz.updatedAt)) })}
+              </p>
+            </div>
+            <Button disabled={play.isPending || quiz.questionCount === 0} onClick={() => play.mutate(quiz.id)}>
+              {t('host.play')}
+            </Button>
           </li>
         ))}
       </ul>

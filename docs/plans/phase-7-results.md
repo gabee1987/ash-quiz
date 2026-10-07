@@ -1,7 +1,7 @@
 # Phase 7: Results, history, export, retention
 
 **Branch:** `feature/results` (from `develop`)
-**Commit:** `feat(results): add game history, results summary, CSV export and retention`
+**Commit:** `Add game history, results summary, CSV export and retention`
 **Skills to load:** `server-api`, `web-ui`, `game-engine`, `i18n`, `verification`, `git-workflow`
 
 ## Goal

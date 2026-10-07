@@ -211,6 +211,9 @@ importers:
       pino-pretty:
         specifier: 13.2.0
         version: 13.2.0
+      socket.io-client:
+        specifier: 4.8.4
+        version: 4.8.4
       tsup:
         specifier: 8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)

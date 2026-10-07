@@ -1,7 +1,7 @@
 # Phase 5: Host control, projector screen, team mode, grading
 
 **Branch:** `feature/host-and-screen` (from `develop`)
-**Commit:** `feat(host): add projector screen, polished host control, team mode and text grading`
+**Commit:** `Add projector screen, polished host control, team mode and text grading`
 **Skills to load:** `web-ui`, `realtime`, `game-engine`, `i18n`, `verification`, `git-workflow`
 
 ## Goal

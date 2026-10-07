@@ -57,6 +57,7 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     me,
     myAnswer: record?.answer ?? null,
     lastPoints: base.reveal ? (record?.points ?? 0) : null,
+    lastCorrect: base.reveal ? (record?.correct ?? null) : null,
   }
 }
 

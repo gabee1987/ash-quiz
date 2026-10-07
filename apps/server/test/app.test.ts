@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../src/app.js'
 import { loadConfig } from '../src/config.js'
 import type { Db } from '../src/db/index.js'
+import { GameManager } from '../src/realtime/game-manager.js'
 
 const config = loadConfig({
   NODE_ENV: 'test',
@@ -14,7 +15,8 @@ describe('app', () => {
 
   beforeAll(async () => {
     // The health check and config tests never query, so a stub db is enough.
-    built = await buildApp(config, { db: {} as Db })
+    const manager = new GameManager({ save: async () => {}, loadActive: async () => [] }, console)
+    built = await buildApp(config, { db: {} as Db, manager })
   })
   afterAll(async () => {
     await built.app.close()

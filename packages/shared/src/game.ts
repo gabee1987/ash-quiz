@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { GameMode, Question } from './quiz.js'
+import { gameModes, type GameMode, type Question } from './quiz.js'
 
 export const gamePhases = ['lobby', 'question', 'reveal', 'scoreboard', 'finished'] as const
 export type GamePhase = (typeof gamePhases)[number]
@@ -85,4 +85,27 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   myAnswer: Answer | null
   /** Points earned on the last revealed question. */
   lastPoints: number | null
+  /** Whether that answer was correct; null for polls, ungraded text, or no answer. */
+  lastCorrect: boolean | null
+}
+
+// ---- HTTP payloads about a running game ------------------------------------
+
+/** `GET /api/games/:pin/public`: what the join page needs, no auth. */
+export const gamePublicInfoSchema = z.object({
+  quizTitle: z.string(),
+  mode: z.enum(gameModes),
+  phase: z.enum(gamePhases),
+  teams: z.array(z.object({ id: z.string(), name: z.string() })),
+})
+export type GamePublicInfo = z.infer<typeof gamePublicInfoSchema>
+
+/** `GET /api/games/:pin`: host control metadata. */
+export interface GameHostInfo {
+  pin: string
+  quizTitle: string
+  mode: GameMode
+  phase: GamePhase
+  /** Link players open (also encoded in the QR code). */
+  joinUrl: string
 }

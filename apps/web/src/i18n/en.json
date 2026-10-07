@@ -11,10 +11,13 @@
     "namePlaceholder": "What should we call you?",
     "team": "Team",
     "submit": "Join",
-    "hostLogin": "Host login"
+    "hostLogin": "Host login",
+    "pinInvalid": "Enter the 6-digit PIN.",
+    "nameRequired": "Enter a name."
   },
   "common": {
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "next": "Next"
   },
   "auth": {
     "title": "Host login",
@@ -29,7 +32,68 @@
     "empty": "No quizzes yet.",
     "questionCount_one": "{{count}} question",
     "questionCount_other": "{{count}} questions",
-    "updated": "updated {{date}}"
+    "updated": "updated {{date}}",
+    "play": "Play",
+    "game": {
+      "phase": {
+        "lobby": "Waiting for players",
+        "question": "Question running",
+        "reveal": "Answers revealed",
+        "scoreboard": "Scoreboard",
+        "finished": "Game finished"
+      },
+      "answered_one": "{{answered}} of {{count}} answered",
+      "answered_other": "{{answered}} of {{count}} answered",
+      "start": "Start",
+      "endQuestion": "End question",
+      "extend": "+30 s",
+      "skip": "Skip",
+      "end": "End game",
+      "confirmEnd": "End the game for everyone?",
+      "kick": "Remove",
+      "confirmKick": "Remove {{name}} from the game?",
+      "online": "Connected",
+      "offline": "Disconnected",
+      "waitingForPlayers": "No players yet. Share the PIN or the QR code.",
+      "backToQuizzes": "Back to quizzes"
+    }
+  },
+  "play": {
+    "youAreIn": "You're in, {{name}}!",
+    "yourTeam": "Team: {{team}}",
+    "waitingForHost": "Waiting for the host to start…",
+    "playerCount_one": "{{count}} player",
+    "playerCount_other": "{{count}} players",
+    "questionOf_one": "Question {{index}} of {{count}}",
+    "questionOf_other": "Question {{index}} of {{count}}",
+    "secondsLeft_one": "{{count}} second left",
+    "secondsLeft_other": "{{count}} seconds left",
+    "selectAll": "Select every correct answer.",
+    "confirm": "Confirm",
+    "submit": "Send",
+    "true": "True",
+    "false": "False",
+    "typeAnswer": "Type your answer",
+    "typeNumber": "Type a number",
+    "answerSent": "Answer sent!",
+    "answeredSoFar_one": "{{answered}} of {{count}} answered",
+    "answeredSoFar_other": "{{answered}} of {{count}} answered",
+    "correct": "Correct!",
+    "wrong": "Not this time",
+    "noAnswer": "No answer",
+    "thanksForVoting": "Thanks for voting!",
+    "awaitingGrading": "The host is checking the answers…",
+    "points_one": "+{{count}} point",
+    "points_other": "+{{count}} points",
+    "correctAnswer": "Correct answer",
+    "totalScore": "Score: {{score}}",
+    "rank": "Rank: {{rank}}.",
+    "yourRank": "Your rank",
+    "leaderboard": "Leaderboard",
+    "gameOver": "Game over!",
+    "finalRank": "Final rank",
+    "podium": "Podium",
+    "backToJoin": "Join a game"
   },
   "errors": {
     "gameNotFound": "No such game. Check the PIN.",
@@ -49,6 +113,7 @@
     "unauthorized": "Please log in.",
     "forbidden": "You do not have access to this.",
     "rateLimited": "Too many attempts. Wait a minute and try again.",
-    "internal": "Something went wrong. Try again."
+    "internal": "Something went wrong. Try again.",
+    "kicked": "The host removed you from the game."
   }
 }

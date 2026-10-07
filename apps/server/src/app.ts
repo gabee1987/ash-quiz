@@ -5,19 +5,20 @@ import cookie from '@fastify/cookie'
 import rateLimit from '@fastify/rate-limit'
 import fastifyStatic from '@fastify/static'
 import { Server as SocketServer } from 'socket.io'
-import type { ClientToServerEvents, ServerToClientEvents } from '@ash-quiz/shared'
 import type { Config } from './config.js'
 import type { Db } from './db/index.js'
+import type { GameManager } from './realtime/game-manager.js'
+import { registerSocketHandlers, type AppSocketServer } from './realtime/handlers.js'
 import { authRoutes } from './routes/auth.js'
+import { gameRoutes } from './routes/games.js'
 import { quizRoutes } from './routes/quizzes.js'
-
-export type AppSocketServer = SocketServer<ClientToServerEvents, ServerToClientEvents>
 
 export interface AppDeps {
   db: Db
+  manager: GameManager
 }
 
-export async function buildApp(config: Config, { db }: AppDeps) {
+export async function buildApp(config: Config, { db, manager }: AppDeps) {
   const app = Fastify({
     logger:
       config.NODE_ENV === 'development'
@@ -50,6 +51,7 @@ export async function buildApp(config: Config, { db }: AppDeps) {
   app.get('/api/health', async () => ({ ok: true }))
   await app.register(authRoutes, { db, secureCookies })
   await app.register(quizRoutes, { db })
+  await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
 
   if (config.NODE_ENV === 'production') {
     const webDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../web/dist')
@@ -68,6 +70,7 @@ export async function buildApp(config: Config, { db }: AppDeps) {
     pingInterval: 10_000,
     pingTimeout: 20_000,
   })
+  registerSocketHandlers(io, { manager, db, parseCookie: (header) => app.parseCookie(header), log: app.log })
   app.addHook('onClose', async () => {
     io.close()
   })

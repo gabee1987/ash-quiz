@@ -1,0 +1,39 @@
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Button } from '../../components/button'
+import { OptionButton } from '../../components/option-button'
+import type { QuestionProps } from './types'
+
+/** Toggle options, then confirm. */
+export function MultipleChoice({ question, mode, disabled, onSubmit }: QuestionProps<'multiple'>) {
+  const { t } = useTranslation()
+  const [selected, setSelected] = useState<string[]>([])
+  const toggle = (id: string) =>
+    setSelected((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]))
+
+  return (
+    <div className="flex flex-1 flex-col gap-3">
+      {mode === 'answer' && <p className="text-center text-sm text-white/70">{t('play.selectAll')}</p>}
+      <div className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2">
+        {question.options.map((option, index) => (
+          <OptionButton
+            key={option.id}
+            index={index}
+            label={option.text}
+            selected={selected.includes(option.id)}
+            disabled={mode === 'display' || disabled}
+            onClick={() => toggle(option.id)}
+          />
+        ))}
+      </div>
+      {mode === 'answer' && (
+        <Button
+          disabled={disabled || selected.length === 0}
+          onClick={() => onSubmit?.({ type: 'multiple', optionIds: selected })}
+        >
+          {t('play.confirm')}
+        </Button>
+      )}
+    </div>
+  )
+}

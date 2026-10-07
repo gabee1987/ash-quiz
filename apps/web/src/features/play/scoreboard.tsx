@@ -1,0 +1,34 @@
+import type { PlayerPublic, PlayerSnapshot } from '@ash-quiz/shared'
+import { useTranslation } from 'react-i18next'
+
+export function RankList({ players, meId, limit }: { players: PlayerPublic[]; meId?: string; limit: number }) {
+  return (
+    <ol className="flex w-full flex-col gap-2">
+      {players.slice(0, limit).map((player) => (
+        <li
+          key={player.id}
+          className={`flex items-center gap-3 rounded-lg px-4 py-2 ${player.id === meId ? 'bg-brand' : 'bg-white/10'}`}
+        >
+          <span className="w-8 text-lg font-bold tabular-nums">{player.rank}.</span>
+          <span className="flex-1 truncate">{player.name}</span>
+          <span className="font-semibold tabular-nums">{player.score}</span>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+export function Scoreboard({ snapshot }: { snapshot: PlayerSnapshot }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex flex-1 flex-col items-center gap-5">
+      <div className="text-center">
+        <p className="text-white/70">{t('play.yourRank')}</p>
+        <p className="text-6xl font-bold">{snapshot.me.rank}.</p>
+        <p className="text-lg">{t('play.totalScore', { score: snapshot.me.score })}</p>
+      </div>
+      <h2 className="text-xl font-semibold">{t('play.leaderboard')}</h2>
+      <RankList players={snapshot.players} meId={snapshot.me.id} limit={5} />
+    </div>
+  )
+}

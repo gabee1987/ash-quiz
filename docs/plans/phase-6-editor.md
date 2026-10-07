@@ -1,7 +1,7 @@
 # Phase 6: Quiz editor, images, user management
 
 **Branch:** `feature/editor` (from `develop`)
-**Commit:** `feat(editor): add quiz editor with images and admin user management`
+**Commit:** `Add quiz editor with images and admin user management`
 **Skills to load:** `web-ui`, `server-api`, `i18n`, `verification`, `git-workflow`
 
 ## Goal

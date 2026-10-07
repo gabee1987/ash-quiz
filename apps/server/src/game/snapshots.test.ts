@@ -126,7 +126,9 @@ describe('toPlayerSnapshot', () => {
 
     state = endQuestion(state)
     expect(toPlayerSnapshot(state, 'p1', T0).lastPoints).toBe(1000)
+    expect(toPlayerSnapshot(state, 'p1', T0).lastCorrect).toBe(true)
     expect(toPlayerSnapshot(state, 'p2', T0).lastPoints).toBe(0)
+    expect(toPlayerSnapshot(state, 'p2', T0).lastCorrect).toBeNull()
   })
 
   it('never contains a token', () => {

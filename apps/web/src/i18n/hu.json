@@ -11,10 +11,13 @@
     "namePlaceholder": "Hogy hívjunk?",
     "team": "Csapat",
     "submit": "Csatlakozom",
-    "hostLogin": "Játékvezető belépés"
+    "hostLogin": "Játékvezető belépés",
+    "pinInvalid": "Add meg a 6 jegyű PIN-t.",
+    "nameRequired": "Adj meg egy nevet."
   },
   "common": {
-    "loading": "Betöltés…"
+    "loading": "Betöltés…",
+    "next": "Tovább"
   },
   "auth": {
     "title": "Játékvezetői belépés",
@@ -29,7 +32,68 @@
     "empty": "Még nincs kvíz.",
     "questionCount_one": "{{count}} kérdés",
     "questionCount_other": "{{count}} kérdés",
-    "updated": "módosítva: {{date}}"
+    "updated": "módosítva: {{date}}",
+    "play": "Indítás",
+    "game": {
+      "phase": {
+        "lobby": "Várakozás a játékosokra",
+        "question": "Kérdés folyamatban",
+        "reveal": "Válaszok felfedve",
+        "scoreboard": "Eredménytábla",
+        "finished": "A játék véget ért"
+      },
+      "answered_one": "{{count}} játékosból {{answered}} válaszolt",
+      "answered_other": "{{count}} játékosból {{answered}} válaszolt",
+      "start": "Start",
+      "endQuestion": "Kérdés lezárása",
+      "extend": "+30 mp",
+      "skip": "Kihagyás",
+      "end": "Játék befejezése",
+      "confirmEnd": "Biztosan befejezi a játékot mindenki számára?",
+      "kick": "Eltávolítás",
+      "confirmKick": "Eltávolítja {{name}} játékost a játékból?",
+      "online": "Kapcsolódva",
+      "offline": "Nincs kapcsolat",
+      "waitingForPlayers": "Még nincs játékos. Ossza meg a PIN-t vagy a QR-kódot.",
+      "backToQuizzes": "Vissza a kvízekhez"
+    }
+  },
+  "play": {
+    "youAreIn": "Bent vagy, {{name}}!",
+    "yourTeam": "Csapat: {{team}}",
+    "waitingForHost": "Várakozás a játékvezetőre…",
+    "playerCount_one": "{{count}} játékos",
+    "playerCount_other": "{{count}} játékos",
+    "questionOf_one": "{{index}}. kérdés / {{count}}",
+    "questionOf_other": "{{index}}. kérdés / {{count}}",
+    "secondsLeft_one": "Még {{count}} másodperc",
+    "secondsLeft_other": "Még {{count}} másodperc",
+    "selectAll": "Jelöld be az összes helyes választ.",
+    "confirm": "Rendben",
+    "submit": "Küldés",
+    "true": "Igaz",
+    "false": "Hamis",
+    "typeAnswer": "Írd be a válaszod",
+    "typeNumber": "Írj be egy számot",
+    "answerSent": "Válasz elküldve!",
+    "answeredSoFar_one": "{{count}} játékosból {{answered}} válaszolt",
+    "answeredSoFar_other": "{{count}} játékosból {{answered}} válaszolt",
+    "correct": "Helyes!",
+    "wrong": "Most nem talált",
+    "noAnswer": "Nem válaszoltál",
+    "thanksForVoting": "Köszönjük a szavazatod!",
+    "awaitingGrading": "A játékvezető ellenőrzi a válaszokat…",
+    "points_one": "+{{count}} pont",
+    "points_other": "+{{count}} pont",
+    "correctAnswer": "Helyes válasz",
+    "totalScore": "Pontszám: {{score}}",
+    "rank": "Helyezés: {{rank}}.",
+    "yourRank": "Helyezésed",
+    "leaderboard": "Ranglista",
+    "gameOver": "Vége a játéknak!",
+    "finalRank": "Végső helyezés",
+    "podium": "Dobogó",
+    "backToJoin": "Csatlakozás játékhoz"
   },
   "errors": {
     "gameNotFound": "Nincs ilyen játék. Ellenőrizd a PIN-t.",
@@ -49,6 +113,7 @@
     "unauthorized": "Kérjük, jelentkezzen be.",
     "forbidden": "Ehhez nincs jogosultsága.",
     "rateLimited": "Túl sok próbálkozás. Várjon egy percet, majd próbálja újra.",
-    "internal": "Hiba történt. Kérjük, próbálja újra."
+    "internal": "Hiba történt. Kérjük, próbálja újra.",
+    "kicked": "A játékvezető eltávolított a játékból."
   }
 }

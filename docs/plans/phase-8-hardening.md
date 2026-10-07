@@ -1,7 +1,7 @@
 # Phase 8: Hardening and release
 
 **Branch:** `feature/hardening` (from `develop`), release merged to `main` afterwards
-**Commit:** `feat(deploy): add load test, end-to-end suite and release checklist`
+**Commit:** `Add load test, end-to-end suite and release checklist`
 **Skills to load:** `realtime`, `verification`, `git-workflow`, `web-ui`
 
 ## Goal
