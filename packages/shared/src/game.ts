@@ -1,0 +1,85 @@
+import { z } from 'zod'
+import type { GameMode, Question } from './quiz.js'
+
+export const gamePhases = ['lobby', 'question', 'reveal', 'scoreboard', 'finished'] as const
+export type GamePhase = (typeof gamePhases)[number]
+
+// ---- Answers --------------------------------------------------------------
+
+export const answerSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('single'), optionId: z.string().min(1) }),
+  z.object({ type: z.literal('multiple'), optionIds: z.array(z.string().min(1)).min(1) }),
+  z.object({ type: z.literal('truefalse'), value: z.boolean() }),
+  z.object({ type: z.literal('text'), value: z.string().trim().min(1).max(100) }),
+  z.object({ type: z.literal('number'), value: z.number().finite() }),
+  z.object({ type: z.literal('poll'), optionId: z.string().min(1) }),
+])
+export type Answer = z.infer<typeof answerSchema>
+
+// ---- Snapshots sent to clients -------------------------------------------
+// The server broadcasts full snapshots on every state change. Clients render
+// whatever snapshot they last received; reconnecting just means receiving one.
+
+export interface PlayerPublic {
+  id: string
+  name: string
+  teamId: string | null
+  connected: boolean
+  score: number
+  rank: number
+}
+
+export interface TeamPublic {
+  id: string
+  name: string
+  score: number
+  rank: number
+  memberCount: number
+}
+
+/** Question as shown while answering: never contains the correct answer. */
+export type PublicQuestion = Omit<
+  Question,
+  'correctOptionId' | 'correctOptionIds' | 'correct' | 'acceptedAnswers' | 'tolerance'
+>
+
+export interface RevealInfo {
+  /** The full question including the correct answer. */
+  question: Question
+  /** Answer bucket (option id, 'true'/'false', normalised text, or number) to count. */
+  distribution: Record<string, number>
+  correctCount: number
+  answeredCount: number
+}
+
+export interface GameSnapshotBase {
+  pin: string
+  phase: GamePhase
+  mode: GameMode
+  quizTitle: string
+  questionIndex: number
+  questionCount: number
+  /** Present in the 'question' phase. */
+  question: PublicQuestion | null
+  /** Unix ms when the current question closes. Present in the 'question' phase. */
+  questionEndsAt: number | null
+  /** Server time at snapshot creation, lets clients compute their clock offset. */
+  serverNow: number
+  answeredCount: number
+  players: PlayerPublic[]
+  teams: TeamPublic[]
+  /** Present in 'reveal', 'scoreboard' and 'finished'. */
+  reveal: RevealInfo | null
+}
+
+/** What the host control and projector screens receive. */
+export type HostSnapshot = GameSnapshotBase
+
+/** What a player's phone receives. */
+export interface PlayerSnapshot extends GameSnapshotBase {
+  me: PlayerPublic
+  /** Answer the player submitted for the current question, if any. */
+  myAnswer: Answer | null
+  /** Points earned on the last revealed question. */
+  lastPoints: number | null
+}

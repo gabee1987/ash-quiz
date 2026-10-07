@@ -1,0 +1,25 @@
+{
+  "app": {
+    "name": "ASH Quiz",
+    "language": "Language"
+  },
+  "join": {
+    "title": "Join a game",
+    "pin": "Game PIN",
+    "pinPlaceholder": "6 digits",
+    "name": "Your name",
+    "namePlaceholder": "What should we call you?",
+    "team": "Team",
+    "submit": "Join",
+    "hostLogin": "Host login"
+  },
+  "errors": {
+    "gameNotFound": "No such game. Check the PIN.",
+    "gameFull": "The game is full.",
+    "gameAlreadyStarted": "The game has already started.",
+    "nameTaken": "That name is already taken.",
+    "invalidInput": "Invalid input.",
+    "notFound": "Not found.",
+    "connectionLost": "Connection lost, reconnecting…"
+  }
+}

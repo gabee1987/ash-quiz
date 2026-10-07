@@ -1,0 +1,25 @@
+{
+  "app": {
+    "name": "ASH Quiz",
+    "language": "Nyelv"
+  },
+  "join": {
+    "title": "Csatlakozás a játékhoz",
+    "pin": "Játék PIN",
+    "pinPlaceholder": "6 számjegy",
+    "name": "Neved",
+    "namePlaceholder": "Hogy hívjunk?",
+    "team": "Csapat",
+    "submit": "Csatlakozom",
+    "hostLogin": "Játékvezető belépés"
+  },
+  "errors": {
+    "gameNotFound": "Nincs ilyen játék. Ellenőrizd a PIN-t.",
+    "gameFull": "A játék megtelt.",
+    "gameAlreadyStarted": "A játék már elindult.",
+    "nameTaken": "Ez a név már foglalt.",
+    "invalidInput": "Hibás adat.",
+    "notFound": "Nem található.",
+    "connectionLost": "Megszakadt a kapcsolat, újracsatlakozás…"
+  }
+}
