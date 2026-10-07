@@ -56,6 +56,9 @@ function HostNav({ user }: { user: User }) {
       <Link to="/host" activeOptions={{ exact: true }} activeProps={active} className={item}>
         {t('nav.quizzes')}
       </Link>
+      <Link to="/host/games" activeOptions={{ exact: true }} activeProps={active} className={item}>
+        {t('nav.games')}
+      </Link>
       {user.role === 'admin' && (
         <Link to="/host/users" activeProps={active} className={item}>
           {t('users.title')}

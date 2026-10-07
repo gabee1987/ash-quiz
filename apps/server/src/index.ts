@@ -4,6 +4,7 @@ import { createDb } from './db/index.js'
 import { runMigrations } from './migrate.js'
 import { GameManager } from './realtime/game-manager.js'
 import { createGameStore } from './realtime/persist.js'
+import { scheduleRetention } from './retention.js'
 
 const config = loadConfig()
 const { db, close } = createDb(config.DATABASE_URL)
@@ -14,7 +15,15 @@ const manager = new GameManager(createGameStore(db), console)
 const { app } = await buildApp(config, { db, manager })
 const restored = await manager.restore()
 if (restored > 0) app.log.info({ restored }, 'restored running games')
+const stopRetention = scheduleRetention(db, {
+  days: config.RESULTS_RETENTION_DAYS,
+  onDeleted: async (ids) => {
+    for (const id of ids) await manager.discard(id)
+  },
+  log: app.log,
+})
 app.addHook('onClose', async () => {
+  stopRetention()
   manager.close()
   await manager.flush()
   await close()

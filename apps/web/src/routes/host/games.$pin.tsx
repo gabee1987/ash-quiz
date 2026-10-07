@@ -70,7 +70,12 @@ function HostGamePage() {
           </p>
         )}
         <Controls host={host} onCommand={(c) => void send(c)} />
-        <PhaseDetail host={host} clockOffset={clockOffset} joinUrl={info.data?.joinUrl ?? null} />
+        <PhaseDetail
+          host={host}
+          clockOffset={clockOffset}
+          joinUrl={info.data?.joinUrl ?? null}
+          gameId={info.data?.gameId ?? null}
+        />
         {host.phase === 'reveal' && host.awaitingGrading && (
           <GradingPanel host={host} onGrade={(ids) => void send({ type: 'gradeText', correctPlayerIds: ids })} />
         )}
@@ -94,6 +99,7 @@ function Header({ host }: { host: HostSnapshot }) {
       ? t('host.create.scoreboardOptions.onDemand')
       : null,
     host.settings.answerStyle === 'colourful' ? t('host.create.answerStyleOptions.colourful') : null,
+    host.settings.finalResults === 'onRelease' ? t('host.create.finalResultsOptions.onRelease') : null,
   ].filter(Boolean)
   return (
     <header className="flex flex-wrap items-start justify-between gap-3">
@@ -120,7 +126,17 @@ function Header({ host }: { host: HostSnapshot }) {
   )
 }
 
-function PhaseDetail({ host, clockOffset, joinUrl }: { host: HostSnapshot; clockOffset: number; joinUrl: string | null }) {
+function PhaseDetail({
+  host,
+  clockOffset,
+  joinUrl,
+  gameId,
+}: {
+  host: HostSnapshot
+  clockOffset: number
+  joinUrl: string | null
+  gameId: string | null
+}) {
   const { t } = useTranslation()
   switch (host.phase) {
     case 'lobby':
@@ -166,6 +182,15 @@ function PhaseDetail({ host, clockOffset, joinUrl }: { host: HostSnapshot; clock
             </ol>
           ) : (
             <RankList players={host.players.filter((p) => p.rank <= 3)} limit={10} />
+          )}
+          {gameId && (
+            <Link
+              to="/host/results/$gameId"
+              params={{ gameId }}
+              className="flex min-h-12 items-center justify-center rounded-lg bg-brand px-4 text-lg font-semibold text-white"
+            >
+              {t('host.game.results')}
+            </Link>
           )}
           <Link to="/host" className="underline">
             {t('host.game.backToQuizzes')}

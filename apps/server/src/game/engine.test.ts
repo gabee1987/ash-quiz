@@ -12,6 +12,9 @@ import {
   kickPlayer,
   next,
   reconnectPlayer,
+  releaseResults,
+  resultsPending,
+  resultsPendingFor,
   showScoreboard,
   skipQuestion,
   startGame,
@@ -323,14 +326,14 @@ describe('question flow', () => {
 
   it('with results at the end there is no scoreboard before the finish', () => {
     let state = startGame(withPlayers(1, { revealAnswers: 'atEnd' }), T0)
-    expect(answersHidden(state)).toBe(true)
+    expect(answersHidden(state, 'players')).toBe(true)
     const reveal = endQuestion(answer(state, 'p1', correctAnswers[0]!, T0))
     expectCode(() => showScoreboard(reveal), 'errors.invalidTransition')
     state = skipQuestion(next(reveal, T0 + 1), T0 + 2)
     expect(state.phase).toBe('question')
     expect(state.questionIndex).toBe(2)
     const finished = endGame(state, T0 + 3)
-    expect(answersHidden(finished)).toBe(false)
+    expect(answersHidden(finished, 'players')).toBe(false)
   })
 
   it('extendTime moves questionEndsAt and keeps the phase', () => {
@@ -353,6 +356,37 @@ describe('question flow', () => {
     }
     const finished = endGame(lobby, T0 + 5)
     expect(endGame(finished, T0 + 99)).toEqual(finished)
+  })
+
+  it('holds the final results until the host releases them, to the projector and the players separately', () => {
+    const running = startGame(withPlayers(1, { finalResults: 'onRelease' }), T0)
+    expectCode(() => releaseResults(running, 'screen'), 'errors.invalidTransition')
+    expect(answersHidden(running, 'players')).toBe(false)
+    const finished = endGame(running, T0 + 5)
+    expect(resultsPending(finished)).toBe(true)
+    expect(answersHidden(finished, 'screen')).toBe(true)
+    expect(answersHidden(finished, 'players')).toBe(true)
+
+    const podium = releaseResults(finished, 'screen')
+    expect(answersHidden(podium, 'screen')).toBe(false)
+    expect(answersHidden(podium, 'players')).toBe(true)
+    expect(resultsPending(podium)).toBe(true)
+    expectCode(() => releaseResults(podium, 'screen'), 'errors.invalidTransition')
+
+    const all = releaseResults(podium, 'players')
+    expect(answersHidden(all, 'players')).toBe(false)
+    expect(resultsPending(all)).toBe(false)
+    expectSerialisable(all)
+    expectCode(() => releaseResults(all, 'players'), 'errors.invalidTransition')
+
+    // Either order: phones first, projector still waiting.
+    const phonesFirst = releaseResults(finished, 'players')
+    expect(resultsPendingFor(phonesFirst, 'screen')).toBe(true)
+    expect(resultsPendingFor(phonesFirst, 'players')).toBe(false)
+
+    // Immediately (the default): nothing to release.
+    expect(resultsPending(endGame(withPlayers(1), T0))).toBe(false)
+    expectCode(() => releaseResults(endGame(withPlayers(1), T0), 'players'), 'errors.invalidTransition')
   })
 })
 

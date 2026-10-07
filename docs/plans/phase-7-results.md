@@ -69,3 +69,15 @@ pnpm verify && TEST_DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashqu
 6. "Show on screen": the laptop opens `/screen/<pin>?summary=1`. Expect podium, then question stats cycling.
 7. Delete the game from history, confirm. Expect it gone and `/host/games/<pin>/results` returns a translated not-found.
 8. Set `RESULTS_RETENTION_DAYS=0`, restart the server. Expect finished games removed, running ones kept.
+
+## Deviations
+
+- **Keyed by game id, not PIN.** A PIN is only unique among running games and is reused afterwards, so history routes use the game id: `GET /api/games/:gameId/results`, `GET /api/games/:gameId/results.csv`, `DELETE /api/games/:gameId`. `GameHostInfo` gained `gameId` so the host control can link to the results.
+- **Routes.** Results page at `/host/results/$gameId` (not `/host/games/$pin/results`), projector summary at `/screen/results/$gameId` (not `/screen/$pin?summary=1`). The summary must work for games long gone from memory, which the PIN-based live screen cannot.
+- **Summary needs the host's session.** Results are never public, so the summary loads the owner-only results API; "Show on screen" opens it in the host's own browser. It auto-advances every 8 s and Space / → / ← work always (no separate non-host mode).
+- **CSV language.** Header labels follow `?lang=hu|en` (default `hu`); the results page passes the UI language. Names starting with `= + - @` are prefixed with `'` so Excel does not run them as formulas.
+- **Correct %** is the share of all players in the game (a missing answer counts as not correct); polls and ungraded text show none.
+- **Delete** is allowed for finished games only (`409 errors.gameNotFinished` otherwise); a running game is ended from the host control first. Deleting also drops the game from memory so a late reconnect cannot save it back.
+- **Retention** also drops deleted games from memory, for the same reason.
+- **Host navigation** gained a "Games" entry for the history.
+- **Added during the phase (user request): final results on release.** New game setting `finalResults: 'immediately' | 'onRelease'` (quiz setting, overridable per game). With `onRelease`, the game runs as configured, but once it is finished phones and the projector show "results coming" (no podium, scores, ranks or answer review; `resultsPending` and `answersHidden` in the snapshot) until the host releases them, separately per audience and in any order: "Show podium" for the projector and "Show results on phones" for the players (`releaseResults` host command with `audience: 'screen' | 'players'`; Space on a host-attached projector shows the podium). The host may also never release to the phones. The results page offers the same two buttons while the game is live and something is still held (`pendingRelease` in the results, `POST /api/games/:gameId/release` with `{ audience }`). A finished game waiting for any release stays in memory for up to 12 hours and is restored after a restart (within the 12-hour restore window). Own commit.

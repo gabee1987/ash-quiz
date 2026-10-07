@@ -21,6 +21,17 @@ export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (
       {host.phase === 'lobby' && host.players.length === 0 && (
         <p className="text-center text-white/60">{t('host.game.waitingForPlayers')}</p>
       )}
+      {(host.resultsPending || host.playersWaiting) && (
+        <p className="text-center text-yellow-300">
+          {t(
+            host.resultsPending && host.playersWaiting
+              ? 'host.game.resultsPendingHint'
+              : host.playersWaiting
+                ? 'host.game.playersWaitingHint'
+                : 'host.game.podiumPendingHint',
+          )}
+        </p>
+      )}
       {host.phase === 'reveal' && host.awaitingGrading && (
         <p className="text-center text-yellow-300">{t('host.game.gradeFirst')}</p>
       )}

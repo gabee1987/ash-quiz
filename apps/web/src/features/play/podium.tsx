@@ -9,6 +9,14 @@ import { RankList, TeamRankList } from './scoreboard'
 
 export function Podium({ snapshot }: { snapshot: PlayerSnapshot }) {
   const { t } = useTranslation()
+  if (snapshot.resultsPending) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+        <h1 className="text-3xl font-bold">{t('play.gameOver')}</h1>
+        <p className="text-lg text-white/80">{t('play.resultsComing')}</p>
+      </div>
+    )
+  }
   const topThree = snapshot.players.filter((p) => p.rank <= 3)
   const myTeam = snapshot.teams.find((team) => team.id === snapshot.me.teamId)
   return (

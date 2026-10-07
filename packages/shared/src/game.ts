@@ -115,12 +115,20 @@ export interface GameSnapshotBase {
    * the host room still gets them, so a host-attached projector must not render them.
    */
   answersHidden: boolean
+  /**
+   * The game is over but the host has not released the final results to this audience yet
+   * (`finalResults: 'onRelease'`): the players for a player snapshot, the projector for
+   * host and screen snapshots. `answersHidden` is then true as well (except in the host room).
+   */
+  resultsPending: boolean
 }
 
 /** What the host control and projector screens receive. */
 export interface HostSnapshot extends GameSnapshotBase {
   /** Answers to the current question. Host room only; null on the public screen. */
   currentAnswers: CurrentAnswer[] | null
+  /** The players' phones still wait for the final results. Host room only; false on the public screen. */
+  playersWaiting: boolean
 }
 
 /** What a player's phone receives. */
@@ -160,10 +168,76 @@ export type GamePublicInfo = z.infer<typeof gamePublicInfoSchema>
 
 /** `GET /api/games/:pin`: host control metadata. */
 export interface GameHostInfo {
+  /** Results and history are keyed by game id: PINs are reused once a game is over. */
+  gameId: string
   pin: string
   quizTitle: string
   mode: GameMode
   phase: GamePhase
   /** Link players open (also encoded in the QR code). */
   joinUrl: string
+}
+
+// ---- Results of a game (host only) -----------------------------------------
+
+/** One question in a game's results: the reveal plus timing. */
+export interface ResultQuestion extends RevealInfo {
+  index: number
+  /** Mean answer time in ms over everyone who answered; null when nobody did. */
+  averageTimeMs: number | null
+}
+
+export interface ResultPlayer {
+  id: string
+  name: string
+  teamId: string | null
+  score: number
+  rank: number
+  correctCount: number
+  /** Points per result question, in order; null where the player gave no answer. */
+  points: (number | null)[]
+}
+
+/** A place on the podium: a player, or a team in team mode. */
+export interface PodiumPlace {
+  id: string
+  name: string
+  score: number
+  rank: number
+}
+
+/** `GET /api/games/:gameId/results`. Derived from the persisted game state, never stored. */
+export interface GameResults {
+  gameId: string
+  pin: string
+  quizTitle: string
+  mode: GameMode
+  phase: GamePhase
+  /** Unix ms. */
+  createdAt: number
+  finishedAt: number | null
+  /** Top three ranks (ties can add places). */
+  podium: PodiumPlace[]
+  players: ResultPlayer[]
+  teams: TeamPublic[]
+  /** Questions revealed so far: every asked question once the game is finished. */
+  questions: ResultQuestion[]
+  /**
+   * Final results still held for release (`finalResults: 'onRelease'`) per audience, while
+   * the game is live and can still be released (`POST /api/games/:gameId/release`).
+   */
+  pendingRelease: { screen: boolean; players: boolean }
+}
+
+/** One row of `GET /api/games`: the host's game history. */
+export interface GameHistoryItem {
+  gameId: string
+  pin: string
+  quizTitle: string
+  mode: GameMode
+  phase: GamePhase
+  playerCount: number
+  /** ISO timestamps. */
+  createdAt: string
+  finishedAt: string | null
 }

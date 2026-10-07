@@ -78,7 +78,13 @@
       "gradeFirst": "A folytatáshoz értékelje az alábbi válaszokat.",
       "onlineCount_one": "{{count}} kapcsolódva",
       "onlineCount_other": "{{count}} kapcsolódva",
-      "openScreen": "Kivetítő megnyitása"
+      "openScreen": "Kivetítő megnyitása",
+      "results": "Eredmények",
+      "resultsPendingHint": "A kivetítő és a játékosok még nem látják az eredményeket.",
+      "showPodium": "Dobogó mutatása",
+      "releaseToPlayers": "Eredmények a telefonokon",
+      "podiumPendingHint": "A kivetítő még nem mutatja az eredményeket.",
+      "playersWaitingHint": "A játékosok még nem látják az eredményeiket."
     },
     "review": {
       "title": "Áttekintés",
@@ -139,7 +145,13 @@
         "plain": "Egyszerű",
         "colourful": "Színes"
       },
-      "answerStyleHelp": "A kivetítőn mindig színesek."
+      "answerStyleHelp": "A kivetítőn mindig színesek.",
+      "finalResults": "Végeredmény",
+      "finalResultsOptions": {
+        "immediately": "A játék végén",
+        "onRelease": "Amikor közzéteszem"
+      },
+      "finalResultsHelp": "A játék után a kivetítő és a telefonok várnak. A dobogót a kivetítőn és az eredményeket a telefonokon külön-külön teheti közzé."
     },
     "newQuiz": "Új kvíz",
     "edit": "Szerkesztés",
@@ -190,7 +202,8 @@
     "resultsAtEnd": "A helyes válaszok a játék végén derülnek ki.",
     "backToHome": "Vissza a kezdőlapra",
     "yourAnswers": "Válaszaid",
-    "yourAnswer": "A te válaszod"
+    "yourAnswer": "A te válaszod",
+    "resultsComing": "Hamarosan jönnek az eredmények."
   },
   "screen": {
     "joinAt": "Csatlakozás itt",
@@ -321,11 +334,50 @@
     "passwordChangeRequired": "Előbb cserélje le a kezdeti jelszót.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "wrongCurrentPassword": "A jelenlegi jelszó hibás.",
-    "samePassword": "Az új jelszónak különböznie kell a jelenlegitől."
+    "samePassword": "Az új jelszónak különböznie kell a jelenlegitől.",
+    "gameNotFinished": "Törlés előtt fejezze be a játékot."
   },
   "nav": {
     "label": "Szervezői menü",
     "quizzes": "Kvízek",
-    "signedInAs": "Bejelentkezve mint"
+    "signedInAs": "Bejelentkezve mint",
+    "games": "Játékok"
+  },
+  "history": {
+    "title": "Játékok",
+    "empty": "Még nincs játék. Indítson egyet egy kvízből.",
+    "players_one": "{{count}} játékos",
+    "players_other": "{{count}} játékos",
+    "results": "Eredmények",
+    "control": "Vezérlés",
+    "deleteTitle": "Törli a játékot?",
+    "deleteBody": "A(z) „{{title}}” ({{date}}) eredményei véglegesen törlődnek."
+  },
+  "results": {
+    "title": "Eredmények",
+    "backToGames": "Vissza a játékokhoz",
+    "running": "A játék még fut. Az eddigi eredmények láthatók.",
+    "exportCsv": "CSV exportálása",
+    "showOnScreen": "Megjelenítés kivetítőn",
+    "podium": "Dobogó",
+    "questions": "Kérdések",
+    "noQuestions": "Még egy kérdés sem zárult le.",
+    "questionNumber": "{{index}}. kérdés",
+    "correctPercent": "{{percent}}% helyes",
+    "answered_one": "{{count}} játékosból {{answered}} válaszolt",
+    "answered_other": "{{count}} játékosból {{answered}} válaszolt",
+    "averageTime": "Átlagos idő: {{seconds}} mp",
+    "noAnswers": "Nincs válasz",
+    "players": "Játékosok",
+    "teams": "Csapatok",
+    "rank": "Hely",
+    "name": "Név",
+    "team": "Csapat",
+    "score": "Pont",
+    "correct": "Helyes",
+    "members": "Tagok",
+    "sortedAscending": "növekvő sorrend",
+    "sortedDescending": "csökkenő sorrend",
+    "screenHint": "Szóköz vagy → tovább, ← vissza"
   }
 }

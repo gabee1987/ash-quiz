@@ -41,10 +41,10 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/images` | session | multipart, returns `{ id }` |
 | `GET /api/images/:id` | - | image bytes, long cache headers |
 | `POST /api/games` | session | `{ quizId, settings }` -> creates lobby, returns `{ pin }` |
-| `GET /api/games` | session | own games (pin, quiz title, phase, createdAt) |
-| `GET /api/games/:pin/results` | owner | full results JSON |
-| `GET /api/games/:pin/results.csv` | owner | CSV export |
-| `DELETE /api/games/:pin` | owner | delete a finished game and its results |
+| `GET /api/games` | session | own games (gameId, pin, quiz title, mode, phase, player count, dates) |
+| `GET /api/games/:gameId/results` | owner | full results JSON |
+| `GET /api/games/:gameId/results.csv?lang=hu\|en` | owner | CSV export |
+| `DELETE /api/games/:gameId` | owner | delete a finished game and its results |
 
 Quiz question ids and option ids are generated server-side with `nanoid(8)` when missing, so the editor can send new questions without ids.
 

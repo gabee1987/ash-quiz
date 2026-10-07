@@ -17,6 +17,7 @@ function reveal(settings: Partial<GameSettings>, questionIndex = 0): HostSnapsho
       revealAnswers: 'afterQuestion',
       scoreboard: 'afterQuestion',
       answerStyle: 'plain',
+      finalResults: 'immediately',
       ...settings,
     },
   } as unknown as HostSnapshot
@@ -44,5 +45,25 @@ describe('host actions after a question', () => {
 
   it('nothing while a text question waits for grading', () => {
     expect(labels({ ...reveal({}), awaitingGrading: true })).toEqual([null, null])
+  })
+})
+
+describe('host action after the game', () => {
+  const finished = (resultsPending: boolean, playersWaiting: boolean) =>
+    ({ ...reveal({ finalResults: 'onRelease' }), phase: 'finished', resultsPending, playersWaiting }) as HostSnapshot
+
+  it('both held: the podium first, the phones as the alternative', () => {
+    expect(primaryAction(finished(true, true))?.command).toEqual({ type: 'releaseResults', audience: 'screen' })
+    expect(labels(finished(true, true))).toEqual(['host.game.showPodium', 'host.game.releaseToPlayers'])
+  })
+
+  it('podium shown: the phones become the main action; phones released first: the podium remains', () => {
+    expect(labels(finished(false, true))).toEqual(['host.game.releaseToPlayers', null])
+    expect(primaryAction(finished(false, true))?.command).toEqual({ type: 'releaseResults', audience: 'players' })
+    expect(labels(finished(true, false))).toEqual(['host.game.showPodium', null])
+  })
+
+  it('nothing held: no action', () => {
+    expect(labels(finished(false, false))).toEqual([null, null])
   })
 })

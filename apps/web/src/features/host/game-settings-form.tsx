@@ -19,6 +19,7 @@ export function settingsSummary(settings: GameSettings, t: TFunction): string {
     settings.revealAnswers === 'afterQuestion'
       ? `${t('host.create.scoreboard')}: ${t(`host.create.scoreboardOptions.${settings.scoreboard}`)}`
       : null,
+    `${t('host.create.finalResults')}: ${t(`host.create.finalResultsOptions.${settings.finalResults}`)}`,
     t(`host.create.answerStyleOptions.${settings.answerStyle}`),
     settings.speedBonus ? t('host.create.speedBonus') : null,
     settings.shuffleOptions ? t('host.create.shuffle') : null,
@@ -128,6 +129,15 @@ export function GameSettingsForm({ value, onChange }: { value: GameSettings; onC
         onChange={(scoreboard) => set({ scoreboard })}
         disabled={value.revealAnswers === 'atEnd'}
         help={value.revealAnswers === 'atEnd' ? t('host.create.scoreboardAtEnd') : undefined}
+      />
+      <RadioGroup
+        legend={t('host.create.finalResults')}
+        name={`${id}-final-results`}
+        value={value.finalResults}
+        options={['immediately', 'onRelease'] as const}
+        labelKey={(v) => `host.create.finalResultsOptions.${v}`}
+        onChange={(finalResults) => set({ finalResults })}
+        help={value.finalResults === 'onRelease' ? t('host.create.finalResultsHelp') : undefined}
       />
       <RadioGroup
         legend={t('host.create.answerStyle')}

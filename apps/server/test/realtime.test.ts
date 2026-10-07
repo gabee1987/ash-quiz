@@ -5,9 +5,15 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { games, quizzes } from '../src/db/schema.js'
-import { extendTime, joinPlayer, startGame, submitAnswer } from '../src/game/index.js'
+import { endGame, extendTime, joinPlayer, releaseResults, startGame, submitAnswer } from '../src/game/index.js'
 import { fixtureQuiz, fixtureSettings } from '../src/game/fixtures.js'
-import { FINISHED_TTL_MS, GameManager, type GameStore, type ManagedGame } from '../src/realtime/game-manager.js'
+import {
+  FINISHED_TTL_MS,
+  GameManager,
+  PENDING_RELEASE_TTL_MS,
+  type GameStore,
+  type ManagedGame,
+} from '../src/realtime/game-manager.js'
 import { RESTORE_WINDOW_MS, createGameStore } from '../src/realtime/persist.js'
 import { generatePin } from '../src/realtime/pin.js'
 import { createRateLimiter } from '../src/realtime/rate-limit.js'
@@ -125,6 +131,28 @@ describe('GameManager', () => {
     expect(manager.get(pin)).toBeUndefined()
   })
 
+  it('keeps a finished game while results wait for release (up to 12 hours), evicts it an hour after the game once released', async () => {
+    const manager = new GameManager(memoryStore(), quietLog)
+    const settings = fixtureSettings({ finalResults: 'onRelease' })
+    const { state } = await manager.create({ ...createInput, settings })
+    manager.apply(state.pin, (s, now) => endGame(s, now))
+    manager.apply(state.pin, (s) => releaseResults(s, 'screen'))
+    vi.advanceTimersByTime(FINISHED_TTL_MS * 3)
+    expect(manager.get(state.pin)).toBeDefined()
+    manager.apply(state.pin, (s) => releaseResults(s, 'players'))
+    vi.advanceTimersByTime(1)
+    expect(manager.get(state.pin)).toBeUndefined()
+
+    // Never released to the phones: dropped from memory after 12 hours.
+    const { state: other } = await manager.create({ ...createInput, id: 'game-2', settings })
+    manager.apply(other.pin, (s, now) => endGame(s, now))
+    vi.advanceTimersByTime(PENDING_RELEASE_TTL_MS - 1)
+    expect(manager.get(other.pin)).toBeDefined()
+    vi.advanceTimersByTime(1)
+    expect(manager.get(other.pin)).toBeUndefined()
+    manager.close()
+  })
+
   it('throws errors.gameNotFound for an unknown pin', () => {
     const manager = new GameManager(memoryStore(), quietLog)
     expect(() => manager.apply('999999', (s) => s)).toThrow('errors.gameNotFound')
@@ -181,6 +209,26 @@ describeDb('persist (database)', () => {
     expect(row.phase).toBe('finished')
     expect(row.state.phase).toBe('finished')
     expect(row.finishedAt).not.toBeNull()
+    manager.close()
+  })
+
+  it('persist: restores finished games while any results wait for release, not fully released ones', async () => {
+    const store = createGameStore(db)
+    const manager = new GameManager(store, quietLog)
+    const settings = fixtureSettings({ finalResults: 'onRelease' })
+    const game = async (id: string, audiences: ('screen' | 'players')[]) => {
+      const { state } = await manager.create({ ...createInput, id, settings, hostId, quizId: null })
+      manager.apply(state.pin, (s, now) => endGame(s, now))
+      for (const audience of audiences) manager.apply(state.pin, (s) => releaseResults(s, audience))
+    }
+    await game('game-pending', [])
+    await game('game-podium-only', ['screen'])
+    await game('game-released', ['screen', 'players'])
+    await manager.flush()
+
+    const ids = (await store.loadActive(Date.now())).map((g) => g.state.id)
+    expect(ids).toEqual(expect.arrayContaining(['game-pending', 'game-podium-only']))
+    expect(ids).not.toContain('game-released')
     manager.close()
   })
 })
@@ -417,6 +465,39 @@ describeDb('sockets (database)', () => {
     const final = await finished
     expect(final.me.score).toBeGreaterThan(0)
     expect(final.myResults![0]).toMatchObject({ correct: true, answer: { type: 'single', optionId: 'a' } })
+  })
+
+  it('final results on release: phones wait after the game until the host releases them', async () => {
+    const res = await built.app.inject({
+      method: 'POST',
+      url: '/api/games',
+      headers: { cookie: hostCookie },
+      payload: { quizId, settings: { finalResults: 'onRelease' } },
+    })
+    const pin = res.json().pin
+    const hostSocket = await host(pin)
+    const a = await player(pin, 'Anna')
+    const screen = await connect()
+    await screen.emitWithAck('screen:attach', { pin })
+    await command(hostSocket, { type: 'start' })
+    const early = await command(hostSocket, { type: 'releaseResults', audience: 'screen' })
+    expect(early).toEqual({ error: 'errors.invalidTransition' })
+    expect(await command(hostSocket, { type: 'releaseResults' })).toEqual({ error: 'errors.invalidInput' })
+
+    const finished = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'finished')
+    expect(await command(hostSocket, { type: 'end' })).toEqual({ ok: true })
+    expect(await finished).toMatchObject({ resultsPending: true, myResults: null })
+
+    // The podium first: the projector shows it, phones keep waiting.
+    const podium = nextSnapshot<HostSnapshot>(screen, 'game:host', (s) => s.phase === 'finished' && !s.resultsPending)
+    const stillWaiting = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'finished')
+    expect(await command(hostSocket, { type: 'releaseResults', audience: 'screen' })).toEqual({ ok: true })
+    expect(await podium).toMatchObject({ answersHidden: false, playersWaiting: false })
+    expect(await stillWaiting).toMatchObject({ resultsPending: true, myResults: null })
+
+    const released = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => !s.resultsPending)
+    expect(await command(hostSocket, { type: 'releaseResults', audience: 'players' })).toEqual({ ok: true })
+    expect((await released).myResults).toHaveLength(1)
   })
 
   it('after a reveal the host can show the scoreboard or go straight to the next question', async () => {

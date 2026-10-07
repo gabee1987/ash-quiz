@@ -1,4 +1,4 @@
-import { and, gt, lte, ne, sql } from 'drizzle-orm'
+import { and, gt, lte, ne, or, sql } from 'drizzle-orm'
 import type { Db } from '../db/index.js'
 import { games } from '../db/schema.js'
 import type { GameStore, ManagedGame } from './game-manager.js'
@@ -38,10 +38,12 @@ export function createGameStore(db: Db): GameStore {
         })
         .where(and(ne(games.phase, 'finished'), lte(games.createdAt, cutoff)))
 
+      // Finished games whose results still wait for the host's release come back too.
+      const awaitingRelease = sql`(${games.state}->'settings'->>'finalResults' = 'onRelease' and not (coalesce((${games.state}->'released'->>'screen')::boolean, false) and coalesce((${games.state}->'released'->>'players')::boolean, false)))`
       const rows = await db
         .select({ state: games.state, hostId: games.hostId, quizId: games.quizId })
         .from(games)
-        .where(and(ne(games.phase, 'finished'), gt(games.createdAt, cutoff)))
+        .where(and(or(ne(games.phase, 'finished'), awaitingRelease), gt(games.createdAt, cutoff)))
       return rows
     },
   }

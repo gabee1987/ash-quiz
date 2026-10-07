@@ -23,6 +23,7 @@ import {
   joinPlayer,
   kickPlayer,
   next,
+  releaseResults,
   showScoreboard,
   skipQuestion,
   startGame,
@@ -246,6 +247,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return gradeText(state, command.correctPlayerIds)
     case 'end':
       return endGame(state, now)
+    case 'releaseResults':
+      return releaseResults(state, command.audience)
   }
 }
 

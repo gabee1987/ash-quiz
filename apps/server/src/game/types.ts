@@ -52,7 +52,12 @@ export interface GameState {
   awaitingGrading: boolean
   createdAt: number
   finishedAt: number | null
+  /** Final results released per audience (`finalResults: 'onRelease'`). Missing in games saved before it existed. */
+  released?: Record<ResultsAudience, boolean>
 }
+
+/** Who sees the final results: the projector (podium) or the players' phones. */
+export type ResultsAudience = 'screen' | 'players'
 
 /** Invalid command. `code` is an i18n key sent to the client as is. */
 export class EngineError extends Error {

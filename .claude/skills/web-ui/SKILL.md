@@ -15,8 +15,10 @@ description: Frontend conventions for apps/web: route map, TanStack Router and Q
 | `/host` | hosts | quiz list with Play, Edit, New, Results |
 | `/host/quizzes/$quizId` | hosts | editor |
 | `/host/games/$pin` | hosts | control view (phone or laptop) |
-| `/host/games/$pin/results` | hosts | results summary and export |
+| `/host/games` | hosts | game history |
+| `/host/results/$gameId` | hosts | results summary and export |
 | `/screen/$pin` | projector | public read-only big-screen view |
+| `/screen/results/$gameId` | projector | results summary (host session required) |
 
 `/host/*` routes have a layout route that loads `/api/auth/me` and redirects to `/login` on 401. `/play/$pin` and `/screen/$pin` need no login.
 

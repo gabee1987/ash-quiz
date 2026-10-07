@@ -14,6 +14,7 @@ import { authRoutes } from './routes/auth.js'
 import { gameRoutes } from './routes/games.js'
 import { imageRoutes } from './routes/images.js'
 import { quizRoutes } from './routes/quizzes.js'
+import { resultRoutes } from './routes/results.js'
 import { userRoutes } from './routes/users.js'
 
 export interface AppDeps {
@@ -59,6 +60,7 @@ export async function buildApp(config: Config, { db, manager }: AppDeps) {
   await app.register(imageRoutes, { db })
   await app.register(userRoutes, { db })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
+  await app.register(resultRoutes, { db, manager })
 
   if (config.NODE_ENV === 'production') {
     const webDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../web/dist')
