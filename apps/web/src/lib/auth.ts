@@ -5,6 +5,8 @@ export interface User {
   id: string
   username: string
   role: 'admin' | 'editor'
+  /** Created by an admin with an initial password: must change it before anything else. */
+  mustChangePassword: boolean
 }
 
 export const meQueryOptions = queryOptions({

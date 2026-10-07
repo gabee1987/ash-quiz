@@ -67,11 +67,32 @@ export type Question = z.infer<typeof questionSchema>
 
 // ---- Quiz -----------------------------------------------------------------
 
+/**
+ * Cross-field rules the per-type schemas cannot express. Messages are i18n keys
+ * (the editor shows them next to the field; the server only reports the path).
+ */
+function checkQuestions(questions: Question[], ctx: z.RefinementCtx) {
+  const issue = (path: (string | number)[], message: string) => ctx.addIssue({ code: 'custom', path, message })
+  questions.forEach((question, i) => {
+    if (!('options' in question)) return
+    const ids = question.options.map((o) => o.id)
+    if (new Set(ids).size !== ids.length) issue([i, 'options'], 'editor.errors.duplicateOptions')
+    if (question.type === 'single' && !ids.includes(question.correctOptionId)) {
+      issue([i, 'correctOptionId'], 'editor.errors.markCorrect')
+    }
+    if (question.type === 'multiple' && !question.correctOptionIds.every((id) => ids.includes(id))) {
+      issue([i, 'correctOptionIds'], 'editor.errors.markCorrect')
+    }
+  })
+  const questionIds = questions.map((q) => q.id)
+  if (new Set(questionIds).size !== questionIds.length) issue([], 'editor.errors.duplicateQuestions')
+}
+
 export const quizSchema = z.object({
   id: z.string().min(1),
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500).default(''),
-  questions: z.array(questionSchema).max(100),
+  questions: z.array(questionSchema).max(100).superRefine(checkQuestions),
 })
 export type Quiz = z.infer<typeof quizSchema>
 

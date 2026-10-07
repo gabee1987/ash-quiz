@@ -69,7 +69,7 @@ describeDb('auth (database)', () => {
   it('logs in with an httpOnly cookie, me returns the user, logout clears the session', async () => {
     const res = await login('test_host', password)
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ user: { id: userId, username: 'test_host', role: 'editor' } })
+    expect(res.json()).toEqual({ user: { id: userId, username: 'test_host', role: 'editor', mustChangePassword: false } })
     const cookie = res.cookies.find((c) => c.name === 'ash_session')!
     expect(cookie).toMatchObject({ httpOnly: true, sameSite: 'Lax', path: '/' })
     const headers = { cookie: sessionCookie(res) }

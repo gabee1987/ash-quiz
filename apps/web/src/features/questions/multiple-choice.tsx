@@ -12,9 +12,9 @@ export function MultipleChoice({ question, mode, disabled, large, onSubmit }: Qu
     setSelected((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]))
 
   return (
-    <div className="flex flex-1 flex-col gap-3">
+    <div className="@container flex flex-1 flex-col gap-3">
       {mode === 'answer' && <p className="text-center text-sm text-white/70">{t('play.selectAll')}</p>}
-      <div className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2">
+      <div className="grid flex-1 auto-rows-fr gap-3 @md:grid-cols-2">
         {question.options.map((option, index) => (
           <OptionButton
             key={option.id}

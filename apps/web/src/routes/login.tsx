@@ -24,7 +24,7 @@ function LoginPage() {
       apiFetch<{ user: User }>('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
     onSuccess: ({ user }) => {
       queryClient.setQueryData(meQueryOptions.queryKey, user)
-      void navigate({ to: '/host' })
+      void navigate({ to: user.mustChangePassword ? '/host/password' : '/host' })
     },
   })
 

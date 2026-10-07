@@ -4,7 +4,8 @@ import type { QuestionProps } from './types'
 /** Tap to submit. Polls share this layout. */
 export function SingleChoice({ question, mode, disabled, large, onSubmit }: QuestionProps<'single' | 'poll'>) {
   return (
-    <div className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2">
+    <div className="@container flex flex-1 flex-col">
+      <div className="grid flex-1 auto-rows-fr gap-3 @md:grid-cols-2">
       {question.options.map((option, index) => (
         <OptionButton
           key={option.id}
@@ -16,6 +17,7 @@ export function SingleChoice({ question, mode, disabled, large, onSubmit }: Ques
           onClick={() => onSubmit?.({ type: question.type, optionId: option.id })}
         />
       ))}
+      </div>
     </div>
   )
 }

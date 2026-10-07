@@ -2,6 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Fastify from 'fastify'
 import cookie from '@fastify/cookie'
+import multipart from '@fastify/multipart'
 import rateLimit from '@fastify/rate-limit'
 import fastifyStatic from '@fastify/static'
 import { Server as SocketServer } from 'socket.io'
@@ -11,7 +12,9 @@ import type { GameManager } from './realtime/game-manager.js'
 import { registerSocketHandlers, type AppSocketServer } from './realtime/handlers.js'
 import { authRoutes } from './routes/auth.js'
 import { gameRoutes } from './routes/games.js'
+import { imageRoutes } from './routes/images.js'
 import { quizRoutes } from './routes/quizzes.js'
+import { userRoutes } from './routes/users.js'
 
 export interface AppDeps {
   db: Db
@@ -38,6 +41,7 @@ export async function buildApp(config: Config, { db, manager }: AppDeps) {
   app.setErrorHandler((error: { statusCode?: number }, request, reply) => {
     const status = error.statusCode ?? 500
     if (status === 429) return reply.code(429).send({ error: 'errors.rateLimited' })
+    if (status === 413) return reply.code(413).send({ error: 'errors.fileTooLarge' })
     if (status >= 400 && status < 500) return reply.code(status).send({ error: 'errors.invalidInput' })
     request.log.error(error)
     return reply.code(500).send({ error: 'errors.internal' })
@@ -50,7 +54,10 @@ export async function buildApp(config: Config, { db, manager }: AppDeps) {
 
   app.get('/api/health', async () => ({ ok: true }))
   await app.register(authRoutes, { db, secureCookies })
+  await app.register(multipart)
   await app.register(quizRoutes, { db })
+  await app.register(imageRoutes, { db })
+  await app.register(userRoutes, { db })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
 
   if (config.NODE_ENV === 'production') {

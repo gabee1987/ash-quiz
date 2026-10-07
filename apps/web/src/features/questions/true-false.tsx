@@ -9,7 +9,8 @@ export function TrueFalse({ mode, disabled, large, onSubmit }: QuestionProps<'tr
     { value: false, label: t('play.false') },
   ]
   return (
-    <div className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2">
+    <div className="@container flex flex-1 flex-col">
+      <div className="grid flex-1 auto-rows-fr gap-3 @md:grid-cols-2">
       {choices.map((choice, index) => (
         <OptionButton
           key={String(choice.value)}
@@ -20,6 +21,7 @@ export function TrueFalse({ mode, disabled, large, onSubmit }: QuestionProps<'tr
           onClick={() => onSubmit?.({ type: 'truefalse', value: choice.value })}
         />
       ))}
+      </div>
     </div>
   )
 }

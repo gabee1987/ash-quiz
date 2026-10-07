@@ -99,6 +99,26 @@ describeDb('quiz routes (database)', () => {
     expect(gone.json()).toEqual({ error: 'errors.notFound' })
   })
 
+  it('duplicates with fresh ids, keeps the correct answer and uses the given title', async () => {
+    const original = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
+    const res = await req(alice, 'POST', `/api/quizzes/${original.id}/duplicate`, { title: 'Test quiz (copy)' })
+    expect(res.statusCode).toBe(201)
+    const copy = res.json().quiz
+    expect(copy.id).not.toBe(original.id)
+    expect(copy.title).toBe('Test quiz (copy)')
+    expect(copy.questions[0].id).not.toBe(original.questions[0].id)
+    const option = copy.questions[0].options.find((o: { text: string }) => o.text === 'A')
+    expect(copy.questions[0].correctOptionId).toBe(option.id)
+    expect((await req(bob, 'POST', `/api/quizzes/${original.id}/duplicate`, {})).statusCode).toBe(403)
+  })
+
+  it('rejects a correct answer that points to no option', async () => {
+    const bad = { ...quizBody, questions: [{ ...quizBody.questions[0], correctOptionId: 'zzz' }] }
+    const res = await req(alice, 'POST', '/api/quizzes', bad)
+    expect(res.statusCode).toBe(400)
+    expect(res.json().issues).toContainEqual({ path: 'questions.0.correctOptionId', code: 'custom' })
+  })
+
   it('answers 400 with issues for an invalid body', async () => {
     const res = await req(alice, 'POST', '/api/quizzes', { title: '', questions: [{ type: 'single', text: 'x' }] })
     expect(res.statusCode).toBe(400)

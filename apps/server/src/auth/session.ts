@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto'
-import { eq } from 'drizzle-orm'
+import { and, eq, ne } from 'drizzle-orm'
 import type { FastifyReply } from 'fastify'
 import type { Db } from '../db/index.js'
 import { sessions, users } from '../db/schema.js'
@@ -11,6 +11,7 @@ export interface SessionUser {
   id: string
   username: string
   role: 'admin' | 'editor'
+  mustChangePassword: boolean
 }
 
 /** The database only stores the SHA-256 of the cookie token. */
@@ -28,7 +29,13 @@ export async function createSession(db: Db, userId: string, now = Date.now()): P
 export async function verifySession(db: Db, token: string, now = Date.now()): Promise<SessionUser | null> {
   const id = hashToken(token)
   const rows = await db
-    .select({ expiresAt: sessions.expiresAt, id: users.id, username: users.username, role: users.role })
+    .select({
+      expiresAt: sessions.expiresAt,
+      id: users.id,
+      username: users.username,
+      role: users.role,
+      mustChangePassword: users.mustChangePassword,
+    })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
     .where(eq(sessions.id, id))
@@ -38,7 +45,12 @@ export async function verifySession(db: Db, token: string, now = Date.now()): Pr
     await db.delete(sessions).where(eq(sessions.id, id))
     return null
   }
-  return { id: row.id, username: row.username, role: row.role }
+  return { id: row.id, username: row.username, role: row.role, mustChangePassword: row.mustChangePassword }
+}
+
+/** Ends every session of a user except `keepToken` (after a password change). */
+export async function destroyOtherSessions(db: Db, userId: string, keepToken: string): Promise<void> {
+  await db.delete(sessions).where(and(eq(sessions.userId, userId), ne(sessions.id, hashToken(keepToken))))
 }
 
 export async function destroySession(db: Db, token: string): Promise<void> {

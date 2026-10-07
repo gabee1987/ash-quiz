@@ -18,7 +18,10 @@
   "common": {
     "loading": "Loading…",
     "next": "Next",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "add": "Add",
+    "delete": "Delete",
+    "removeItem": "Remove {{name}}"
   },
   "auth": {
     "title": "Host login",
@@ -26,7 +29,19 @@
     "password": "Password",
     "submit": "Log in",
     "logout": "Log out",
-    "required": "Required."
+    "required": "Required.",
+    "passwordChange": {
+      "link": "Change password",
+      "title": "Change password",
+      "mustChange": "Please replace the initial password before you continue.",
+      "current": "Current password",
+      "new": "New password",
+      "repeat": "New password again",
+      "tooShort_one": "At least {{count}} character.",
+      "tooShort_other": "At least {{count}} characters.",
+      "mismatch": "The two passwords differ.",
+      "submit": "Save password"
+    }
   },
   "host": {
     "title": "Quizzes",
@@ -107,7 +122,13 @@
       "speedBonusHelp": "Faster correct answers earn more points.",
       "shuffle": "Shuffle answer options",
       "submit": "Create game"
-    }
+    },
+    "newQuiz": "New quiz",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "copyTitle": "{{title}} (copy)",
+    "deleteTitle": "Delete this quiz?",
+    "deleteBody": "“{{title}}” will be deleted permanently. Results of games already played are kept."
   },
   "play": {
     "youAreIn": "You're in, {{name}}!",
@@ -156,6 +177,100 @@
     "correctCount_one": "{{correct}} of {{count}} answered correctly",
     "correctCount_other": "{{correct}} of {{count}} answered correctly"
   },
+  "questionTypes": {
+    "single": "Single choice",
+    "singleHelp": "One correct option.",
+    "multiple": "Multiple choice",
+    "multipleHelp": "Several correct options, all must be picked.",
+    "truefalse": "True or false",
+    "truefalseHelp": "A statement to judge.",
+    "text": "Free text",
+    "textHelp": "Players type a short answer.",
+    "number": "Number",
+    "numberHelp": "Players type a number, with optional tolerance.",
+    "poll": "Poll",
+    "pollHelp": "Opinion vote, no points."
+  },
+  "editor": {
+    "title": "Quiz title",
+    "description": "Description (optional)",
+    "untitledQuiz": "New quiz",
+    "untitledQuestion": "Untitled question",
+    "questionCount_one": "{{count}} question",
+    "questionCount_other": "{{count}} questions",
+    "addQuestion": "Add question",
+    "pickType": "Choose the question type",
+    "questionText": "Question",
+    "questionImage": "Question image",
+    "addImage": "Add image (JPG, PNG or WebP, max 5 MB)",
+    "addImageShort": "Add image",
+    "removeImage": "Remove image",
+    "options": "Options",
+    "optionsMarkOne": "Options: mark the correct one",
+    "optionsMarkAll": "Options: mark every correct one",
+    "optionText": "Option {{n}}",
+    "optionImage": "Image for option {{n}}",
+    "removeOption": "Remove option {{n}}",
+    "addOption": "Add option",
+    "correct": "Correct",
+    "correctAnswer": "Correct answer",
+    "acceptedAnswers": "Accepted answers",
+    "acceptedAnswerPlaceholder": "e.g. Győr",
+    "acceptedAnswersHint": "Upper and lower case, accents and extra spaces are ignored when comparing.",
+    "hostGradedHint": "No accepted answers: you will mark the correct answers yourself during the game.",
+    "correctNumber": "Correct number",
+    "tolerance": "Tolerance (±)",
+    "timeLimit": "Time limit",
+    "seconds_one": "{{count}} second",
+    "seconds_other": "{{count}} seconds",
+    "points": "Points",
+    "pointsValue_one": "{{count}} point",
+    "pointsValue_other": "{{count}} points",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "dragToReorder": "Drag to reorder",
+    "duplicateQuestion": "Duplicate",
+    "deleteQuestion": "Delete question",
+    "deleteQuestionTitle": "Delete this question?",
+    "needsFixing": "Fix",
+    "preview": "Phone preview",
+    "showPreview": "Show phone preview",
+    "hidePreview": "Hide phone preview",
+    "previewEmpty": "Select a question to preview it.",
+    "status": {
+      "saved": "Saved",
+      "pending": "Unsaved changes…",
+      "saving": "Saving…",
+      "invalid": "Not saved: some fields are incomplete",
+      "error": "Saving failed, retrying on the next change"
+    },
+    "errors": {
+      "required": "Required.",
+      "tooFew": "Add more.",
+      "tooMany": "Too many.",
+      "tooLong": "Too long.",
+      "tooSmall": "Too small.",
+      "tooBig": "Too big.",
+      "invalid": "Invalid value.",
+      "markCorrect": "Mark the correct option.",
+      "duplicateOptions": "Options must be distinct.",
+      "duplicateQuestions": "Duplicate question ids; duplicate the question again."
+    }
+  },
+  "users": {
+    "title": "Users",
+    "add": "Add user",
+    "role": "Role",
+    "roles": {
+      "admin": "Admin",
+      "editor": "Host"
+    },
+    "initialPassword": "Initial password",
+    "initialPasswordHint": "Share the initial password privately. The user must change it at first login.",
+    "usernameRules": "3–40 characters: letters, digits, dot, dash, underscore. No e-mail addresses.",
+    "pendingPassword": "Password not changed yet",
+    "created": "User {{name}} created."
+  },
   "errors": {
     "gameNotFound": "No such game. Check the PIN.",
     "gameFull": "The game is full.",
@@ -175,6 +290,12 @@
     "forbidden": "You do not have access to this.",
     "rateLimited": "Too many attempts. Wait a minute and try again.",
     "internal": "Something went wrong. Try again.",
-    "kicked": "The host removed you from the game."
+    "kicked": "The host removed you from the game.",
+    "unsupportedImage": "Use a JPG, PNG or WebP image.",
+    "fileTooLarge": "The file is larger than 5 MB.",
+    "passwordChangeRequired": "Change your initial password first.",
+    "usernameTaken": "This username is already taken.",
+    "wrongCurrentPassword": "The current password is wrong.",
+    "samePassword": "The new password must differ from the current one."
   }
 }

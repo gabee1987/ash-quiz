@@ -12,7 +12,8 @@ export class ApiError extends Error {
 /** JSON fetch against the same-origin API. Throws ApiError for non-2xx answers and network failures. */
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers)
-  if (init.body !== undefined && !headers.has('content-type')) headers.set('content-type', 'application/json')
+  // JSON bodies are strings; FormData (uploads) must let the browser set its own multipart boundary.
+  if (typeof init.body === 'string' && !headers.has('content-type')) headers.set('content-type', 'application/json')
 
   let res: Response
   try {

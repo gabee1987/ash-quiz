@@ -18,7 +18,10 @@
   "common": {
     "loading": "Betöltés…",
     "next": "Tovább",
-    "cancel": "Mégse"
+    "cancel": "Mégse",
+    "add": "Hozzáadás",
+    "delete": "Törlés",
+    "removeItem": "{{name}} eltávolítása"
   },
   "auth": {
     "title": "Játékvezetői belépés",
@@ -26,7 +29,19 @@
     "password": "Jelszó",
     "submit": "Belépés",
     "logout": "Kilépés",
-    "required": "Kötelező mező."
+    "required": "Kötelező mező.",
+    "passwordChange": {
+      "link": "Jelszó módosítása",
+      "title": "Jelszó módosítása",
+      "mustChange": "Kérjük, a folytatás előtt cserélje le a kezdeti jelszót.",
+      "current": "Jelenlegi jelszó",
+      "new": "Új jelszó",
+      "repeat": "Új jelszó még egyszer",
+      "tooShort_one": "Legalább {{count}} karakter.",
+      "tooShort_other": "Legalább {{count}} karakter.",
+      "mismatch": "A két jelszó nem egyezik.",
+      "submit": "Jelszó mentése"
+    }
   },
   "host": {
     "title": "Kvízek",
@@ -107,7 +122,13 @@
       "speedBonusHelp": "A gyorsabb helyes válasz több pontot ér.",
       "shuffle": "Válaszlehetőségek keverése",
       "submit": "Játék létrehozása"
-    }
+    },
+    "newQuiz": "Új kvíz",
+    "edit": "Szerkesztés",
+    "duplicate": "Másolat",
+    "copyTitle": "{{title}} (másolat)",
+    "deleteTitle": "Törli ezt a kvízt?",
+    "deleteBody": "A(z) „{{title}}” véglegesen törlődik. A már lejátszott játékok eredményei megmaradnak."
   },
   "play": {
     "youAreIn": "Bent vagy, {{name}}!",
@@ -156,6 +177,100 @@
     "correctCount_one": "{{count}} válaszból {{correct}} helyes",
     "correctCount_other": "{{count}} válaszból {{correct}} helyes"
   },
+  "questionTypes": {
+    "single": "Egy helyes válasz",
+    "singleHelp": "Egyetlen helyes lehetőség.",
+    "multiple": "Több helyes válasz",
+    "multipleHelp": "Több helyes lehetőség, mindet meg kell jelölni.",
+    "truefalse": "Igaz vagy hamis",
+    "truefalseHelp": "Egy állítás megítélése.",
+    "text": "Szöveges válasz",
+    "textHelp": "A játékosok rövid választ írnak be.",
+    "number": "Szám",
+    "numberHelp": "A játékosok számot írnak be, megadható tűréssel.",
+    "poll": "Szavazás",
+    "pollHelp": "Véleménykérés, pontozás nélkül."
+  },
+  "editor": {
+    "title": "Kvíz címe",
+    "description": "Leírás (nem kötelező)",
+    "untitledQuiz": "Új kvíz",
+    "untitledQuestion": "Cím nélküli kérdés",
+    "questionCount_one": "{{count}} kérdés",
+    "questionCount_other": "{{count}} kérdés",
+    "addQuestion": "Kérdés hozzáadása",
+    "pickType": "Válassza ki a kérdés típusát",
+    "questionText": "Kérdés",
+    "questionImage": "Kérdés képe",
+    "addImage": "Kép hozzáadása (JPG, PNG vagy WebP, legfeljebb 5 MB)",
+    "addImageShort": "Kép",
+    "removeImage": "Kép eltávolítása",
+    "options": "Válaszlehetőségek",
+    "optionsMarkOne": "Válaszlehetőségek: jelölje a helyeset",
+    "optionsMarkAll": "Válaszlehetőségek: jelölje az összes helyeset",
+    "optionText": "{{n}}. lehetőség",
+    "optionImage": "A(z) {{n}}. lehetőség képe",
+    "removeOption": "A(z) {{n}}. lehetőség törlése",
+    "addOption": "Lehetőség hozzáadása",
+    "correct": "Helyes",
+    "correctAnswer": "Helyes válasz",
+    "acceptedAnswers": "Elfogadott válaszok",
+    "acceptedAnswerPlaceholder": "pl. Győr",
+    "acceptedAnswersHint": "Az összevetésnél a kis- és nagybetű, az ékezet és a felesleges szóköz nem számít.",
+    "hostGradedHint": "Nincs elfogadott válasz: a helyes válaszokat Ön jelöli meg a játék közben.",
+    "correctNumber": "Helyes szám",
+    "tolerance": "Tűrés (±)",
+    "timeLimit": "Időkorlát",
+    "seconds_one": "{{count}} másodperc",
+    "seconds_other": "{{count}} másodperc",
+    "points": "Pontszám",
+    "pointsValue_one": "{{count}} pont",
+    "pointsValue_other": "{{count}} pont",
+    "moveUp": "Feljebb",
+    "moveDown": "Lejjebb",
+    "dragToReorder": "Húzza az átrendezéshez",
+    "duplicateQuestion": "Másolat",
+    "deleteQuestion": "Kérdés törlése",
+    "deleteQuestionTitle": "Törli ezt a kérdést?",
+    "needsFixing": "Javítandó",
+    "preview": "Telefonos előnézet",
+    "showPreview": "Telefonos előnézet megjelenítése",
+    "hidePreview": "Telefonos előnézet elrejtése",
+    "previewEmpty": "Válasszon ki egy kérdést az előnézethez.",
+    "status": {
+      "saved": "Mentve",
+      "pending": "Nem mentett módosítások…",
+      "saving": "Mentés…",
+      "invalid": "Nincs mentve: néhány mező hiányos",
+      "error": "A mentés nem sikerült, a következő módosításkor újrapróbáljuk"
+    },
+    "errors": {
+      "required": "Kötelező mező.",
+      "tooFew": "Adjon hozzá többet.",
+      "tooMany": "Túl sok.",
+      "tooLong": "Túl hosszú.",
+      "tooSmall": "Túl kicsi.",
+      "tooBig": "Túl nagy.",
+      "invalid": "Érvénytelen érték.",
+      "markCorrect": "Jelölje meg a helyes lehetőséget.",
+      "duplicateOptions": "A lehetőségeknek különbözniük kell.",
+      "duplicateQuestions": "Ismétlődő kérdésazonosító; másolja újra a kérdést."
+    }
+  },
+  "users": {
+    "title": "Felhasználók",
+    "add": "Felhasználó hozzáadása",
+    "role": "Szerepkör",
+    "roles": {
+      "admin": "Adminisztrátor",
+      "editor": "Játékvezető"
+    },
+    "initialPassword": "Kezdeti jelszó",
+    "initialPasswordHint": "A kezdeti jelszót bizalmasan adja át. Első belépéskor meg kell változtatni.",
+    "usernameRules": "3–40 karakter: betű, szám, pont, kötőjel, aláhúzás. E-mail-cím nem lehet.",
+    "pendingPassword": "Még nem változtatott jelszót",
+    "created": "{{name}} felhasználó létrehozva."
+  },
   "errors": {
     "gameNotFound": "Nincs ilyen játék. Ellenőrizd a PIN-t.",
     "gameFull": "A játék megtelt.",
@@ -175,6 +290,12 @@
     "forbidden": "Ehhez nincs jogosultsága.",
     "rateLimited": "Túl sok próbálkozás. Várjon egy percet, majd próbálja újra.",
     "internal": "Hiba történt. Kérjük, próbálja újra.",
-    "kicked": "A játékvezető eltávolított a játékból."
+    "kicked": "A játékvezető eltávolított a játékból.",
+    "unsupportedImage": "JPG, PNG vagy WebP képet használjon.",
+    "fileTooLarge": "A fájl nagyobb 5 MB-nál.",
+    "passwordChangeRequired": "Előbb cserélje le a kezdeti jelszót.",
+    "usernameTaken": "Ez a felhasználónév már foglalt.",
+    "wrongCurrentPassword": "A jelenlegi jelszó hibás.",
+    "samePassword": "Az új jelszónak különböznie kell a jelenlegitől."
   }
 }

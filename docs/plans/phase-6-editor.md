@@ -74,3 +74,15 @@ pnpm verify && TEST_DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashqu
 9. Play the quiz. Expect images on phones and screen.
 10. As admin, add user "hr1" with an initial password. Log in as hr1. Expect the forced password change, then the empty quiz list.
 11. As hr1, try `/host/users`. Expect 403 translated message and no list.
+
+## Deviations
+
+- Cross-field quiz rules (correct option exists, distinct option and question ids) were added to the shared `quizSchema` so the API rejects inconsistent quizzes and the editor shows the same errors. Messages are i18n keys.
+- `mustChangePassword` is enforced on the server as well: until it is cleared, every authenticated route except `me`, `logout` and `POST /api/auth/password` answers `403 errors.passwordChangeRequired`. A password change signs out the user's other sessions.
+- Usernames are restricted to `[a-zA-Z0-9._-]{3,40}` so e-mail addresses (personal data) cannot be used as login names.
+- Image uploads are checked by decoded content, not only the declared mime type, and EXIF/GPS metadata is stripped (sharp does not copy it to the WebP output).
+- `POST /api/quizzes/:id/duplicate` takes the translated title from the client (`{ title }`), since the server never writes human-readable text.
+- Field errors of a new question appear once the user leaves it or once it was valid at least once, so a fresh question is not covered in "Required." before anything is typed.
+- Option grids use container queries (`@md:grid-cols-2`) instead of viewport breakpoints, so the 375 px phone preview, phones and the projector each get the right layout.
+- The editor IDs use `crypto.getRandomValues`, because `crypto.randomUUID` is unavailable on plain http (laptop on the LAN).
+- New dependencies: `@fastify/multipart`, `sharp` (server); `@testing-library/react`, `happy-dom` (web, dev only). All local libraries, no external services.

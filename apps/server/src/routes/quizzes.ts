@@ -1,7 +1,8 @@
-import { quizInputSchema, type QuizInput } from '@ash-quiz/shared'
+import { quizInputSchema, type Question, type QuizInput } from '@ash-quiz/shared'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
+import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
@@ -21,6 +22,24 @@ export function assignIds(body: unknown): unknown {
     return Array.isArray(options) ? { ...question, options: options.map(withId) } : question
   })
   return { ...body, questions }
+}
+
+/** The client sends the translated title ("… (copy)"); the server never writes human text itself. */
+const duplicateSchema = z.object({ title: z.string().trim().min(1).max(120).optional() })
+
+/** New ids for a question and its options, keeping the correct-answer references intact. */
+export function withFreshIds(question: Question): Question {
+  if (!('options' in question)) return { ...question, id: nanoid(8) }
+  const map = new Map(question.options.map((o) => [o.id, nanoid(8)]))
+  const options = question.options.map((o) => ({ ...o, id: map.get(o.id)! }))
+  switch (question.type) {
+    case 'single':
+      return { ...question, id: nanoid(8), options, correctOptionId: map.get(question.correctOptionId) ?? question.correctOptionId }
+    case 'multiple':
+      return { ...question, id: nanoid(8), options, correctOptionIds: question.correctOptionIds.map((id) => map.get(id) ?? id) }
+    case 'poll':
+      return { ...question, id: nanoid(8), options }
+  }
 }
 
 type QuizRow = typeof quizzes.$inferSelect
@@ -98,6 +117,25 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
       .where(and(eq(quizzes.id, row.id), eq(quizzes.ownerId, request.user!.id)))
       .returning()
     return { quiz: toQuiz(updated!) }
+  })
+
+  // Copy with fresh question and option ids (answers in running games are keyed by them).
+  app.post<{ Params: { id: string } }>('/api/quizzes/:id/duplicate', auth, async (request, reply) => {
+    const row = await ownQuiz(request.params.id, request.user!.id, reply)
+    if (!row) return reply
+    const body = parseOr400(duplicateSchema, request.body ?? {}, reply)
+    if (!body) return reply
+    const [copy] = await db
+      .insert(quizzes)
+      .values({
+        id: nanoid(12),
+        ownerId: request.user!.id,
+        title: body.title ?? row.title,
+        description: row.description,
+        questions: row.questions.map(withFreshIds),
+      })
+      .returning()
+    return reply.code(201).send({ quiz: toQuiz(copy!) })
   })
 
   app.delete<{ Params: { id: string } }>('/api/quizzes/:id', auth, async (request, reply) => {
