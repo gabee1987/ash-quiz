@@ -5,19 +5,16 @@ One file per phase. Each phase is one `feature/*` branch off `develop`, implemen
 | Phase | Plan | Branch | Status |
 |---|---|---|---|
 | 1 | Scaffold: workspace, shared schemas, server and web skeletons | `feature/scaffold` | done |
-| 2 | [Game engine](phase-2-game-engine.md) | `feature/game-engine` | todo |
-| 3 | [Database, auth, deployment](phase-3-db-auth-deploy.md) | `feature/db-auth-deploy` | todo |
-| 4 | [Realtime play: sockets, player screens, minimal host control](phase-4-realtime-play.md) | `feature/realtime-play` | todo |
-| 5 | [Host control, projector screen, team mode, grading](phase-5-host-and-screen.md) | `feature/host-and-screen` | todo |
-| 6 | [Quiz editor, images, user management](phase-6-editor.md) | `feature/editor` | todo |
+| 2 | [Game engine](phase-2-game-engine.md) | `feature/game-engine` | done |
+| 3 | [Database, auth, deployment](phase-3-db-auth-deploy.md) | `feature/db-auth-deploy` | done |
+| 4 | [Realtime play: sockets, player screens, minimal host control](phase-4-realtime-play.md) | `feature/realtime-play` | done |
+| 5 | [Host control, projector screen, team mode, grading](phase-5-host-and-screen.md) | `feature/host-and-screen` | done |
+| 6 | [Quiz editor, images, user management](phase-6-editor.md) | `feature/editor` | done |
+| 6b | [Host flow options, sidebar, plain answer buttons](phase-6b-host-flow.md) | `feature/host-flow` | done |
 | 7 | [Results, history, export, retention](phase-7-results.md) | `feature/results` | todo |
 | 8 | [Hardening: load test, end-to-end, release](phase-8-hardening.md) | `feature/hardening` | todo |
 
-Order matters: each phase builds on the previous one. Phase 1 is in the working tree, uncommitted, and should be the first commit on `develop`:
-
-```
-chore: scaffold pnpm workspace with shared schemas, server and web skeletons
-```
+Order matters: each phase builds on the previous one. Phase 1 and this planning material are the first two commits on `main` and `develop`.
 
 ## Conventions every plan follows
 
@@ -30,12 +27,11 @@ chore: scaffold pnpm workspace with shared schemas, server and web skeletons
 
 ## Git setup the user does once
 
+Local branches `main`, `develop` and `feature/game-engine` already exist. Remaining steps:
+
 ```
-git branch -M main
-git add -A && git commit -m "chore: scaffold pnpm workspace with shared schemas, server and web skeletons"
-git checkout -b develop
 gh repo create ash-quiz --private --source . --push
-git push -u origin main develop
+git push -u origin main develop feature/game-engine
 ```
 
 Then on GitHub: set `develop` as the default branch, protect `main` (require PR and the CI check), and open the project board with one card per phase.

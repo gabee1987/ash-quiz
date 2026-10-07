@@ -3,6 +3,24 @@
 @theme {
   --color-brand: #4f46e5;
   --color-brand-dark: #1e1b4b;
+  --animate-rise: rise 0.9s ease-out both;
+
+  @keyframes rise {
+    from {
+      transform: translateY(60px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise {
+    animation: none;
+  }
 }
 
 html,

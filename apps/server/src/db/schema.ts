@@ -1,5 +1,6 @@
-import { pgTable, text, timestamp, jsonb, integer, customType } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, jsonb, integer, boolean, customType } from 'drizzle-orm/pg-core'
 import type { GameSettings, Question } from '@ash-quiz/shared'
+import type { GameState } from '../game/types.js'
 
 const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' })
 
@@ -9,6 +10,8 @@ export const users = pgTable('users', {
   id: text('id').primaryKey(),
   username: text('username').notNull().unique(),
   role: text('role', { enum: ['admin', 'editor'] }).notNull().default('editor'),
+  /** Set for users created by an admin with an initial password; cleared on first password change. */
+  mustChangePassword: boolean('must_change_password').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
@@ -38,6 +41,8 @@ export const quizzes = pgTable('quizzes', {
   title: text('title').notNull(),
   description: text('description').notNull().default(''),
   questions: jsonb('questions').$type<Question[]>().notNull(),
+  /** Default game settings. Stored as sent; read through `gameSettingsSchema` so new fields get defaults. */
+  settings: jsonb('settings').$type<Partial<GameSettings>>().notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
@@ -66,7 +71,7 @@ export const games = pgTable('games', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   settings: jsonb('settings').$type<GameSettings>().notNull(),
-  state: jsonb('state').notNull(),
+  state: jsonb('state').$type<GameState>().notNull(),
   phase: text('phase').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   finishedAt: timestamp('finished_at', { withTimezone: true }),

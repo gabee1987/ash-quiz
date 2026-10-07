@@ -1,11 +1,19 @@
 import { z } from 'zod'
 
+/** Docker Compose and hosting dashboards pass unset variables as empty strings. */
+const emptyAsUnset = <T extends z.ZodType>(schema: T) => z.preprocess((v) => (v === '' ? undefined : v), schema)
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   DATABASE_URL: z.string().url(),
   SESSION_SECRET: z.string().min(32),
   APP_ORIGIN: z.string().url().default('http://localhost:3000'),
+  /** Used only by the seed script to create the first admin. */
+  SEED_ADMIN_USERNAME: emptyAsUnset(z.string().trim().min(1).max(40).optional()),
+  SEED_ADMIN_PASSWORD: emptyAsUnset(z.string().min(10).optional()),
+  /** Finished games older than this are deleted (data minimisation). */
+  RESULTS_RETENTION_DAYS: z.coerce.number().int().min(0).default(90),
 })
 
 export type Config = z.infer<typeof envSchema>

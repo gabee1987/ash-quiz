@@ -24,11 +24,16 @@ export type PlayerAnswer = z.infer<typeof playerAnswerSchema>
 
 export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('start') }),
+  /** Next question, or finish after the last one. */
   z.object({ type: z.literal('next') }),
+  /** From the reveal to the scoreboard. */
+  z.object({ type: z.literal('scoreboard') }),
   z.object({ type: z.literal('skip') }),
   z.object({ type: z.literal('extendTime'), seconds: z.number().int().min(1).max(120) }),
   z.object({ type: z.literal('endQuestion') }),
   z.object({ type: z.literal('kick'), playerId: z.string().min(1) }),
+  /** Host grading of a text question without accepted answers: listed players are correct. */
+  z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(50) }),
   z.object({ type: z.literal('end') }),
 ])
 export type HostCommand = z.infer<typeof hostCommandSchema>
@@ -45,6 +50,7 @@ export interface ClientToServerEvents {
   'player:answer': (data: PlayerAnswer, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:command': (data: HostCommand, ack: (res: { ok: true } | ErrorPayload) => void) => void
+  'screen:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
 }
 
 export interface ServerToClientEvents {

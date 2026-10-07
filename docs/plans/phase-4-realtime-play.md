@@ -88,3 +88,15 @@ pnpm verify && TEST_DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashqu
 10. Host: Kick Bence. Expect Bence's phone shows a translated "removed" message and the lobby/join form.
 11. Finish the quiz. Expect podium on phones with the final rank and the laptop shows top 3.
 12. Close and reopen phone A's browser after the game. Expect the podium again, not the join form.
+
+## Deviations
+
+- `PlayerSnapshot` gained `lastCorrect: boolean | null` so the phone can show correct / wrong without guessing from points (a correct answer can score 0 on a 0-point question).
+- Shared `GameHostInfo` type for `GET /api/games/:pin` (`pin`, `quizTitle`, `mode`, `phase`, `joinUrl` built from `APP_ORIGIN`).
+- `POST /api/games` rejects team mode without team names (`400 errors.invalidInput`); there is no team setup UI yet, so the Play button always creates a classic game.
+- After joining or attaching, the socket receives a snapshot of the state at that moment, not the state from before the handler's awaits. The end-to-end run found that a host attaching while players joined otherwise missed them.
+- Answers to the host-graded text flow and team mode UI beyond the join picker remain phase 5, as planned.
+- New error key `errors.kicked` (sent with `game:closed`).
+- `socket.io-client` added as a server dev dependency for the realtime tests.
+- Fixed after browser testing: `emitAck` lost its `this` binding (host page and join stuck), the join page crashed on QR links because the router parses `?pin=123456` as a number, and the per-socket rate limit no longer applies to an attached (authenticated) host socket. Each has a regression test (`socket.test.ts`, realtime host rate-limit test); the QR case is covered by the schema coercion in `routes/index.tsx`.
+- Added `pnpm dev:lan` (`scripts/dev-lan.mjs`) for phone testing on the local network.

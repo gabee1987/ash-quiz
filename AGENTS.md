@@ -161,7 +161,7 @@ ASH Quiz: a browser-based, mobile-first live quiz (Kahoot-like) for company even
 ### Git and delivery
 - The user runs every git command. The agent never runs `git`.
 - Branches: `main` (production only), `develop` (integration), `feature/*`, `fix/*`, `chore/*` off `develop`.
-- Work is organised in phases under `docs/plans/`, implemented with the `implement-phase` skill. Every phase or task ends with the delivery report defined in the `git-workflow` skill: branch, one-line Conventional Commit message, verification command, tests added, manual test list.
+- Work is organised in phases under `docs/plans/`, implemented with the `implement-phase` skill. Every phase or task ends with the delivery report defined in the `git-workflow` skill: branch, one-line commit message (sentence case, no type prefix, e.g. "Add socket game sessions"), verification command, tests added, manual test list.
 - Skills in `.claude/skills/`: `implement-phase`, `git-workflow`, `verification`, `game-engine`, `realtime`, `server-api`, `web-ui`, `i18n`.
 
 ### Commands
@@ -172,7 +172,9 @@ ASH Quiz: a browser-based, mobile-first live quiz (Kahoot-like) for company even
 - Test (single file): `pnpm --filter @ash-quiz/server exec vitest run test/app.test.ts`
 - Lint: not configured yet
 - Typecheck: `pnpm typecheck`
+- Migrate and seed: `pnpm --filter @ash-quiz/server db:migrate`, then `SEED_ADMIN_USERNAME=admin SEED_ADMIN_PASSWORD=<10+ chars> pnpm --filter @ash-quiz/server seed`
 - Run locally: `pnpm db:up` (Postgres in Docker), copy `.env.example` to `.env`, then `pnpm dev` (server on :3000, Vite on :5173 proxying `/api` and `/socket.io`)
+- Test with phones on the same wifi: `pnpm dev:lan` (detects the LAN IP and a free port, sets `APP_ORIGIN` so QR codes point there, prints the URLs)
 
 Prefer single-file or single-test runs during iteration. Full suites are for the final verification pass.
 
@@ -205,7 +207,8 @@ Prefer single-file or single-test runs during iteration. Full suites are for the
 
 When the user corrects your approach, append a one-line rule here before ending the session. Write it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line already covers the correction, tighten it instead of adding a new one. Remove lines when the underlying issue goes away (model upgrades, refactors, process changes).
 
-- (empty)
+- The user runs PowerShell on Windows: write commands in delivery reports and manual tests as `$env:VAR="value"; command`, never `VAR=value command`.
+- While the user's dev server runs, edit source files with the Edit/Write tools, never `cat > file` in the shell: Vite can read the truncated empty file and keep serving it ("does not provide an export named …").
 
 ---
 

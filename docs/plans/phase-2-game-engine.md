@@ -70,3 +70,13 @@ pnpm verify && pnpm --filter @ash-quiz/server exec vitest run src/game
 ## Manual test list (draft)
 
 Engine-only phase, nothing to click. The delivery report lists the test counts per file and shows the `vitest` summary line.
+
+## Deviations
+
+- `PublicQuestion` in `packages/shared/src/game.ts` now uses a distributive `Omit`. Plain `Omit` over the `Question` union kept only the keys shared by all members, so `options` was missing from the public type.
+- Added the error code `errors.playerNotFound` (unknown player id or token in `reconnectPlayer`, `kickPlayer`, `submitAnswer`, `toPlayerSnapshot`). `disconnectPlayer` ignores unknown ids, because a kicked player's socket can still disconnect afterwards.
+- `errors.notYourTurn` from the skill's list is not used by any command.
+- `endGame` on an already finished game returns the state unchanged, so `finishedAt` keeps its first value.
+- Team ids are deterministic (`team-1`, `team-2`, ...) in the order of `settings.teamNames`, since the engine takes no random input.
+- `settings.shuffleOptions` is not applied by the engine: shuffling needs randomness and is left to the realtime layer (phase 4/5).
+- Added hu/en translations for the engine error codes that had none yet (`questionClosed`, `alreadyAnswered`, `invalidAnswer`, `unknownTeam`, `invalidTransition`, `playerNotFound`).

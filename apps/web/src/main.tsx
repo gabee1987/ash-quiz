@@ -7,7 +7,7 @@ import './i18n'
 import './styles.css'
 
 const queryClient = new QueryClient()
-const router = createRouter({ routeTree, defaultPreload: 'intent' })
+const router = createRouter({ routeTree, context: { queryClient }, defaultPreload: 'intent' })
 
 declare module '@tanstack/react-router' {
   interface Register {
