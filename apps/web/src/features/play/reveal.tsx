@@ -5,6 +5,8 @@ import { CorrectAnswer } from '../questions/correct-answer'
 
 export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
   const { t } = useTranslation()
+  if (snapshot.answersHidden) return <AnswerKept answered={snapshot.myAnswer !== null} />
+
   const question = snapshot.reveal?.question
   const isPoll = question?.type === 'poll'
   const answered = snapshot.myAnswer !== null
@@ -28,9 +30,25 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
         )}
       </div>
       {question && <CorrectAnswer question={question} />}
-      <p className="text-white/70">
-        {t('play.totalScore', { score: snapshot.me.score })} · {t('play.rank', { rank: snapshot.me.rank })}
-      </p>
+      {/* The running rank is a scoreboard of its own: only shown when the scoreboard follows every question. */}
+      {snapshot.settings.scoreboard === 'afterQuestion' && (
+        <p className="text-white/70">
+          {t('play.totalScore', { score: snapshot.me.score })} · {t('play.rank', { rank: snapshot.me.rank })}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/** Results are held back until the end: confirm the answer was kept, reveal nothing. */
+function AnswerKept({ answered }: { answered: boolean }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
+      <div className="flex w-full flex-col items-center gap-2 rounded-2xl bg-white/10 px-4 py-8">
+        <h1 className="text-3xl font-bold">{answered ? t('play.answerKept') : t('play.noAnswer')}</h1>
+      </div>
+      <p className="text-white/70">{t('play.resultsAtEnd')}</p>
     </div>
   )
 }

@@ -13,6 +13,7 @@ interface QuizSummary {
   title: string
   questionCount: number
   updatedAt: string
+  settings: GameSettings
 }
 
 const quizzesQueryOptions = queryOptions({
@@ -28,7 +29,6 @@ const errorCode = (error: unknown) => (error instanceof ApiError ? error.code : 
 
 function HostHome() {
   const { t, i18n } = useTranslation()
-  const { user } = Route.useRouteContext()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const quizzes = useQuery(quizzesQueryOptions)
@@ -67,36 +67,13 @@ function HostHome() {
       refresh()
     },
   })
-  const logout = useMutation({
-    mutationFn: () => apiFetch<void>('/api/auth/logout', { method: 'POST' }),
-    onSettled: () => {
-      queryClient.clear()
-      void navigate({ to: '/login' })
-    },
-  })
 
   const dateFormat = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })
   const actionError = create.error ?? duplicate.error ?? remove.error
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">{t('host.title')}</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-white/70">{user.username}</span>
-          {user.role === 'admin' && (
-            <Link to="/host/users" className="flex min-h-12 items-center rounded-lg px-3 underline">
-              {t('users.title')}
-            </Link>
-          )}
-          <Link to="/host/password" className="flex min-h-12 items-center rounded-lg px-3 underline">
-            {t('auth.passwordChange.link')}
-          </Link>
-          <Button variant="secondary" onClick={() => logout.mutate()} disabled={logout.isPending}>
-            {t('auth.logout')}
-          </Button>
-        </div>
-      </div>
+      <h1 className="text-2xl font-bold">{t('host.title')}</h1>
 
       <Button onClick={() => create.mutate()} disabled={create.isPending}>
         {t('host.newQuiz')}
@@ -147,6 +124,7 @@ function HostHome() {
       {creating && (
         <CreateGameDialog
           quizTitle={creating.title}
+          quizSettings={creating.settings}
           pending={play.isPending}
           error={play.error ? errorCode(play.error) : null}
           onCreate={(settings) => play.mutate({ quizId: creating.id, settings })}

@@ -1,10 +1,10 @@
-import type { QuizInput } from '@ash-quiz/shared'
+import { gameSettingsSchema, type QuizInput } from '@ash-quiz/shared'
 import { describe, expect, it } from 'vitest'
 import { copyQuestion, move, newQuestion } from './draft'
 import { errorsUnder, validateQuiz } from './validate'
 
 function quiz(questions: QuizInput['questions']): QuizInput {
-  return { title: 'Quiz', description: '', questions }
+  return { title: 'Quiz', description: '', questions, settings: gameSettingsSchema.parse({}) }
 }
 
 function filledSingle() {
@@ -31,6 +31,13 @@ describe('validateQuiz', () => {
 
   it('reports a missing title', () => {
     expect(validateQuiz({ ...quiz([]), title: '  ' })).toEqual({ title: 'editor.errors.required' })
+  })
+
+  it('reports team settings without two distinct names, so such a quiz is never saved', () => {
+    const team = (teamNames: string[]) => ({ ...quiz([]), settings: { ...quiz([]).settings, mode: 'team' as const, teamNames } })
+    expect(validateQuiz(team(['Red']))).toEqual({ 'settings.teamNames': 'host.create.needTwoTeams' })
+    expect(validateQuiz(team(['Red', 'RED']))).toEqual({ 'settings.teamNames': 'host.create.duplicateTeams' })
+    expect(validateQuiz(team(['Red', 'Blue']))).toEqual({})
   })
 
   it('reports a correct answer pointing to a removed option', () => {

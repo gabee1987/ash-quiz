@@ -74,7 +74,9 @@ describeDb('quiz routes (database)', () => {
     expect(quiz.questions[0].timeLimitSec).toBe(20)
 
     const aliceList = (await req(alice, 'GET', '/api/quizzes')).json().quizzes
-    expect(aliceList).toEqual([{ id: quiz.id, title: 'Test quiz', questionCount: 2, updatedAt: expect.any(String) }])
+    expect(aliceList).toEqual([
+      { id: quiz.id, title: 'Test quiz', questionCount: 2, updatedAt: expect.any(String), settings: quiz.settings },
+    ])
     expect((await req(bob, 'GET', '/api/quizzes')).json().quizzes).toEqual([])
   })
 
@@ -117,6 +119,28 @@ describeDb('quiz routes (database)', () => {
     const res = await req(alice, 'POST', '/api/quizzes', bad)
     expect(res.statusCode).toBe(400)
     expect(res.json().issues).toContainEqual({ path: 'questions.0.correctOptionId', code: 'custom' })
+  })
+
+  it('stores game settings with the quiz, fills defaults, and copies them on duplicate', async () => {
+    const plain = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
+    expect(plain.settings).toMatchObject({ mode: 'classic', revealAnswers: 'afterQuestion', answerStyle: 'plain' })
+
+    const settings = { revealAnswers: 'atEnd', answerStyle: 'colourful', mode: 'team', teamNames: ['Red', 'Blue'] }
+    const quiz = (await req(alice, 'POST', '/api/quizzes', { ...quizBody, settings })).json().quiz
+    expect(quiz.settings).toMatchObject(settings)
+    expect((await req(alice, 'GET', `/api/quizzes/${quiz.id}`)).json().quiz.settings).toMatchObject(settings)
+    const listed = (await req(alice, 'GET', '/api/quizzes')).json().quizzes.find((q: { id: string }) => q.id === quiz.id)
+    expect(listed.settings).toMatchObject(settings)
+    const copy = (await req(alice, 'POST', `/api/quizzes/${quiz.id}/duplicate`, {})).json().quiz
+    expect(copy.settings).toMatchObject(settings)
+  })
+
+  it('rejects team mode without two distinct team names', async () => {
+    for (const teamNames of [['Red'], ['Red', 'red']]) {
+      const res = await req(alice, 'POST', '/api/quizzes', { ...quizBody, settings: { mode: 'team', teamNames } })
+      expect(res.statusCode).toBe(400)
+      expect(res.json().issues).toContainEqual({ path: 'settings.teamNames', code: 'custom' })
+    }
   })
 
   it('answers 400 with issues for an invalid body', async () => {

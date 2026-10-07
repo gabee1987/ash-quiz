@@ -1,6 +1,6 @@
-import type { Answer, GameSettings, Question, Quiz } from '@ash-quiz/shared'
+import type { Answer, GameSettings, Question } from '@ash-quiz/shared'
 import { isCorrect, pointsFor } from './scoring.js'
-import { EngineError, MAX_PLAYERS, type GameState, type Player, type Team } from './types.js'
+import { EngineError, MAX_PLAYERS, type GameQuiz, type GameState, type Player, type Team } from './types.js'
 
 // Pure commands: (state, input, now) => new state. No I/O, no timers, no clock.
 
@@ -10,7 +10,7 @@ import { EngineError, MAX_PLAYERS, type GameState, type Player, type Team } from
  * so nothing else changes. `random` is injectable for tests.
  */
 export function createGame(
-  quiz: Quiz,
+  quiz: GameQuiz,
   settings: GameSettings,
   pin: string,
   id: string,
@@ -160,18 +160,25 @@ export function gradeText(state: GameState, correctPlayerIds: readonly string[])
   }
 }
 
+/** Next question (or finish after the last one), from the reveal or the scoreboard. */
 export function next(state: GameState, now: number): GameState {
-  if (state.phase === 'reveal' && !state.awaitingGrading) return { ...state, phase: 'scoreboard' }
-  if (state.phase === 'scoreboard') {
-    const index = state.questionIndex + 1
-    if (index >= state.quiz.questions.length) return { ...state, phase: 'finished', finishedAt: now }
-    return openQuestion(state, index, now)
-  }
+  if ((state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard') return advance(state, now)
   throw new EngineError('errors.invalidTransition')
 }
 
-/** Discards all answers to the current question and shows the scoreboard. Nobody scores. */
-export function skipQuestion(state: GameState): GameState {
+/** From the reveal to the scoreboard. Not available while scores are held back until the end. */
+export function showScoreboard(state: GameState): GameState {
+  if (state.phase !== 'reveal' || state.awaitingGrading || answersHidden(state)) {
+    throw new EngineError('errors.invalidTransition')
+  }
+  return { ...state, phase: 'scoreboard' }
+}
+
+/**
+ * Discards all answers to the current question; nobody scores. Shows the scoreboard when it
+ * follows every question, otherwise moves straight on.
+ */
+export function skipQuestion(state: GameState, now: number): GameState {
   if (state.phase !== 'question') throw new EngineError('errors.invalidTransition')
   const questionId = currentQuestion(state).id
   const players: Record<string, Player> = {}
@@ -179,7 +186,8 @@ export function skipQuestion(state: GameState): GameState {
     const { [questionId]: _discarded, ...answers } = player.answers
     players[player.id] = { ...player, answers }
   }
-  return { ...state, phase: 'scoreboard', players }
+  const skipped = { ...state, players }
+  return scoreboardAfterEachQuestion(state) ? { ...skipped, phase: 'scoreboard' } : advance(skipped, now)
 }
 
 export function extendTime(state: GameState, seconds: number): GameState {
@@ -192,9 +200,24 @@ export function endGame(state: GameState, now: number): GameState {
   return { ...state, phase: 'finished', finishedAt: now, awaitingGrading: false }
 }
 
+/** Correctness and scores are held back from players and the public screen until the game is finished. */
+export function answersHidden(state: GameState): boolean {
+  return state.settings.revealAnswers === 'atEnd' && state.phase !== 'finished'
+}
+
 // ---- helpers ---------------------------------------------------------------
 
-function shuffleOptions(quiz: Quiz, random: () => number): Quiz {
+function scoreboardAfterEachQuestion(state: GameState): boolean {
+  return state.settings.scoreboard === 'afterQuestion' && state.settings.revealAnswers === 'afterQuestion'
+}
+
+function advance(state: GameState, now: number): GameState {
+  const index = state.questionIndex + 1
+  if (index >= state.quiz.questions.length) return { ...state, phase: 'finished', finishedAt: now }
+  return openQuestion(state, index, now)
+}
+
+function shuffleOptions(quiz: GameQuiz, random: () => number): GameQuiz {
   const questions = quiz.questions.map((question) => {
     if (question.type !== 'single' && question.type !== 'multiple' && question.type !== 'poll') return question
     // Fisher-Yates on a copy.

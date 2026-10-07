@@ -1,4 +1,4 @@
-import { quizInputSchema, type Question, type QuizInput } from '@ash-quiz/shared'
+import { gameSettingsSchema, quizInputSchema, type Question, type QuizInput } from '@ash-quiz/shared'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
@@ -50,6 +50,7 @@ function toQuiz(row: QuizRow) {
     title: row.title,
     description: row.description,
     questions: row.questions,
+    settings: gameSettingsSchema.parse(row.settings),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   }
@@ -83,11 +84,13 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         title: quizzes.title,
         questionCount: sql<number>`jsonb_array_length(${quizzes.questions})`.mapWith(Number),
         updatedAt: quizzes.updatedAt,
+        settings: quizzes.settings,
       })
       .from(quizzes)
       .where(eq(quizzes.ownerId, request.user!.id))
       .orderBy(desc(quizzes.updatedAt))
-    return { quizzes: rows }
+    // The list carries the settings so the new-game dialog can start from them.
+    return { quizzes: rows.map((row) => ({ ...row, settings: gameSettingsSchema.parse(row.settings) })) }
   })
 
   app.post('/api/quizzes', auth, async (request, reply) => {
@@ -133,6 +136,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         title: body.title ?? row.title,
         description: row.description,
         questions: row.questions.map(withFreshIds),
+        settings: row.settings,
       })
       .returning()
     return reply.code(201).send({ quiz: toQuiz(copy!) })

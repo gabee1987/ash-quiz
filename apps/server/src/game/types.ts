@@ -30,12 +30,15 @@ export interface Team {
   score: number
 }
 
+/** The quiz frozen into a game. Its default settings are not part of it: the game has its own. */
+export type GameQuiz = Omit<Quiz, 'settings'>
+
 /** Plain JSON-serialisable value: persisted on every transition and restored on boot. */
 export interface GameState {
   id: string
   pin: string
   /** Frozen copy taken when the game was created. */
-  quiz: Quiz
+  quiz: GameQuiz
   settings: GameSettings
   phase: GamePhase
   /** -1 in lobby. */

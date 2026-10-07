@@ -208,6 +208,7 @@ Prefer single-file or single-test runs during iteration. Full suites are for the
 When the user corrects your approach, append a one-line rule here before ending the session. Write it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line already covers the correction, tighten it instead of adding a new one. Remove lines when the underlying issue goes away (model upgrades, refactors, process changes).
 
 - The user runs PowerShell on Windows: write commands in delivery reports and manual tests as `$env:VAR="value"; command`, never `VAR=value command`.
+- While the user's dev server runs, edit source files with the Edit/Write tools, never `cat > file` in the shell: Vite can read the truncated empty file and keep serving it ("does not provide an export named …").
 
 ---
 

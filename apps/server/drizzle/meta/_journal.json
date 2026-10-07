@@ -15,6 +15,13 @@
       "when": 1791383167727,
       "tag": "0001_wild_black_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791386658216,
+      "tag": "0002_wakeful_dark_phoenix",
+      "breakpoints": true
     }
   ]
 }

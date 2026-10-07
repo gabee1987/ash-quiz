@@ -23,6 +23,7 @@ import {
   joinPlayer,
   kickPlayer,
   next,
+  showScoreboard,
   skipQuestion,
   startGame,
   submitAnswer,
@@ -231,8 +232,10 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return startGame(state, now)
     case 'next':
       return next(state, now)
+    case 'scoreboard':
+      return showScoreboard(state)
     case 'skip':
-      return skipQuestion(state)
+      return skipQuestion(state, now)
     case 'extendTime':
       return extendTime(state, command.seconds)
     case 'endQuestion':

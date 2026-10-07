@@ -89,6 +89,11 @@ function Header({ host }: { host: HostSnapshot }) {
     t(`host.create.modes.${host.settings.mode}`),
     host.settings.speedBonus ? t('host.create.speedBonus') : null,
     host.settings.shuffleOptions ? t('host.create.shuffle') : null,
+    host.settings.revealAnswers === 'atEnd' ? t('host.create.revealAnswersOptions.atEnd') : null,
+    host.settings.revealAnswers === 'afterQuestion' && host.settings.scoreboard === 'onDemand'
+      ? t('host.create.scoreboardOptions.onDemand')
+      : null,
+    host.settings.answerStyle === 'colourful' ? t('host.create.answerStyleOptions.colourful') : null,
   ].filter(Boolean)
   return (
     <header className="flex flex-wrap items-start justify-between gap-3">

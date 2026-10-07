@@ -11,7 +11,8 @@ import { parseOr400 } from './http.js'
 
 const createGameSchema = z.object({
   quizId: z.string().min(1),
-  settings: gameSettingsSchema.default(gameSettingsSchema.parse({})),
+  /** Overrides for this game; without them the quiz's own settings apply. */
+  settings: gameSettingsSchema.optional(),
 })
 
 export interface GameRouteOptions {
@@ -26,19 +27,19 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
   app.post('/api/games', auth, async (request, reply) => {
     const body = parseOr400(createGameSchema, request.body, reply)
     if (!body) return reply
-    // Team mode needs at least one team to pick when joining.
-    if (body.settings.mode === 'team' && body.settings.teamNames.length === 0) {
-      return reply.code(400).send({ error: 'errors.invalidInput' })
-    }
     const quiz = (await db.select().from(quizzes).where(eq(quizzes.id, body.quizId)))[0]
     if (!quiz) return reply.code(404).send({ error: 'errors.notFound' })
     if (quiz.ownerId !== request.user!.id) return reply.code(403).send({ error: 'errors.forbidden' })
+    // Quiz settings are validated on save, but parse again so fields added later get defaults.
+    const quizSettings = gameSettingsSchema.safeParse(quiz.settings)
+    const settings = body.settings ?? (quizSettings.success ? quizSettings.data : null)
+    if (!settings) return reply.code(400).send({ error: 'errors.invalidInput' })
 
     const game = await manager.create({
       id: nanoid(12),
       // Frozen copy: later quiz edits do not affect a running game.
       quiz: { id: quiz.id, title: quiz.title, description: quiz.description, questions: quiz.questions },
-      settings: body.settings,
+      settings,
       hostId: request.user!.id,
       quizId: quiz.id,
     })

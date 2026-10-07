@@ -10,6 +10,7 @@ import { PhonePreview } from '../../features/editor/phone-preview'
 import { QuestionCard } from '../../features/editor/question-card'
 import { TypePicker } from '../../features/editor/type-picker'
 import { useAutosave, type SaveStatus } from '../../features/editor/use-autosave'
+import { GameSettingsForm, settingsSummary } from '../../features/host/game-settings-form'
 import { errorsUnder, validateQuiz } from '../../features/editor/validate'
 import { ApiError, apiFetch } from '../../lib/api'
 
@@ -45,7 +46,12 @@ function QuizEditorPage() {
 function Editor({ quiz }: { quiz: Quiz }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const [draft, setDraft] = useState<QuizInput>({ title: quiz.title, description: quiz.description, questions: quiz.questions })
+  const [draft, setDraft] = useState<QuizInput>({
+    title: quiz.title,
+    description: quiz.description,
+    questions: quiz.questions,
+    settings: quiz.settings,
+  })
   const [selectedId, setSelectedId] = useState<string | null>(quiz.questions[0]?.id ?? null)
   const [picking, setPicking] = useState(quiz.questions.length === 0)
   const [showPreview, setShowPreview] = useState(false)
@@ -88,9 +94,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
   }, [draft.questions, errors, visited])
   const setQuestions = (next: Question[]) => setDraft((d) => ({ ...d, questions: next }))
   const titleError = errors.title
+  const colourful = draft.settings.answerStyle === 'colourful'
 
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
+    <div className="mx-auto grid w-full max-w-6xl gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
       <div className="flex min-w-0 flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Link to="/host" className="min-h-10 py-2 underline">
@@ -127,6 +134,17 @@ function Editor({ quiz }: { quiz: Quiz }) {
             className="rounded-lg bg-white px-3 py-2 text-black"
           />
         </label>
+
+        <details className="rounded-lg bg-white/5 px-4 py-2">
+          <summary className="flex min-h-10 cursor-pointer flex-col justify-center">
+            <span className="font-semibold">{t('editor.gameSettings')}</span>
+            <span className="text-sm text-white/70">{settingsSummary(draft.settings, t)}</span>
+          </summary>
+          <div className="flex flex-col gap-3 pt-3">
+            <p className="text-sm text-white/70">{t('editor.gameSettingsHelp')}</p>
+            <GameSettingsForm value={draft.settings} onChange={(settings) => setDraft((d) => ({ ...d, settings }))} />
+          </div>
+        </details>
 
         <h2 className="text-lg font-semibold">{t('editor.questionCount', { count: questions.length })}</h2>
         <ol className="flex flex-col gap-2">
@@ -174,20 +192,20 @@ function Editor({ quiz }: { quiz: Quiz }) {
           )
         )}
 
-        <Button variant="secondary" className="lg:hidden" onClick={() => setShowPreview((s) => !s)} aria-expanded={showPreview}>
+        <Button variant="secondary" className="xl:hidden" onClick={() => setShowPreview((s) => !s)} aria-expanded={showPreview}>
           {showPreview ? t('editor.hidePreview') : t('editor.showPreview')}
         </Button>
         {showPreview && (
-          <div className="lg:hidden">
-            <PhonePreview question={questions[selectedIndex] ?? null} index={selectedIndex} count={questions.length} />
+          <div className="xl:hidden">
+            <PhonePreview question={questions[selectedIndex] ?? null} index={selectedIndex} count={questions.length} colourful={colourful} />
           </div>
         )}
       </div>
 
-      <aside className="hidden lg:block">
+      <aside className="hidden xl:block">
         <div className="sticky top-4 flex flex-col gap-2">
           <p className="text-center text-sm text-white/60">{t('editor.preview')}</p>
-          <PhonePreview question={questions[selectedIndex] ?? null} index={selectedIndex} count={questions.length} />
+          <PhonePreview question={questions[selectedIndex] ?? null} index={selectedIndex} count={questions.length} colourful={colourful} />
         </div>
       </aside>
     </div>

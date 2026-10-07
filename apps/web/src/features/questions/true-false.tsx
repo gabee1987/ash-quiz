@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { OptionButton } from '../../components/option-button'
 import type { QuestionProps } from './types'
 
-export function TrueFalse({ mode, disabled, large, onSubmit }: QuestionProps<'truefalse'>) {
+export function TrueFalse({ mode, disabled, large, colourful, onSubmit }: QuestionProps<'truefalse'>) {
   const { t } = useTranslation()
   const choices = [
     { value: true, label: t('play.true') },
@@ -17,6 +17,7 @@ export function TrueFalse({ mode, disabled, large, onSubmit }: QuestionProps<'tr
           index={index}
           label={choice.label}
           large={large ?? false}
+          colourful={colourful ?? large ?? false}
           disabled={mode === 'display' || disabled}
           onClick={() => onSubmit?.({ type: 'truefalse', value: choice.value })}
         />

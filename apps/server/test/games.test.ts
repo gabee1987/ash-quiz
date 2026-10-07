@@ -49,7 +49,23 @@ describeDb('game routes (database)', () => {
     expect((await create(alice, { quizId: 'missing' })).statusCode).toBe(404)
     const noTeams = await create(alice, { quizId: 'quiz-test_alice', settings: { mode: 'team' } })
     expect(noTeams.statusCode).toBe(400)
-    expect(noTeams.json()).toEqual({ error: 'errors.invalidInput' })
+    expect(noTeams.json()).toMatchObject({ error: 'errors.invalidInput', issues: [{ path: 'settings.teamNames' }] })
+  })
+
+  it("uses the quiz's settings unless the request overrides them", async () => {
+    const quizSettings = { revealAnswers: 'atEnd', answerStyle: 'colourful' }
+    await built.app.inject({
+      method: 'PUT',
+      url: '/api/quizzes/quiz-test_alice',
+      headers: { cookie: alice },
+      payload: { title: 'Quiz test_alice', questions: fixtureQuiz().questions, settings: quizSettings },
+    })
+    const fromQuiz = (await create(alice, { quizId: 'quiz-test_alice' })).json().pin
+    expect(built.manager.get(fromQuiz)!.state.settings).toMatchObject({ ...quizSettings, mode: 'classic' })
+
+    const overridden = (await create(alice, { quizId: 'quiz-test_alice', settings: { answerStyle: 'plain' } })).json().pin
+    expect(built.manager.get(overridden)!.state.settings).toMatchObject({ revealAnswers: 'afterQuestion', answerStyle: 'plain' })
+    expect(built.manager.get(overridden)!.state.quiz).not.toHaveProperty('settings')
   })
 
   it('returns host metadata with the join URL to the owner only', async () => {

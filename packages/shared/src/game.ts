@@ -108,11 +108,17 @@ export interface GameSnapshotBase {
   awaitingGrading: boolean
   /** Every question revealed so far, in order. */
   questionStats: QuestionStat[]
+  settings: GameSettings
+  /**
+   * Correct answers and scores are held back until the end (`revealAnswers: 'atEnd'`).
+   * Player and public screen snapshots then carry no correctness, points or ranks;
+   * the host room still gets them, so a host-attached projector must not render them.
+   */
+  answersHidden: boolean
 }
 
 /** What the host control and projector screens receive. */
 export interface HostSnapshot extends GameSnapshotBase {
-  settings: GameSettings
   /** Answers to the current question. Host room only; null on the public screen. */
   currentAnswers: CurrentAnswer[] | null
 }
@@ -126,6 +132,17 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   lastPoints: number | null
   /** Whether that answer was correct; null for polls, ungraded text, or no answer. */
   lastCorrect: boolean | null
+  /** Every question with this player's answer, once the game is finished; otherwise null. */
+  myResults: PlayerQuestionResult[] | null
+}
+
+/** One question of the player's end-of-game review. */
+export interface PlayerQuestionResult {
+  /** Full question including the correct answer. */
+  question: Question
+  answer: Answer | null
+  correct: boolean | null
+  points: number
 }
 
 // ---- HTTP payloads about a running game ------------------------------------

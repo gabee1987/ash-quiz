@@ -4,6 +4,7 @@ import type {
   GameSnapshotBase,
   HostSnapshot,
   PlayerPublic,
+  PlayerQuestionResult,
   PlayerSnapshot,
   PublicQuestion,
   Question,
@@ -12,6 +13,7 @@ import type {
   TeamPublic,
 } from '@ash-quiz/shared'
 import { normalise } from './normalise.js'
+import { answersHidden } from './engine.js'
 import { denseRank } from './scoring.js'
 import { EngineError, type GameState, type Player } from './types.js'
 
@@ -45,18 +47,19 @@ export function toPublicQuestion(question: Question): PublicQuestion {
 
 /**
  * Snapshot for the host control and the projector. `includeAnswers` adds the live
- * answer list; only the host room gets it, the public screen never does.
+ * answer list; only the host room gets it, the public screen never does. Without it,
+ * results held back until the end are concealed as for players.
  */
 export function toHostSnapshot(state: GameState, now: number, { includeAnswers = false } = {}): HostSnapshot {
+  const base = baseSnapshot(state, now)
   return {
-    ...baseSnapshot(state, now),
-    settings: state.settings,
+    ...(includeAnswers ? base : conceal(state, base)),
     currentAnswers: includeAnswers ? currentAnswers(state) : null,
   }
 }
 
 export function toPlayerSnapshot(state: GameState, playerId: string, now: number): PlayerSnapshot {
-  const base = baseSnapshot(state, now)
+  const base = conceal(state, baseSnapshot(state, now))
   const me = base.players.find((p) => p.id === playerId)
   const player = state.players[playerId]
   if (!me || !player) throw new EngineError('errors.playerNotFound')
@@ -68,7 +71,34 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     myAnswer: record?.answer ?? null,
     lastPoints: base.reveal ? (record?.points ?? 0) : null,
     lastCorrect: base.reveal ? (record?.correct ?? null) : null,
+    myResults: state.phase === 'finished' ? playerResults(state, player) : null,
   }
+}
+
+/**
+ * While results are held back until the end, strips everything that tells who was right:
+ * the reveal (correct answer, distribution), points, scores, ranks and correct counts.
+ * The question itself stays visible during its reveal.
+ */
+function conceal(state: GameState, base: GameSnapshotBase): GameSnapshotBase {
+  if (!base.answersHidden) return base
+  const question = state.quiz.questions[state.questionIndex]
+  return {
+    ...base,
+    question: base.reveal && question ? toPublicQuestion(question) : base.question,
+    reveal: null,
+    players: base.players.map((p) => ({ ...p, score: 0, rank: 1, correctCount: 0, roundPoints: 0 })),
+    teams: base.teams.map((t) => ({ ...t, score: 0, rank: 1 })),
+    questionStats: base.questionStats.map((q) => ({ ...q, correctCount: 0 })),
+  }
+}
+
+/** Questions actually asked (a game ended early stops at the current one). */
+function playerResults(state: GameState, player: Player): PlayerQuestionResult[] {
+  return state.quiz.questions.slice(0, state.questionIndex + 1).map((question) => {
+    const record = player.answers[question.id]
+    return { question, answer: record?.answer ?? null, correct: record?.correct ?? null, points: record?.points ?? 0 }
+  })
 }
 
 /** Distribution bucket of an answer: option id, 'true'/'false', normalised text, or the number. */
@@ -132,6 +162,8 @@ function baseSnapshot(state: GameState, now: number): GameSnapshotBase {
     reveal: revealed ? revealInfo(state, question) : null,
     awaitingGrading: state.awaitingGrading,
     questionStats: questionStats(state, players),
+    settings: state.settings,
+    answersHidden: answersHidden(state),
   }
 }
 

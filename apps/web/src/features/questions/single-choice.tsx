@@ -2,7 +2,7 @@ import { OptionButton } from '../../components/option-button'
 import type { QuestionProps } from './types'
 
 /** Tap to submit. Polls share this layout. */
-export function SingleChoice({ question, mode, disabled, large, onSubmit }: QuestionProps<'single' | 'poll'>) {
+export function SingleChoice({ question, mode, disabled, large, colourful, onSubmit }: QuestionProps<'single' | 'poll'>) {
   return (
     <div className="@container flex flex-1 flex-col">
       <div className="grid flex-1 auto-rows-fr gap-3 @md:grid-cols-2">
@@ -13,6 +13,7 @@ export function SingleChoice({ question, mode, disabled, large, onSubmit }: Ques
           label={option.text}
           imageId={option.imageId}
           large={large ?? false}
+          colourful={colourful ?? large ?? false}
           disabled={mode === 'display' || disabled}
           onClick={() => onSubmit?.({ type: question.type, optionId: option.id })}
         />

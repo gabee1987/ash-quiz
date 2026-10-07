@@ -1,5 +1,5 @@
-import type { GameSettings, Quiz } from '@ash-quiz/shared'
-import { EngineError, createGame, endQuestion, type GameState } from '../game/index.js'
+import { gameSettingsSchema, type GameSettings } from '@ash-quiz/shared'
+import { EngineError, createGame, endQuestion, type GameQuiz, type GameState } from '../game/index.js'
 import { generatePin } from './pin.js'
 
 export interface ManagedGame {
@@ -52,7 +52,7 @@ export class GameManager {
     return () => this.listeners.delete(listener)
   }
 
-  async create(input: { id: string; quiz: Quiz; settings: GameSettings; hostId: string; quizId: string | null }) {
+  async create(input: { id: string; quiz: GameQuiz; settings: GameSettings; hostId: string; quizId: string | null }) {
     const pin = generatePin((candidate) => this.games.has(candidate))
     const state = createGame(input.quiz, input.settings, pin, input.id, this.now())
     const entry: Entry = { game: { state, hostId: input.hostId, quizId: input.quizId }, timer: null, saving: Promise.resolve() }
@@ -92,7 +92,13 @@ export class GameManager {
       const players = Object.fromEntries(
         Object.entries(game.state.players).map(([id, player]) => [id, { ...player, connected: false }]),
       )
-      const entry: Entry = { game: { ...game, state: { ...game.state, players } }, timer: null, saving: Promise.resolve() }
+      // Games saved before a settings field existed get its default.
+      const settings = gameSettingsSchema.parse(game.state.settings)
+      const entry: Entry = {
+        game: { ...game, state: { ...game.state, settings, players } },
+        timer: null,
+        saving: Promise.resolve(),
+      }
       this.games.set(game.state.pin, entry)
       this.schedule(game.state.pin, entry)
     }

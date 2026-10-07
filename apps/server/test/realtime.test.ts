@@ -383,6 +383,58 @@ describeDb('sockets (database)', () => {
     expect(screenSnaps.every((s) => s.currentAnswers === null)).toBe(true)
   })
 
+  it('results at the end: phones and the public screen see no correctness until the game is over', async () => {
+    const res = await built.app.inject({
+      method: 'POST',
+      url: '/api/games',
+      headers: { cookie: hostCookie },
+      payload: { quizId, settings: { revealAnswers: 'atEnd' } },
+    })
+    const pin = res.json().pin
+    const hostSocket = await host(pin)
+    const screen = await connect()
+    await screen.emitWithAck('screen:attach', { pin })
+    const a = await player(pin, 'Anna')
+    const question = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'question')
+    await command(hostSocket, { type: 'start' })
+    const q = (await question).question!
+
+    const playerReveal = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'reveal')
+    const screenReveal = nextSnapshot<HostSnapshot>(screen, 'game:host', (s) => s.phase === 'reveal')
+    const hostReveal = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.phase === 'reveal')
+    await a.socket.emitWithAck('player:answer', { questionId: q.id, answer: { type: 'single', optionId: 'a' } })
+    for (const snap of [await playerReveal, await screenReveal]) {
+      expect(snap.answersHidden).toBe(true)
+      expect(snap.reveal).toBeNull()
+      expect(snap.players[0]!.score).toBe(0)
+    }
+    expect((await playerReveal).lastCorrect).toBeNull()
+    expect((await hostReveal).players[0]!.score).toBeGreaterThan(0)
+    expect(await command(hostSocket, { type: 'scoreboard' })).toEqual({ error: 'errors.invalidTransition' })
+
+    const finished = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'finished')
+    expect(await command(hostSocket, { type: 'end' })).toEqual({ ok: true })
+    const final = await finished
+    expect(final.me.score).toBeGreaterThan(0)
+    expect(final.myResults![0]).toMatchObject({ correct: true, answer: { type: 'single', optionId: 'a' } })
+  })
+
+  it('after a reveal the host can show the scoreboard or go straight to the next question', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    await player(pin, 'Anna')
+    await command(hostSocket, { type: 'start' })
+    await command(hostSocket, { type: 'endQuestion' })
+    const scoreboard = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.phase === 'scoreboard')
+    expect(await command(hostSocket, { type: 'scoreboard' })).toEqual({ ok: true })
+    await scoreboard
+    await command(hostSocket, { type: 'next' })
+    await command(hostSocket, { type: 'endQuestion' })
+    const second = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.phase === 'question' && s.questionIndex === 2)
+    expect(await command(hostSocket, { type: 'next' })).toEqual({ ok: true })
+    await second
+  })
+
   it('screen:attach is public and receives host snapshots', async () => {
     const pin = await newGame()
     const screen = await connect()

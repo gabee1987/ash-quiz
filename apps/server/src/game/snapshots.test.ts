@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { createGame, endGame, endQuestion, gradeText, joinPlayer, next, skipQuestion, startGame, submitAnswer } from './engine.js'
+import {
+  createGame,
+  endGame,
+  endQuestion,
+  gradeText,
+  joinPlayer,
+  next,
+  showScoreboard,
+  skipQuestion,
+  startGame,
+  submitAnswer,
+} from './engine.js'
 import { fixtureQuiz, fixtureSettings } from './fixtures.js'
 import { toHostSnapshot, toPlayerSnapshot, toPublicQuestion } from './snapshots.js'
 import { EngineError, type GameState } from './types.js'
@@ -17,7 +28,7 @@ function lobby(): GameState {
 /** Advances a started game to question `index` without answers. */
 function atQuestion(index: number): GameState {
   let state = startGame(lobby(), T0)
-  for (let i = 0; i < index; i++) state = next(skipQuestion(state), T0)
+  for (let i = 0; i < index; i++) state = next(skipQuestion(state, T0), T0)
   return state
 }
 
@@ -93,7 +104,7 @@ describe('toHostSnapshot', () => {
   })
 
   it('keeps the reveal on the scoreboard and when finished, none when finished from the lobby', () => {
-    const scoreboard = next(endQuestion(atQuestion(0)), T0)
+    const scoreboard = showScoreboard(endQuestion(atQuestion(0)))
     expect(toHostSnapshot(scoreboard, T0).reveal).not.toBeNull()
     expect(toHostSnapshot(endGame(scoreboard, T0), T0).reveal).not.toBeNull()
     expect(toHostSnapshot(endGame(lobby(), T0), T0).reveal).toBeNull()
@@ -177,7 +188,7 @@ describe('review and grading data', () => {
     expect(snap.players.find((p) => p.id === 'p1')).toMatchObject({ correctCount: 1, roundPoints: 950 })
     expect(snap.players.find((p) => p.id === 'p3')).toMatchObject({ correctCount: 0, roundPoints: 0 })
     // On the next question the previous stats stay and round points reset.
-    const nextQ = toHostSnapshot(next(next(state, T0), T0), T0)
+    const nextQ = toHostSnapshot(next(state, T0), T0)
     expect(nextQ.questionStats).toHaveLength(1)
     expect(nextQ.players.every((p) => p.roundPoints === 0)).toBe(true)
   })
@@ -195,5 +206,65 @@ describe('review and grading data', () => {
     const graded = toHostSnapshot(gradeText(state, ['p1']), T0)
     expect(graded.awaitingGrading).toBe(false)
     expect(graded.reveal!.correctKeys).toEqual(['gyor'])
+  })
+})
+
+describe('results held back until the end', () => {
+  function revealedHidden(): GameState {
+    let state = createGame(fixtureQuiz(), fixtureSettings({ revealAnswers: 'atEnd' }), '123456', 'g', T0)
+    state = joinPlayer(joinPlayer(state, { id: 'p1', name: 'Anna', token: 't1' }), { id: 'p2', name: 'Bela', token: 't2' })
+    state = startGame(state, T0)
+    state = submitAnswer(state, { playerId: 'p1', questionId: 'q-single', answer: { type: 'single', optionId: 'a' } }, T0)
+    state = submitAnswer(state, { playerId: 'p2', questionId: 'q-single', answer: { type: 'single', optionId: 'b' } }, T0)
+    return endQuestion(state)
+  }
+
+  it('players and the public screen get no correct answer, points, scores or ranks', () => {
+    const state = revealedHidden()
+    const player = toPlayerSnapshot(state, 'p1', T0)
+    const screen = toHostSnapshot(state, T0)
+    for (const snap of [player, screen]) {
+      expect(snap.answersHidden).toBe(true)
+      expect(snap.reveal).toBeNull()
+      expect(snap.question).toMatchObject({ id: 'q-single', text: 'Capital of Hungary?' })
+      expect(snap.question).not.toHaveProperty('correctOptionId')
+      expect(snap.players.every((p) => p.score === 0 && p.rank === 1 && p.correctCount === 0 && p.roundPoints === 0)).toBe(true)
+      expect(snap.questionStats.every((q) => q.correctCount === 0)).toBe(true)
+      expect(JSON.stringify(snap)).not.toContain('correctOptionId')
+    }
+    expect(player.me.score).toBe(0)
+    expect(player.lastPoints).toBeNull()
+    expect(player.lastCorrect).toBeNull()
+    expect(player.myAnswer).toEqual({ type: 'single', optionId: 'a' })
+  })
+
+  it('the host room still gets everything', () => {
+    const host = toHostSnapshot(revealedHidden(), T0, { includeAnswers: true })
+    expect(host.answersHidden).toBe(true)
+    expect(host.reveal?.correctKeys).toEqual(['a'])
+    expect(host.players.find((p) => p.id === 'p1')?.score).toBe(1000)
+  })
+
+  it('reveals everything once finished, with each player answer next to its question', () => {
+    const finished = endGame(revealedHidden(), T0)
+    const player = toPlayerSnapshot(finished, 'p2', T0)
+    expect(player.answersHidden).toBe(false)
+    expect(player.players.find((p) => p.id === 'p1')?.score).toBe(1000)
+    // Ended during question 1: only that question is listed.
+    expect(player.myResults).toHaveLength(1)
+    expect(player.myResults![0]).toMatchObject({
+      question: { id: 'q-single', correctOptionId: 'a' },
+      answer: { type: 'single', optionId: 'b' },
+      correct: false,
+      points: 0,
+    })
+    expect(toPlayerSnapshot(finished, 'p1', T0).myResults![0]).toMatchObject({ correct: true, points: 1000 })
+    expect(toPlayerSnapshot(revealedHidden(), 'p2', T0).myResults).toBeNull()
+  })
+
+  it('without the setting nothing is concealed', () => {
+    const snap = toPlayerSnapshot(endQuestion(atQuestion(0)), 'p1', T0)
+    expect(snap.answersHidden).toBe(false)
+    expect(snap.reveal).not.toBeNull()
   })
 })

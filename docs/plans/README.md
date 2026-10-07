@@ -10,6 +10,7 @@ One file per phase. Each phase is one `feature/*` branch off `develop`, implemen
 | 4 | [Realtime play: sockets, player screens, minimal host control](phase-4-realtime-play.md) | `feature/realtime-play` | done |
 | 5 | [Host control, projector screen, team mode, grading](phase-5-host-and-screen.md) | `feature/host-and-screen` | done |
 | 6 | [Quiz editor, images, user management](phase-6-editor.md) | `feature/editor` | done |
+| 6b | [Host flow options, sidebar, plain answer buttons](phase-6b-host-flow.md) | `feature/host-flow` | done |
 | 7 | [Results, history, export, retention](phase-7-results.md) | `feature/results` | todo |
 | 8 | [Hardening: load test, end-to-end, release](phase-8-hardening.md) | `feature/hardening` | todo |
 

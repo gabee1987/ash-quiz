@@ -41,6 +41,8 @@ export const quizzes = pgTable('quizzes', {
   title: text('title').notNull(),
   description: text('description').notNull().default(''),
   questions: jsonb('questions').$type<Question[]>().notNull(),
+  /** Default game settings. Stored as sent; read through `gameSettingsSchema` so new fields get defaults. */
+  settings: jsonb('settings').$type<Partial<GameSettings>>().notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

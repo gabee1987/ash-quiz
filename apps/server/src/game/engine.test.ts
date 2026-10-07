@@ -1,6 +1,7 @@
-import type { Answer, GameSettings, Question, Quiz } from '@ash-quiz/shared'
+import type { Answer, GameSettings, Question } from '@ash-quiz/shared'
 import { describe, expect, it } from 'vitest'
 import {
+  answersHidden,
   createGame,
   disconnectPlayer,
   endGame,
@@ -11,16 +12,17 @@ import {
   kickPlayer,
   next,
   reconnectPlayer,
+  showScoreboard,
   skipQuestion,
   startGame,
   submitAnswer,
 } from './engine.js'
 import { fixtureQuiz, fixtureSettings } from './fixtures.js'
-import { EngineError, type GameState } from './types.js'
+import { EngineError, type GameQuiz, type GameState } from './types.js'
 
 const T0 = 1_000_000
 
-function newGame(settings: Partial<GameSettings> = {}, quiz: Quiz = fixtureQuiz()): GameState {
+function newGame(settings: Partial<GameSettings> = {}, quiz: GameQuiz = fixtureQuiz()): GameState {
   return createGame(quiz, fixtureSettings(settings), '123456', 'game-1', T0)
 }
 
@@ -28,7 +30,7 @@ function join(state: GameState, n: number, teamId?: string): GameState {
   return joinPlayer(state, { id: `p${n}`, name: `Player ${n}`, teamId, token: `tok-${n}` })
 }
 
-function withPlayers(count: number, settings: Partial<GameSettings> = {}, quiz?: Quiz): GameState {
+function withPlayers(count: number, settings: Partial<GameSettings> = {}, quiz?: GameQuiz): GameState {
   let state = newGame(settings, quiz)
   for (let i = 1; i <= count; i++) state = join(state, i)
   return state
@@ -54,7 +56,7 @@ function expectSerialisable(state: GameState) {
   expect(JSON.parse(JSON.stringify(state))).toEqual(state)
 }
 
-function quizOf(...questions: Question[]): Quiz {
+function quizOf(...questions: Question[]): GameQuiz {
   return { id: 'quiz-x', title: 'Custom', description: '', questions }
 }
 
@@ -202,7 +204,7 @@ describe('question flow', () => {
       state = endQuestion(state)
       expectSerialisable(state)
       expect(state.phase).toBe('reveal')
-      state = next(state, now)
+      state = showScoreboard(state)
       expect(state.phase).toBe('scoreboard')
       expectSerialisable(state)
       now += 30_000
@@ -281,14 +283,54 @@ describe('question flow', () => {
   it('skipQuestion awards nothing and lands on the scoreboard', () => {
     let state = startGame(withPlayers(1), T0)
     state = answer(state, 'p1', correctAnswers[0]!, T0)
-    state = skipQuestion(state)
+    state = skipQuestion(state, T0)
     expect(state.phase).toBe('scoreboard')
     expect(state.players.p1!.score).toBe(0)
     expect(state.players.p1!.answers).toEqual({})
-    expectCode(() => skipQuestion(state), 'errors.invalidTransition')
+    expectCode(() => skipQuestion(state, T0), 'errors.invalidTransition')
     state = next(state, T0 + 1)
     expect(state.phase).toBe('question')
     expect(state.questionIndex).toBe(1)
+  })
+
+  it('next from the reveal skips the scoreboard and finishes after the last question', () => {
+    let state = endQuestion(answer(startGame(withPlayers(1), T0), 'p1', correctAnswers[0]!, T0))
+    state = next(state, T0 + 1)
+    expect(state.phase).toBe('question')
+    expect(state.questionIndex).toBe(1)
+    expect(state.players.p1!.score).toBe(1000)
+
+    const last = { ...endQuestion(state), questionIndex: state.quiz.questions.length - 1 }
+    const finished = next(last, T0 + 2)
+    expect(finished.phase).toBe('finished')
+    expect(finished.finishedAt).toBe(T0 + 2)
+  })
+
+  it('showScoreboard is only valid from the reveal', () => {
+    expectCode(() => showScoreboard(startGame(withPlayers(1), T0)), 'errors.invalidTransition')
+    const scoreboard = showScoreboard(endQuestion(startGame(withPlayers(1), T0)))
+    expectCode(() => showScoreboard(scoreboard), 'errors.invalidTransition')
+  })
+
+  it('skipQuestion moves straight on when the scoreboard is on demand', () => {
+    let state = startGame(withPlayers(1, { scoreboard: 'onDemand' }), T0)
+    state = skipQuestion(answer(state, 'p1', correctAnswers[0]!, T0), T0 + 5)
+    expect(state.phase).toBe('question')
+    expect(state.questionIndex).toBe(1)
+    expect(state.questionStartedAt).toBe(T0 + 5)
+    expect(state.players.p1!.answers).toEqual({})
+  })
+
+  it('with results at the end there is no scoreboard before the finish', () => {
+    let state = startGame(withPlayers(1, { revealAnswers: 'atEnd' }), T0)
+    expect(answersHidden(state)).toBe(true)
+    const reveal = endQuestion(answer(state, 'p1', correctAnswers[0]!, T0))
+    expectCode(() => showScoreboard(reveal), 'errors.invalidTransition')
+    state = skipQuestion(next(reveal, T0 + 1), T0 + 2)
+    expect(state.phase).toBe('question')
+    expect(state.questionIndex).toBe(2)
+    const finished = endGame(state, T0 + 3)
+    expect(answersHidden(finished)).toBe(false)
   })
 
   it('extendTime moves questionEndsAt and keeps the phase', () => {
@@ -303,7 +345,7 @@ describe('question flow', () => {
     const lobby = withPlayers(1)
     const question = startGame(lobby, T0)
     const reveal = endQuestion(question)
-    const scoreboard = next(reveal, T0)
+    const scoreboard = showScoreboard(reveal)
     for (const state of [lobby, question, reveal, scoreboard]) {
       const ended = endGame(state, T0 + 5)
       expect(ended.phase).toBe('finished')
@@ -326,12 +368,13 @@ describe('host grading', () => {
     expect(state.awaitingGrading).toBe(true)
     expect(state.players.p1!.answers['q-text']).toMatchObject({ correct: null, points: 0 })
     expectCode(() => next(state, T0), 'errors.invalidTransition')
+    expectCode(() => showScoreboard(state), 'errors.invalidTransition')
 
     state = gradeText(state, ['p1'])
     expect(state.awaitingGrading).toBe(false)
     expect(state.players.p1!.answers['q-text']).toMatchObject({ correct: true, points: 750 })
     expect(state.players.p2!.answers['q-text']).toMatchObject({ correct: false, points: 0 })
-    expect(next(state, T0).phase).toBe('scoreboard')
+    expect(showScoreboard(state).phase).toBe('scoreboard')
     expectSerialisable(state)
   })
 
@@ -377,7 +420,7 @@ describe('teams', () => {
     state = answer(state, 'p1', { type: 'single', optionId: 'a' }, T0)
     state = answer(state, 'p2', { type: 'single', optionId: 'a' }, T0)
     state = answer(state, 'p3', { type: 'single', optionId: 'a' }, T0)
-    state = next(endQuestion(state), T0)
+    state = showScoreboard(endQuestion(state))
     expect(state.teams['team-1']!.score).toBe(1000)
 
     state = kickPlayer(state, 'p3')

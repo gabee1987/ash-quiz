@@ -9,5 +9,7 @@ export interface QuestionProps<Q extends PublicQuestion['type']> {
   disabled?: boolean
   /** Projector size (display mode on the screen). */
   large?: boolean
+  /** Coloured option buttons with shapes; the projector (`large`) always has them. */
+  colourful?: boolean
   onSubmit?: (answer: Answer) => void
 }

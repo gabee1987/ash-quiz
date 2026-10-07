@@ -121,7 +121,25 @@
       "speedBonus": "Gyorsasági bónusz",
       "speedBonusHelp": "A gyorsabb helyes válasz több pontot ér.",
       "shuffle": "Válaszlehetőségek keverése",
-      "submit": "Játék létrehozása"
+      "submit": "Játék létrehozása",
+      "changeForGame": "Beállítások módosítása erre a játékra",
+      "revealAnswers": "Helyes válaszok",
+      "revealAnswersOptions": {
+        "afterQuestion": "Minden kérdés után",
+        "atEnd": "Csak a játék végén"
+      },
+      "scoreboard": "Eredménytábla",
+      "scoreboardOptions": {
+        "afterQuestion": "Minden kérdés után",
+        "onDemand": "Amikor megmutatom"
+      },
+      "scoreboardAtEnd": "A pontszámok elárulnák a válaszokat, ezért az eredménytábla a játék végén jelenik meg.",
+      "answerStyle": "Válaszgombok a telefonokon",
+      "answerStyleOptions": {
+        "plain": "Egyszerű",
+        "colourful": "Színes"
+      },
+      "answerStyleHelp": "A kivetítőn mindig színesek."
     },
     "newQuiz": "Új kvíz",
     "edit": "Szerkesztés",
@@ -167,7 +185,12 @@
     "podium": "Dobogó",
     "backToJoin": "Csatlakozás játékhoz",
     "teamRank": "{{team}} csapat: {{rank}}. hely",
-    "teamLeaderboard": "Csapatok"
+    "teamLeaderboard": "Csapatok",
+    "answerKept": "Válasz rögzítve",
+    "resultsAtEnd": "A helyes válaszok a játék végén derülnek ki.",
+    "backToHome": "Vissza a kezdőlapra",
+    "yourAnswers": "Válaszaid",
+    "yourAnswer": "A te válaszod"
   },
   "screen": {
     "joinAt": "Csatlakozás itt",
@@ -195,6 +218,8 @@
     "title": "Kvíz címe",
     "description": "Leírás (nem kötelező)",
     "untitledQuiz": "Új kvíz",
+    "gameSettings": "Játékbeállítások",
+    "gameSettingsHelp": "A kvíz minden játéka ezekkel a beállításokkal indul. Indításkor még módosíthatók.",
     "untitledQuestion": "Cím nélküli kérdés",
     "questionCount_one": "{{count}} kérdés",
     "questionCount_other": "{{count}} kérdés",
@@ -297,5 +322,10 @@
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "wrongCurrentPassword": "A jelenlegi jelszó hibás.",
     "samePassword": "Az új jelszónak különböznie kell a jelenlegitől."
+  },
+  "nav": {
+    "label": "Szervezői menü",
+    "quizzes": "Kvízek",
+    "signedInAs": "Bejelentkezve mint"
   }
 }

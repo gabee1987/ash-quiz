@@ -47,7 +47,13 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
           {t(error)}
         </p>
       )}
-      <QuestionInput question={question} mode="answer" disabled={pending || closed} onSubmit={(a) => void submit(a)} />
+      <QuestionInput
+        question={question}
+        mode="answer"
+        disabled={pending || closed}
+        colourful={snapshot.settings.answerStyle === 'colourful'}
+        onSubmit={(a) => void submit(a)}
+      />
     </div>
   )
 }

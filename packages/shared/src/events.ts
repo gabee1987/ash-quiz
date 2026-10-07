@@ -24,7 +24,10 @@ export type PlayerAnswer = z.infer<typeof playerAnswerSchema>
 
 export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('start') }),
+  /** Next question, or finish after the last one. */
   z.object({ type: z.literal('next') }),
+  /** From the reveal to the scoreboard. */
+  z.object({ type: z.literal('scoreboard') }),
   z.object({ type: z.literal('skip') }),
   z.object({ type: z.literal('extendTime'), seconds: z.number().int().min(1).max(120) }),
   z.object({ type: z.literal('endQuestion') }),

@@ -1,7 +1,8 @@
-import type { GameSettings, Quiz } from '@ash-quiz/shared'
+import type { GameSettings } from '@ash-quiz/shared'
+import type { GameQuiz } from './types.js'
 
 /** One question of each type with deterministic ids, 20 s and 1000 points each. */
-export function fixtureQuiz(): Quiz {
+export function fixtureQuiz(): GameQuiz {
   const base = { timeLimitSec: 20, points: 1000 }
   return {
     id: 'quiz-1',
@@ -50,5 +51,14 @@ export function fixtureQuiz(): Quiz {
 }
 
 export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSettings {
-  return { mode: 'classic', speedBonus: true, shuffleOptions: false, teamNames: [], ...overrides }
+  return {
+    mode: 'classic',
+    speedBonus: true,
+    shuffleOptions: false,
+    teamNames: [],
+    revealAnswers: 'afterQuestion',
+    scoreboard: 'afterQuestion',
+    answerStyle: 'plain',
+    ...overrides,
+  }
 }

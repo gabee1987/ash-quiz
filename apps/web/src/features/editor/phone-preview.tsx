@@ -3,7 +3,18 @@ import { useTranslation } from 'react-i18next'
 import { QuestionInput } from '../questions/question-input'
 
 /** The selected question as a player sees it, inside a 375 px phone frame. */
-export function PhonePreview({ question, index, count }: { question: Question | null; index: number; count: number }) {
+export function PhonePreview({
+  question,
+  index,
+  count,
+  colourful,
+}: {
+  question: Question | null
+  index: number
+  count: number
+  /** The quiz's answer button style. */
+  colourful: boolean
+}) {
   const { t } = useTranslation()
   return (
     <div className="mx-auto w-[375px] max-w-full rounded-[2rem] border-8 border-black bg-brand-dark p-4 shadow-2xl">
@@ -16,7 +27,7 @@ export function PhonePreview({ question, index, count }: { question: Question | 
           {question.imageId && (
             <img src={`/api/images/${question.imageId}`} alt="" className="max-h-48 self-center rounded-lg object-contain" />
           )}
-          <QuestionInput question={question} mode="answer" />
+          <QuestionInput question={question} mode="answer" colourful={colourful} />
         </div>
       ) : (
         <p className="flex min-h-[600px] items-center justify-center text-center text-white/60">{t('editor.previewEmpty')}</p>

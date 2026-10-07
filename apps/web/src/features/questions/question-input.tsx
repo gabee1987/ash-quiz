@@ -13,6 +13,7 @@ export function QuestionInput(props: {
   mode: QuestionMode
   disabled?: boolean
   large?: boolean
+  colourful?: boolean
   onSubmit?: (answer: Answer) => void
 }) {
   const { question, ...rest } = props

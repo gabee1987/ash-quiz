@@ -88,30 +88,50 @@ function checkQuestions(questions: Question[], ctx: z.RefinementCtx) {
   if (new Set(questionIds).size !== questionIds.length) issue([], 'editor.errors.duplicateQuestions')
 }
 
+// ---- Game settings --------------------------------------------------------
+
+export const gameModes = ['classic', 'team'] as const
+export type GameMode = (typeof gameModes)[number]
+
+export const gameSettingsSchema = z
+  .object({
+    mode: z.enum(gameModes).default('classic'),
+    /** Faster correct answers earn more points (Kahoot style). */
+    speedBonus: z.boolean().default(true),
+    /** Shuffle answer options per game. */
+    shuffleOptions: z.boolean().default(false),
+    /** Team names prepared by the host (team mode only). Players pick one when joining. */
+    teamNames: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
+    /** When correct answers, right/wrong and scores reach players and the projector: after each question or only at the end. */
+    revealAnswers: z.enum(['afterQuestion', 'atEnd']).default('afterQuestion'),
+    /** Scoreboard after every question, or only when the host asks for it (and at the end). */
+    scoreboard: z.enum(['afterQuestion', 'onDemand']).default('afterQuestion'),
+    /** Answer buttons on phones: neutral with letters, or coloured like the projector. */
+    answerStyle: z.enum(['plain', 'colourful']).default('plain'),
+  })
+  .superRefine(checkTeams)
+export type GameSettings = z.infer<typeof gameSettingsSchema>
+
+/** Team mode needs at least two distinct team names. Messages are i18n keys. */
+function checkTeams(settings: { mode: GameMode; teamNames: string[] }, ctx: z.RefinementCtx) {
+  if (settings.mode !== 'team') return
+  const names = settings.teamNames.map((n) => n.toLowerCase())
+  if (names.length < 2) ctx.addIssue({ code: 'custom', path: ['teamNames'], message: 'host.create.needTwoTeams' })
+  else if (new Set(names).size !== names.length) {
+    ctx.addIssue({ code: 'custom', path: ['teamNames'], message: 'host.create.duplicateTeams' })
+  }
+}
+
 export const quizSchema = z.object({
   id: z.string().min(1),
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500).default(''),
   questions: z.array(questionSchema).max(100).superRefine(checkQuestions),
+  /** Default settings for games of this quiz; the host can change them when starting a game. */
+  settings: gameSettingsSchema.prefault({}),
 })
 export type Quiz = z.infer<typeof quizSchema>
 
 /** Payload accepted by the editor when creating or updating a quiz (id assigned server-side). */
 export const quizInputSchema = quizSchema.omit({ id: true })
 export type QuizInput = z.infer<typeof quizInputSchema>
-
-// ---- Game settings --------------------------------------------------------
-
-export const gameModes = ['classic', 'team'] as const
-export type GameMode = (typeof gameModes)[number]
-
-export const gameSettingsSchema = z.object({
-  mode: z.enum(gameModes).default('classic'),
-  /** Faster correct answers earn more points (Kahoot style). */
-  speedBonus: z.boolean().default(true),
-  /** Shuffle answer options per game. */
-  shuffleOptions: z.boolean().default(false),
-  /** Team names prepared by the host (team mode only). Players pick one when joining. */
-  teamNames: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
-})
-export type GameSettings = z.infer<typeof gameSettingsSchema>
