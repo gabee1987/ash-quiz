@@ -13,6 +13,24 @@
     "submit": "Csatlakozom",
     "hostLogin": "Játékvezető belépés"
   },
+  "common": {
+    "loading": "Betöltés…"
+  },
+  "auth": {
+    "title": "Játékvezetői belépés",
+    "username": "Felhasználónév",
+    "password": "Jelszó",
+    "submit": "Belépés",
+    "logout": "Kilépés",
+    "required": "Kötelező mező."
+  },
+  "host": {
+    "title": "Kvízek",
+    "empty": "Még nincs kvíz.",
+    "questionCount_one": "{{count}} kérdés",
+    "questionCount_other": "{{count}} kérdés",
+    "updated": "módosítva: {{date}}"
+  },
   "errors": {
     "gameNotFound": "Nincs ilyen játék. Ellenőrizd a PIN-t.",
     "gameFull": "A játék megtelt.",
@@ -26,6 +44,11 @@
     "invalidAnswer": "Érvénytelen válasz.",
     "unknownTeam": "Válassz csapatot.",
     "invalidTransition": "Ez most nem lehetséges.",
-    "playerNotFound": "A játékos nem található. Csatlakozz újra."
+    "playerNotFound": "A játékos nem található. Csatlakozz újra.",
+    "invalidCredentials": "Hibás felhasználónév vagy jelszó.",
+    "unauthorized": "Kérjük, jelentkezzen be.",
+    "forbidden": "Ehhez nincs jogosultsága.",
+    "rateLimited": "Túl sok próbálkozás. Várjon egy percet, majd próbálja újra.",
+    "internal": "Hiba történt. Kérjük, próbálja újra."
   }
 }

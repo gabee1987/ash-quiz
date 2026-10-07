@@ -172,6 +172,7 @@ ASH Quiz: a browser-based, mobile-first live quiz (Kahoot-like) for company even
 - Test (single file): `pnpm --filter @ash-quiz/server exec vitest run test/app.test.ts`
 - Lint: not configured yet
 - Typecheck: `pnpm typecheck`
+- Migrate and seed: `pnpm --filter @ash-quiz/server db:migrate`, then `SEED_ADMIN_USERNAME=admin SEED_ADMIN_PASSWORD=<10+ chars> pnpm --filter @ash-quiz/server seed`
 - Run locally: `pnpm db:up` (Postgres in Docker), copy `.env.example` to `.env`, then `pnpm dev` (server on :3000, Vite on :5173 proxying `/api` and `/socket.io`)
 
 Prefer single-file or single-test runs during iteration. Full suites are for the final verification pass.
@@ -205,7 +206,7 @@ Prefer single-file or single-test runs during iteration. Full suites are for the
 
 When the user corrects your approach, append a one-line rule here before ending the session. Write it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line already covers the correction, tighten it instead of adding a new one. Remove lines when the underlying issue goes away (model upgrades, refactors, process changes).
 
-- (empty)
+- The user runs PowerShell on Windows: write commands in delivery reports and manual tests as `$env:VAR="value"; command`, never `VAR=value command`.
 
 ---
 

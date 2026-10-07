@@ -9,5 +9,29 @@ services:
       - "5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ashquiz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Full app on http://localhost:3000 (or http://<laptop-ip>:3000 on the venue LAN).
+  # SESSION_SECRET and APP_ORIGIN come from .env next to this file.
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://ashquiz:ashquiz@db:5432/ashquiz
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      RESULTS_RETENTION_DAYS: ${RESULTS_RETENTION_DAYS:-90}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
 volumes:
   dbdata:

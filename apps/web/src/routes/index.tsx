@@ -44,7 +44,7 @@ function JoinPage() {
           {t('join.submit')}
         </button>
       </form>
-      <Link to="/" className="text-center text-sm text-white/60 underline">
+      <Link to="/login" className="text-center text-sm text-white/60 underline">
         {t('join.hostLogin')}
       </Link>
     </div>

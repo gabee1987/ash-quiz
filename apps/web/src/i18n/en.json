@@ -13,6 +13,24 @@
     "submit": "Join",
     "hostLogin": "Host login"
   },
+  "common": {
+    "loading": "Loading…"
+  },
+  "auth": {
+    "title": "Host login",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Log in",
+    "logout": "Log out",
+    "required": "Required."
+  },
+  "host": {
+    "title": "Quizzes",
+    "empty": "No quizzes yet.",
+    "questionCount_one": "{{count}} question",
+    "questionCount_other": "{{count}} questions",
+    "updated": "updated {{date}}"
+  },
   "errors": {
     "gameNotFound": "No such game. Check the PIN.",
     "gameFull": "The game is full.",
@@ -26,6 +44,11 @@
     "invalidAnswer": "Invalid answer.",
     "unknownTeam": "Choose a team.",
     "invalidTransition": "That is not possible right now.",
-    "playerNotFound": "Player not found. Join again."
+    "playerNotFound": "Player not found. Join again.",
+    "invalidCredentials": "Wrong username or password.",
+    "unauthorized": "Please log in.",
+    "forbidden": "You do not have access to this.",
+    "rateLimited": "Too many attempts. Wait a minute and try again.",
+    "internal": "Something went wrong. Try again."
   }
 }

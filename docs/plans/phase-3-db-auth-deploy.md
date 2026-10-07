@@ -81,3 +81,14 @@ pnpm verify && TEST_DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashqu
 6. Open the same URL on a phone on the same wifi using the laptop IP and port 5173. Expect the login page laid out for a phone, no horizontal scroll.
 7. Log out. Expect redirect to `/login` and `/host` is protected again.
 8. `docker compose up --build`, repeat steps 2 to 4 on port 3000.
+
+## Deviations
+
+- Test isolation uses a throwaway database per test file instead of a schema: drizzle-kit migrations reference tables as `"public"."users"`, so `search_path` cannot redirect them. `TEST_DATABASE_URL` must therefore be a role allowed to `CREATE DATABASE` (true for the docker-compose and CI Postgres).
+- `db:migrate` runs `src/scripts/migrate.ts` (the same `runMigrations` used at production start-up, reads `.env`) instead of `drizzle-kit migrate`.
+- The seed script is also bundled as `apps/server/dist/seed.js` so it runs inside the Docker image without `tsx`.
+- Session cookies are `Secure` when `APP_ORIGIN` is `https://`, not when `NODE_ENV=production`; otherwise login fails on a laptop serving `http://<ip>:3000`.
+- Empty environment variables are treated as unset for the optional seed variables (Docker Compose and dashboards pass empty strings).
+- New error codes with hu/en translations: `errors.unauthorized`, `errors.forbidden`, `errors.invalidCredentials`, `errors.rateLimited`, `errors.internal`. A global error handler maps framework errors (malformed JSON, oversized body) to `errors.invalidInput` and unexpected errors to `errors.internal`.
+- Response shapes: `{ user }`, `{ quizzes }`, `{ quiz }`; `201` on create, `204` on delete and logout.
+- Added `apps/web/src/components/button.tsx`, `text-field.tsx`, `apps/web/src/lib/auth.ts` (me query) and the `i18n.test.ts` key-set test the `i18n` skill describes.
