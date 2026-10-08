@@ -13,6 +13,10 @@ const hues: Record<GameTheme, { hue: number; accent: number; chroma: number }> =
   berry: { hue: 345, accent: 285, chroma: 1 },
   forest: { hue: 135, accent: 75, chroma: 1 },
   graphite: { hue: 255, accent: 60, chroma: 0.3 },
+  navy: { hue: 262, accent: 225, chroma: 0.55 },
+  petrol: { hue: 215, accent: 185, chroma: 0.5 },
+  stone: { hue: 65, accent: 40, chroma: 0.28 },
+  bordeaux: { hue: 12, accent: 350, chroma: 0.5 },
 }
 
 /** Primary, accent and surface colours of a theme, for a small preview. */

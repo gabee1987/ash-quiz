@@ -8,7 +8,7 @@ const solid =
   'shadow-[0_4px_0_0_var(--edge)] enabled:hover:-translate-y-0.5 enabled:hover:shadow-[0_6px_0_0_var(--edge)] enabled:active:translate-y-1 enabled:active:shadow-none [a&]:hover:-translate-y-0.5 [a&]:hover:shadow-[0_6px_0_0_var(--edge)] [a&]:active:translate-y-1 [a&]:active:shadow-none'
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap transition-[transform,box-shadow,background-color,color,filter] duration-150 ease-out outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap transition-[transform,box-shadow,background-color,color,filter] duration-150 ease-out outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:scale-115 hover:[&_svg]:-rotate-6",
   {
     variants: {
       variant: {

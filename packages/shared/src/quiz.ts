@@ -93,12 +93,31 @@ function checkQuestions(questions: Question[], ctx: z.RefinementCtx) {
 export const gameModes = ['classic', 'team'] as const
 export type GameMode = (typeof gameModes)[number]
 
-/** Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice. */
-export const gameThemes = ['classic', 'arcade', 'sunset', 'mint', 'ocean', 'berry', 'forest', 'graphite'] as const
+/**
+ * Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice.
+ * The first seven are playful, the last five (graphite onwards) are subdued for formal company events.
+ */
+export const gameThemes = [
+  'classic',
+  'arcade',
+  'sunset',
+  'mint',
+  'ocean',
+  'berry',
+  'forest',
+  'graphite',
+  'navy',
+  'petrol',
+  'stone',
+  'bordeaux',
+] as const
 export type GameTheme = (typeof gameThemes)[number]
 
-/** Six fixed answer colours (one per option index), independent of the theme so answers stand out from the background. */
-export const answerPalettes = ['vivid', 'candy', 'neon', 'earth'] as const
+/**
+ * Six fixed answer colours (one per option index), independent of the theme so answers stand out from the background.
+ * Muted and corporate are the low-saturation sets for formal events.
+ */
+export const answerPalettes = ['vivid', 'candy', 'neon', 'earth', 'muted', 'corporate'] as const
 export type AnswerPalette = (typeof answerPalettes)[number]
 
 /** What marks each answer option besides its colour. */

@@ -30,21 +30,23 @@ export function ChoiceCards<T extends string>({
 }) {
   const id = useId()
   return (
-    <fieldset className="flex flex-col gap-2" disabled={disabled}>
+    // Two columns when the fieldset itself is wide enough (a container query), so the cards also fit narrow panels.
+    <fieldset className="@container flex flex-col gap-2" disabled={disabled}>
       <legend className="mb-2 font-bold">{legend}</legend>
       <RadioGroup
         value={value}
         onValueChange={(next) => onChange(next as T)}
         disabled={disabled}
-        className={cn('gap-2', columns === 2 && 'sm:grid-cols-2')}
+        className={cn('gap-2', columns === 2 && '@md:grid-cols-2')}
       >
         {choices.map((choice) => (
           <label
             key={choice.value}
             htmlFor={`${id}-${choice.value}`}
+            data-squish
             className={cn(
-              'flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 bg-card px-3 py-2 transition-colors',
-              'hover:border-ring/60 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-secondary',
+              'group/choice flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 bg-card px-3 py-2 transition-[border-color,background-color,transform,box-shadow] duration-200',
+              'hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-soft has-data-[state=checked]:border-primary has-data-[state=checked]:bg-secondary',
               disabled && 'cursor-not-allowed opacity-60',
             )}
           >
@@ -53,7 +55,11 @@ export function ChoiceCards<T extends string>({
               <span className="block font-semibold">{choice.label}</span>
               {choice.description && <span className="block text-sm text-muted-foreground">{choice.description}</span>}
             </span>
-            {choice.adornment}
+            {choice.adornment && (
+              <span className="transition-transform duration-300 group-hover/choice:scale-110 group-hover/choice:-rotate-3">
+                {choice.adornment}
+              </span>
+            )}
           </label>
         ))}
       </RadioGroup>

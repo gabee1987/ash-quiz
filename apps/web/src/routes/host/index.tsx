@@ -1,10 +1,22 @@
 import type { GameSettings, Quiz } from '@ash-quiz/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CopyIcon, EllipsisVerticalIcon, PencilIcon, PlayIcon, PlusIcon, SparklesIcon, Trash2Icon } from 'lucide-react'
+import {
+  ArrowUpDownIcon,
+  CopyIcon,
+  EllipsisVerticalIcon,
+  PencilIcon,
+  PlayIcon,
+  PlusIcon,
+  SearchIcon,
+  SparklesIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import { FormAlert } from '@/components/form-alert'
+import { SelectField } from '@/components/select-field'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
+import { stagger } from '@/lib/motion'
 import { themeSwatches } from '@/lib/themes'
 import { toastError } from '@/lib/toast'
 import { ConfirmDialog } from '../../components/dialog'
@@ -44,6 +57,8 @@ function HostHome() {
   const quizzes = useQuery(quizzesQueryOptions)
   const [creating, setCreating] = useState<QuizSummary | null>(null)
   const [deleting, setDeleting] = useState<QuizSummary | null>(null)
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState<'updated' | 'title'>('updated')
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['quizzes'] })
 
   const play = useMutation({
@@ -64,13 +79,17 @@ function HostHome() {
     },
     onError: toastError,
   })
+  // The copy opens in the editor: duplicating is how a quiz becomes the start of a new one.
   const duplicate = useMutation({
     mutationFn: (quiz: QuizSummary) =>
-      apiFetch(`/api/quizzes/${quiz.id}/duplicate`, {
+      apiFetch<{ quiz: Quiz }>(`/api/quizzes/${quiz.id}/duplicate`, {
         method: 'POST',
         body: JSON.stringify({ title: t('host.copyTitle', { title: quiz.title }).slice(0, 120) }),
       }),
-    onSuccess: refresh,
+    onSuccess: ({ quiz }) => {
+      refresh()
+      void navigate({ to: '/host/quizzes/$quizId', params: { quizId: quiz.id } })
+    },
     onError: toastError,
   })
   const remove = useMutation({
@@ -83,6 +102,14 @@ function HostHome() {
   })
 
   const dateFormat = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })
+  const query = search.trim().toLocaleLowerCase(i18n.language)
+  const shown = useMemo(() => {
+    const matching = (quizzes.data ?? []).filter((q) => q.title.toLocaleLowerCase(i18n.language).includes(query))
+    // The API lists the most recently edited first.
+    return sort === 'title'
+      ? [...matching].sort((a, b) => a.title.localeCompare(b.title, i18n.language, { sensitivity: 'base' }))
+      : matching
+  }, [quizzes.data, query, sort, i18n.language])
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
@@ -108,9 +135,44 @@ function HostHome() {
         </div>
       )}
 
+      {(quizzes.data?.length ?? 0) > 1 && (
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-0 flex-1 basis-60">
+            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label={t('host.search')}
+              placeholder={t('host.search')}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <ArrowUpDownIcon className="size-4 text-muted-foreground" aria-hidden="true" />
+            <SelectField
+              label={t('host.sort')}
+              hideLabel
+              value={sort}
+              options={[
+                { value: 'updated', label: t('host.sortOptions.updated') },
+                { value: 'title', label: t('host.sortOptions.title') },
+              ]}
+              onChange={setSort}
+              className="min-w-48"
+            />
+          </div>
+        </div>
+      )}
+      {query && shown.length === 0 && <p className="text-muted-foreground">{t('host.noMatches', { query: search.trim() })}</p>}
+
       <ul className="grid gap-3 sm:grid-cols-2">
-        {quizzes.data?.map((quiz) => (
-          <li key={quiz.id} className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-soft">
+        {shown.map((quiz, index) => (
+          <li
+            key={quiz.id}
+            style={stagger(index, 50)}
+            className="flex animate-fade-up flex-col gap-4 rounded-2xl border bg-card p-5 shadow-soft transition-[box-shadow,border-color] duration-200 hover:border-ring/50 hover:shadow-[0_2px_4px_var(--shadow-color),0_16px_32px_-12px_var(--shadow-color)]"
+          >
             <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">
                 <p className="text-lg leading-snug font-extrabold wrap-break-word">{quiz.title}</p>

@@ -1,7 +1,7 @@
 import { gameSettingsSchema, type QuizInput } from '@ash-quiz/shared'
 import { describe, expect, it } from 'vitest'
 import { copyQuestion, move, newQuestion } from './draft'
-import { errorsUnder, validateQuiz } from './validate'
+import { errorsUnder, locateProblem, validateQuiz } from './validate'
 
 function quiz(questions: QuizInput['questions']): QuizInput {
   return { title: 'Quiz', description: '', questions, settings: gameSettingsSchema.parse({}) }
@@ -76,5 +76,31 @@ describe('draft helpers', () => {
   it('creates unique ids without crypto.randomUUID (plain http on the LAN)', () => {
     const ids = new Set(Array.from({ length: 200 }, () => newQuestion('poll').id))
     expect(ids.size).toBe(200)
+  })
+})
+
+describe('locateProblem', () => {
+  it('names the field and the element to focus for each error path', () => {
+    expect(locateProblem('title')).toEqual({ questionIndex: null, part: { kind: 'title' }, field: 'title' })
+    expect(locateProblem('questions')).toEqual({ questionIndex: null, part: { kind: 'other' }, field: null })
+    expect(locateProblem('questions.2.text')).toEqual({ questionIndex: 2, part: { kind: 'text' }, field: 'questions.2.text' })
+    expect(locateProblem('questions.0.options.3.text')).toEqual({
+      questionIndex: 0,
+      part: { kind: 'option', n: 4 },
+      field: 'questions.0.options.3.text',
+    })
+    expect(locateProblem('questions.1.options')).toMatchObject({ part: { kind: 'options' }, field: 'questions.1.options' })
+    expect(locateProblem('questions.1.correctOptionId')).toMatchObject({ part: { kind: 'correct' }, field: 'questions.1.correct-marker' })
+    expect(locateProblem('questions.1.correctOptionIds')).toMatchObject({ field: 'questions.1.correct-marker' })
+    expect(locateProblem('questions.4.acceptedAnswers.0')).toMatchObject({ part: { kind: 'acceptedAnswers' } })
+    expect(locateProblem('questions.4.tolerance')).toMatchObject({ part: { kind: 'number' }, field: 'questions.4.correct' })
+    expect(locateProblem('questions.4.timeLimitSec')).toMatchObject({ questionIndex: 4, part: { kind: 'question' } })
+  })
+
+  it('locates every error of a broken draft inside its question', () => {
+    const errors = validateQuiz(quiz([filledSingle(), { ...newQuestion('single'), text: '' }]))
+    const located = Object.keys(errors).map(locateProblem)
+    expect(located.length).toBeGreaterThan(0)
+    expect(located.every((p) => p.questionIndex === 1 && p.field?.startsWith('questions.1.'))).toBe(true)
   })
 })

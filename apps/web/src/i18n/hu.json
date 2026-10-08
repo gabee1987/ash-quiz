@@ -170,7 +170,7 @@
       },
       "finalResultsHelp": "A játék után a kivetítő és a telefonok várnak. A dobogót a kivetítőn és az eredményeket a telefonokon külön-külön teheti közzé.",
       "theme": "Téma",
-      "themeHelp": "Színvilág a telefonokon, a kivetítőn és a vezérlőn. A világos vagy sötét módot mindenki a saját eszközén választja.",
+      "themeHelp": "Színvilág a telefonokon, a kivetítőn és a vezérlőn. A világos vagy sötét módot mindenki a saját eszközén választja. A Grafit, Sötétkék, Petrol, Kő és Bordó visszafogott, hivatalos eseményekhez illik.",
       "themeOptions": {
         "classic": "Klasszikus",
         "arcade": "Játékterem",
@@ -179,15 +179,21 @@
         "ocean": "Óceán",
         "berry": "Bogyó",
         "forest": "Erdő",
-        "graphite": "Grafit"
+        "graphite": "Grafit",
+        "navy": "Sötétkék",
+        "petrol": "Petrol",
+        "stone": "Kő",
+        "bordeaux": "Bordó"
       },
       "answerPalette": "Válaszok színei",
-      "answerPaletteHelp": "A válaszgombok és az eredménysávok színei a telefonokon és a kivetítőn, a témától függetlenül.",
+      "answerPaletteHelp": "A válaszgombok és az eredménysávok színei a telefonokon és a kivetítőn, a témától függetlenül. A Tompa és a Céges visszafogottabb.",
       "answerPaletteOptions": {
         "vivid": "Élénk",
         "candy": "Cukorka",
         "neon": "Neon",
-        "earth": "Földszínek"
+        "earth": "Földszínek",
+        "muted": "Tompa",
+        "corporate": "Céges"
       },
       "answerSymbols": "Válaszok jelei",
       "answerSymbolsOptions": {
@@ -203,7 +209,14 @@
     "copyTitle": "{{title}} (másolat)",
     "deleteTitle": "Törli ezt a kvízt?",
     "deleteBody": "A(z) „{{title}}” véglegesen törlődik. A már lejátszott játékok eredményei megmaradnak.",
-    "moreActions": "További műveletek: {{title}}"
+    "moreActions": "További műveletek: {{title}}",
+    "search": "Kvízek keresése",
+    "sort": "Rendezés",
+    "sortOptions": {
+      "updated": "Legutóbb szerkesztett",
+      "title": "Cím"
+    },
+    "noMatches": "Nincs „{{query}}” című kvíz."
   },
   "play": {
     "youAreIn": "Bent vagy, {{name}}!",
@@ -267,7 +280,10 @@
     "runnersUp": "A többiek",
     "previous": "Előző",
     "next": "Következő",
-    "keyHint": "Szóköz"
+    "keyHint": "Szóköz",
+    "pause": "Szünet",
+    "resume": "Folytatás",
+    "paused": "Szünetel"
   },
   "questionTypes": {
     "single": "Egy helyes válasz",
@@ -296,7 +312,7 @@
     "pickType": "Válassza ki a kérdés típusát",
     "questionText": "Kérdés",
     "questionImage": "Kérdés képe",
-    "addImage": "Kép hozzáadása (JPG, PNG vagy WebP, legfeljebb 5 MB)",
+    "addImage": "Kép hozzáadása",
     "addImageShort": "Kép",
     "removeImage": "Kép eltávolítása",
     "options": "Válaszlehetőségek",
@@ -322,10 +338,8 @@
     "pointsValue_other": "{{count}} pont",
     "moveUp": "Feljebb",
     "moveDown": "Lejjebb",
-    "dragToReorder": "Húzza az átrendezéshez",
     "duplicateQuestion": "Másolat",
     "deleteQuestion": "Kérdés törlése",
-    "deleteQuestionTitle": "Törli ezt a kérdést?",
     "needsFixing": "Javítandó",
     "preview": "Telefonos előnézet",
     "showPreview": "Telefonos előnézet megjelenítése",
@@ -335,7 +349,8 @@
       "pending": "Nem mentett módosítások…",
       "saving": "Mentés…",
       "invalid": "Nincs mentve: néhány mező hiányos",
-      "error": "A mentés nem sikerült, a következő módosításkor újrapróbáljuk"
+      "error": "A mentés nem sikerült",
+      "offline": "Nincs kapcsolat: mentés, amint visszatér"
     },
     "errors": {
       "required": "Kötelező mező.",
@@ -354,7 +369,54 @@
     "sampleOption2": "Mars",
     "sampleOption3": "Vénusz",
     "sampleOption4": "Szaturnusz",
-    "previewSample": "Mintakérdés a beállítások előnézetéhez."
+    "previewSample": "Mintakérdés a beállítások előnézetéhez.",
+    "addImageHint": "Húzza ide, illessze be vagy válassza ki. JPG, PNG vagy WebP, legfeljebb 5 MB.",
+    "replaceImage": "Kép cseréje",
+    "uploading": "Feltöltés…",
+    "questionN": "{{n}}. kérdés",
+    "questionNOfCount": "{{n}}. kérdés / {{count}}",
+    "dragQuestion": "A(z) {{n}}. kérdés áthelyezése",
+    "dragOption": "A(z) {{n}}. lehetőség áthelyezése",
+    "correctOption": "Helyes: {{n}}. lehetőség",
+    "retrySave": "Mentés újra",
+    "problemCount_one": "{{count}} javítandó",
+    "problemCount_other": "{{count}} javítandó",
+    "problemsTitle": "Indítás előtt javítsa ezeket",
+    "problemAt": "{{where}}: {{message}}",
+    "playNeedsQuestion": "Előbb adjon hozzá egy kérdést.",
+    "playNeedsFixes": "Előbb javítsa ezeket:",
+    "settings": "Kvíz beállításai",
+    "emptyHelp": "Válassza ki az első kérdés típusát. Később továbbiakat adhat hozzá, átrendezheti és másolhatja őket.",
+    "listHelp": "Koppintson egy kérdésre a szerkesztéshez. Nyomva tartva áthúzhatja máshová.",
+    "moreQuestionActions": "További műveletek a kérdéssel",
+    "moveToTop": "Áthelyezés az elejére",
+    "moveToBottom": "Áthelyezés a végére",
+    "questionDuplicated": "Kérdés másolva",
+    "questionDeleted": "A(z) {{n}}. kérdés törölve",
+    "undo": "Visszavonás",
+    "leaveTitle": "Kilép a szerkesztőből?",
+    "leave": "Kilépés",
+    "leaveBody": {
+      "invalid": "Néhány mező hiányos, ezért a legutóbbi módosítások nincsenek mentve. Ha most kilép, elvesznek.",
+      "offline": "Nincs kapcsolat, a legutóbbi módosítások még nincsenek mentve. Ha most kilép, elvesznek.",
+      "error": "A legutóbbi módosításokat nem sikerült menteni. Ha most kilép, elvesznek."
+    },
+    "shortcuts": {
+      "title": "Billentyűparancsok",
+      "help": "Ez a lista",
+      "duplicate": "Kérdés másolása",
+      "add": "Új kérdés",
+      "moveUp": "Kérdés feljebb",
+      "moveDown": "Kérdés lejjebb"
+    },
+    "dnd": {
+      "instructions": "Átrendezéshez nyomja meg a Szóközt, mozgassa a nyilakkal, majd a Szóközzel tegye le, vagy az Escape-pel vonja vissza.",
+      "pickedUp": "{{item}} felvéve, {{position}}. hely a(z) {{count}} közül.",
+      "movedOver": "{{item}} a(z) {{position}}. helyre került a(z) {{count}} közül.",
+      "outside": "{{item}} a listán kívül van.",
+      "dropped": "{{item}} letéve a(z) {{position}}. helyre a(z) {{count}} közül.",
+      "cancelled": "Átrendezés visszavonva, {{item}} a helyén maradt."
+    }
   },
   "users": {
     "title": "Felhasználók",
@@ -445,6 +507,6 @@
     "members": "Tagok",
     "sortedAscending": "növekvő sorrend",
     "sortedDescending": "csökkenő sorrend",
-    "screenHint": "Szóköz vagy → tovább, ← vissza"
+    "screenHint": "Szóköz vagy → tovább, ← vissza, P szünet"
   }
 }

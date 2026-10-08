@@ -28,6 +28,7 @@ The web app bundles the following open-source packages. None of them calls a net
 | `@axe-core/playwright` | Accessibility checks in the end-to-end tests (development only, not in the image) | phase 9 |
 | `canvas-confetti` | Confetti on the podium, drawn on a canvas over the page; loaded only then. Used without its web worker, so the CSP keeps `script-src 'self'` (the worker would come from a blob URL) | phase 10 |
 | `jsqr` | Decodes the join QR code from the phone's camera, on the device; loaded only when the camera button is pressed | phase 10 |
+| `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` | Drag and drop in the quiz editor (questions and options) with mouse, touch and keyboard; no network access | phase 11 |
 
 The shadcn/ui component code is copied into `apps/web/src/components/ui` rather than installed, so it is reviewed like the rest of the code.
 

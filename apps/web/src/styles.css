@@ -148,6 +148,31 @@
   --tint: 0.004;
   --chroma: 0.3;
 }
+/* Subdued themes for formal events: low chroma, one calm hue each. */
+[data-theme='navy'] {
+  --hue: 262;
+  --hue-accent: 225;
+  --tint: 0.006;
+  --chroma: 0.55;
+}
+[data-theme='petrol'] {
+  --hue: 215;
+  --hue-accent: 185;
+  --tint: 0.006;
+  --chroma: 0.5;
+}
+[data-theme='stone'] {
+  --hue: 65;
+  --hue-accent: 40;
+  --tint: 0.008;
+  --chroma: 0.28;
+}
+[data-theme='bordeaux'] {
+  --hue: 12;
+  --hue-accent: 350;
+  --tint: 0.006;
+  --chroma: 0.5;
+}
 
 /*
  * Answer palettes: six fixed colours by option index (red, blue, yellow, green, orange, purple
@@ -211,6 +236,35 @@
   --option-6: oklch(0.48 0.12 330);
   --option-6-fg: oklch(0.99 0 0);
 }
+/* Low-saturation sets for formal events; the symbols carry the distinction as much as the colours. */
+[data-palette='muted'] {
+  --option-1: oklch(0.52 0.1 25);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.5 0.09 255);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.82 0.09 90);
+  --option-3-fg: oklch(0.28 0.05 90);
+  --option-4: oklch(0.52 0.08 155);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.76 0.09 60);
+  --option-5-fg: oklch(0.28 0.05 60);
+  --option-6: oklch(0.5 0.08 310);
+  --option-6-fg: oklch(0.99 0 0);
+}
+[data-palette='corporate'] {
+  --option-1: oklch(0.42 0.09 260);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.52 0.08 195);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.85 0.05 85);
+  --option-3-fg: oklch(0.3 0.04 85);
+  --option-4: oklch(0.5 0.03 250);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.74 0.1 70);
+  --option-5-fg: oklch(0.27 0.05 70);
+  --option-6: oklch(0.45 0.07 330);
+  --option-6-fg: oklch(0.99 0 0);
+}
 
 /* Angle of the rotating gradient border, animatable thanks to @property. */
 @property --angle {
@@ -259,6 +313,10 @@
 
   --shadow-soft: 0 1px 2px var(--shadow-color), 0 8px 24px -8px var(--shadow-color);
 
+  /* "Bubble gum" easings: ease-spring overshoots a little and settles, ease-spring-soft barely. */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring-soft: cubic-bezier(0.3, 1.25, 0.5, 1);
+
   /*
    * Motion. Everything below animates transform or opacity only (compositor work, no layout), except
    * `draw` (an SVG stroke) and `shimmer` (text background), which are used on single small elements.
@@ -280,6 +338,41 @@
   --animate-drift: drift 28s ease-in-out infinite alternate;
   --animate-dot: dot 1.2s ease-in-out infinite;
   --animate-spin-angle: spin-angle 6s linear infinite;
+  --animate-menu-pop: menu-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-panel-in: panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-dialog-pop: dialog-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  /* Menus and select lists spring open from their trigger (transform-origin is set by Radix). */
+  @keyframes menu-pop {
+    from {
+      transform: scale(0.88);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes dialog-pop {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes panel-in {
+    from {
+      transform: translateX(32px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
 
   @keyframes rise {
     from {
@@ -453,6 +546,42 @@
     animation: var(--animate-spin-angle);
     pointer-events: none;
   }
+}
+
+/*
+ * Scrollbars: a rounded "gum" thumb in the theme colour on a clear track, plumper on hover and
+ * fully coloured while dragged. WebKit/Blink get the full shape; Firefox, which has no scrollbar
+ * pseudo-elements, the thin coloured variant. (Chrome ignores the ::-webkit rules on any element
+ * with scrollbar-color set, hence the @supports split.)
+ */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--primary) 45%, transparent) transparent;
+  }
+}
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  min-height: 48px;
+  border: 4px solid transparent;
+  border-radius: 999px;
+  background-color: color-mix(in oklch, var(--primary) 38%, transparent);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  border-width: 3px;
+  background-color: color-mix(in oklch, var(--primary) 62%, transparent);
+}
+::-webkit-scrollbar-thumb:active {
+  border-width: 2px;
+  background-color: var(--primary);
 }
 
 /* Reduced motion: primitives and app animations end immediately in their final state. */

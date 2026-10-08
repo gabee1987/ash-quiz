@@ -24,8 +24,12 @@ async function newPage(browser: Browser, mode: (typeof modes)[number], viewport:
 }
 
 async function expectAccessible(page: Page, name: string) {
-  // Let transitions settle so contrast is measured on final colours.
+  // Let transitions and entrance animations (fade-ins, staggered lists) settle so contrast is measured
+  // on final colours; endless ones (the backdrop, waiting dots) never finish and are ignored.
   await page.waitForTimeout(400)
+  await page.waitForFunction(() =>
+    document.getAnimations().every((a) => a.playState !== 'running' || a.effect?.getComputedTiming().iterations === Infinity),
+  )
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   const blocking = results.violations
     .filter((v) => v.impact === 'serious' || v.impact === 'critical')

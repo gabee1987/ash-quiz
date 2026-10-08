@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { Outlet, createFileRoute, redirect, useMatches } from '@tanstack/react-router'
 import { HostNav } from '@/components/host-nav'
 import { ApiError } from '../../lib/api'
 import { meQueryOptions } from '../../lib/auth'
@@ -20,12 +20,17 @@ export const Route = createFileRoute('/host')({
   component: HostLayout,
 })
 
-/** Sidebar on laptops, a bottom tab bar on phones. Hidden until a forced password change is done. */
+/**
+ * Sidebar on laptops, a bottom tab bar on phones. Hidden until a forced password change is done,
+ * and in the quiz editor, a full-width workspace with its own back button.
+ */
 function HostLayout() {
   const { user } = Route.useRouteContext()
+  const editing = useMatches({ select: (matches) => matches.some((m) => m.routeId === '/host/quizzes/$quizId') })
+  const nav = !user.mustChangePassword && !editing
   return (
-    <div className={`flex flex-1 flex-col gap-4 lg:flex-row lg:gap-8 ${user.mustChangePassword ? '' : 'pb-20 lg:pb-0'}`}>
-      {!user.mustChangePassword && <HostNav user={user} />}
+    <div className={`flex flex-1 flex-col gap-4 lg:flex-row lg:gap-8 ${nav ? 'pb-20 lg:pb-0' : ''}`}>
+      {nav && <HostNav user={user} />}
       <div className="flex min-w-0 flex-1 flex-col">
         <Outlet />
       </div>

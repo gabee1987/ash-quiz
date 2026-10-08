@@ -56,7 +56,7 @@ export function HostNav({ user }: { user: User }) {
             activeOptions={{ exact: item.exact }}
             className="group flex min-h-12 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:bg-primary data-[status=active]:text-primary-foreground data-[status=active]:shadow-[0_3px_0_0_var(--primary-edge)]"
           >
-            <item.icon className="size-5" />
+            <item.icon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8" />
             {item.label}
           </Link>
         ))}

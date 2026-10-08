@@ -1,10 +1,10 @@
-import type { Question } from '@ash-quiz/shared'
+import type { AnswerSymbols, Question } from '@ash-quiz/shared'
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ChipsInput } from '../../components/chips'
-import { NativeSelect } from '../../components/native-select'
+import { SelectField } from '../../components/select-field'
 import { withImage } from './draft'
 import { ImageField } from './image-field'
 import { NumberField } from './number-field'
@@ -20,11 +20,14 @@ export function QuestionForm({
   onChange,
   errors,
   path,
+  symbols,
 }: {
   question: Question
   onChange: (question: Question) => void
   errors: FieldErrors
   path: string
+  /** The quiz's answer symbols, shown next to the options as in the game. */
+  symbols: AnswerSymbols
 }) {
   const { t } = useTranslation()
   const textId = useId()
@@ -42,6 +45,7 @@ export function QuestionForm({
         </Label>
         <Textarea
           id={textId}
+          data-field={`${path}.text`}
           value={question.text}
           maxLength={500}
           rows={2}
@@ -61,28 +65,31 @@ export function QuestionForm({
         label={t('editor.questionImage')}
         imageId={question.imageId}
         onChange={(imageId) => onChange(withImage(question, imageId))}
+        pasteAnywhere
       />
 
       {question.type === 'single' && (
         <OptionsEditor
           options={question.options}
-          marker="radio"
+          marker="one"
           correctIds={[question.correctOptionId]}
           onOptions={(options) => onChange({ ...question, options })}
           onCorrect={(ids) => onChange({ ...question, correctOptionId: ids[0] ?? '' })}
           errors={errors}
           path={path}
+          symbols={symbols}
         />
       )}
       {question.type === 'multiple' && (
         <OptionsEditor
           options={question.options}
-          marker="checkbox"
+          marker="many"
           correctIds={question.correctOptionIds}
           onOptions={(options) => onChange({ ...question, options })}
           onCorrect={(ids) => onChange({ ...question, correctOptionIds: ids })}
           errors={errors}
           path={path}
+          symbols={symbols}
         />
       )}
       {question.type === 'poll' && (
@@ -94,6 +101,7 @@ export function QuestionForm({
           onCorrect={() => {}}
           errors={errors}
           path={path}
+          symbols={symbols}
         />
       )}
       {question.type === 'truefalse' && (
@@ -119,7 +127,7 @@ export function QuestionForm({
         </fieldset>
       )}
       {question.type === 'text' && (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1" data-field={`${path}.acceptedAnswers`}>
           <ChipsInput
             label={t('editor.acceptedAnswers')}
             values={question.acceptedAnswers}
@@ -132,7 +140,7 @@ export function QuestionForm({
         </div>
       )}
       {question.type === 'number' && (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3" data-field={`${path}.correct`}>
           <NumberField
             label={t('editor.correctNumber')}
             value={question.correct}
@@ -150,33 +158,19 @@ export function QuestionForm({
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-2 text-sm font-semibold">
-          {t('editor.timeLimit')}
-          <NativeSelect
-            value={question.timeLimitSec}
-            onChange={(e) => onChange({ ...question, timeLimitSec: Number(e.target.value) })}
-          >
-            {timeOptions.map((s) => (
-              <option key={s} value={s}>
-                {t('editor.seconds', { count: s })}
-              </option>
-            ))}
-          </NativeSelect>
-        </label>
+        <SelectField
+          label={t('editor.timeLimit')}
+          value={question.timeLimitSec}
+          options={timeOptions.map((s) => ({ value: s, label: t('editor.seconds', { count: s }) }))}
+          onChange={(timeLimitSec) => onChange({ ...question, timeLimitSec })}
+        />
         {question.type !== 'poll' && (
-          <label className="flex flex-col gap-2 text-sm font-semibold">
-            {t('editor.points')}
-            <NativeSelect
-              value={question.points}
-              onChange={(e) => onChange({ ...question, points: Number(e.target.value) })}
-            >
-              {pointsOptions.map((p) => (
-                <option key={p} value={p}>
-                  {t('editor.pointsValue', { count: p })}
-                </option>
-              ))}
-            </NativeSelect>
-          </label>
+          <SelectField
+            label={t('editor.points')}
+            value={question.points}
+            options={pointsOptions.map((p) => ({ value: p, label: t('editor.pointsValue', { count: p }) }))}
+            onChange={(points) => onChange({ ...question, points })}
+          />
         )}
       </div>
     </div>
