@@ -1,10 +1,11 @@
 import type { Answer, PlayerSnapshot } from '@ash-quiz/shared'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
 import { Timer } from '../../components/timer'
 import { stagger } from '../../lib/motion'
-import { emitAck } from '../../lib/socket'
+import { sendAnswer } from '../../lib/socket'
 import { QuestionInput } from '../questions/question-input'
 import { Answered } from './answered'
 
@@ -23,9 +24,11 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
     if (!question) return
     setPending(true)
     setError(null)
-    const res = await emitAck('player:answer', { questionId: question.id, answer })
+    // Stays pending through a reconnect and one retry.
+    const res = await sendAnswer({ questionId: question.id, answer })
     if ('error' in res) {
-      setError(res.error)
+      if (res.error === 'errors.answerNotSent') toast.error(t(res.error), { id: res.error })
+      else setError(res.error)
       if (res.error === 'errors.questionClosed' || res.error === 'errors.alreadyAnswered') setClosed(true)
     }
     // On success the next snapshot carries myAnswer and switches to the answered view.

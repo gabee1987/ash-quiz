@@ -47,6 +47,7 @@ export function createGame(
     createdAt: now,
     finishedAt: null,
     released: { screen: false, players: false },
+    announcement: null,
   }
 }
 
@@ -60,7 +61,7 @@ export interface JoinInput {
 /** Adds a player in the lobby. A known token reclaims that player in any phase instead. */
 export function joinPlayer(state: GameState, input: JoinInput): GameState {
   const existing = findByToken(state, input.token)
-  if (existing) return withPlayer(state, { ...existing, connected: true })
+  if (existing) return withPlayer(state, { ...existing, connected: true, disconnectedAt: null })
 
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
   const name = input.name.trim()
@@ -79,6 +80,7 @@ export function joinPlayer(state: GameState, input: JoinInput): GameState {
     teamId,
     token: input.token,
     connected: true,
+    disconnectedAt: null,
     score: 0,
     answers: {},
   })
@@ -87,14 +89,14 @@ export function joinPlayer(state: GameState, input: JoinInput): GameState {
 export function reconnectPlayer(state: GameState, token: string): GameState {
   const player = findByToken(state, token)
   if (!player) throw new EngineError('errors.playerNotFound')
-  return withPlayer(state, { ...player, connected: true })
+  return withPlayer(state, { ...player, connected: true, disconnectedAt: null })
 }
 
 /** Unknown ids are ignored: a kicked player's socket may still disconnect afterwards. */
-export function disconnectPlayer(state: GameState, playerId: string): GameState {
+export function disconnectPlayer(state: GameState, playerId: string, now: number): GameState {
   const player = state.players[playerId]
   if (!player) return state
-  return withPlayer(state, { ...player, connected: false })
+  return withPlayer(state, { ...player, connected: false, disconnectedAt: now })
 }
 
 /** Removes the player. Team scores already earned are kept; the player stops counting from the next question. */
@@ -110,7 +112,7 @@ export function startGame(state: GameState, now: number): GameState {
   if (Object.keys(state.players).length === 0 || state.quiz.questions.length === 0) {
     throw new EngineError('errors.invalidTransition')
   }
-  return openQuestion(state, 0, now)
+  return openQuestion({ ...state, announcement: null }, 0, now)
 }
 
 export interface SubmitInput {
@@ -171,7 +173,9 @@ export function gradeText(state: GameState, correctPlayerIds: readonly string[])
 
 /** Next question (or finish after the last one), from the reveal or the scoreboard. */
 export function next(state: GameState, now: number): GameState {
-  if ((state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard') return advance(state, now)
+  if ((state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard') {
+    return advance({ ...state, announcement: null }, now)
+  }
   throw new EngineError('errors.invalidTransition')
 }
 
@@ -214,6 +218,18 @@ export function releaseResults(state: GameState, audience: ResultsAudience): Gam
   if (!resultsPendingFor(state, audience)) throw new EngineError('errors.invalidTransition')
   const released = { screen: false, players: false, ...state.released }
   return { ...state, released: { ...released, [audience]: true } }
+}
+
+/** Shows a message on every phone and the projector, replacing the current one. Allowed in any phase. */
+export function announce(state: GameState, input: { id: string; text: string }, now: number): GameState {
+  const text = input.text.trim()
+  if (text.length < 1 || text.length > 200) throw new EngineError('errors.invalidInput')
+  return { ...state, announcement: { id: input.id, text, at: now } }
+}
+
+export function clearAnnouncement(state: GameState): GameState {
+  if (!state.announcement) return state
+  return { ...state, announcement: null }
 }
 
 /**

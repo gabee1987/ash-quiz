@@ -1,6 +1,6 @@
 import type { GameSettings, HostSnapshot } from '@ash-quiz/shared'
 import { describe, expect, it } from 'vitest'
-import { alternativeAction, primaryAction } from './primary-action'
+import { alternativeAction, primaryAction, reconnectingCount } from './primary-action'
 
 function reveal(settings: Partial<GameSettings>, questionIndex = 0): HostSnapshot {
   return {
@@ -65,5 +65,27 @@ describe('host action after the game', () => {
 
   it('nothing held: no action', () => {
     expect(labels(finished(false, false))).toEqual([null, null])
+  })
+})
+
+describe('reconnecting hint before a question', () => {
+  const players = (online: number, offline: number) =>
+    [...Array(online).fill(true), ...Array(offline).fill(false)].map((connected, i) => ({ id: `p${i}`, connected }))
+  const withPlayers = (host: HostSnapshot, online: number, offline: number) =>
+    ({ ...host, players: players(online, offline) }) as unknown as HostSnapshot
+
+  it('counts disconnected players when more than 20% are away and the next step opens a question', () => {
+    const scoreboard = { ...reveal({}), phase: 'scoreboard' } as HostSnapshot
+    expect(reconnectingCount(withPlayers(scoreboard, 7, 3))).toBe(3)
+    expect(reconnectingCount(withPlayers(scoreboard, 8, 2))).toBeNull()
+    const lobby = { ...reveal({}), phase: 'lobby', questionIndex: -1 } as HostSnapshot
+    expect(reconnectingCount(withPlayers(lobby, 1, 1))).toBe(1)
+  })
+
+  it('stays quiet when the next step opens no question', () => {
+    // Reveal with the scoreboard next, and the scoreboard after the last question.
+    expect(reconnectingCount(withPlayers(reveal({}), 1, 9))).toBeNull()
+    const last = { ...reveal({}, 2), phase: 'scoreboard' } as HostSnapshot
+    expect(reconnectingCount(withPlayers(last, 1, 9))).toBeNull()
   })
 })

@@ -584,6 +584,239 @@
   background-color: var(--primary);
 }
 
+/*
+ * Notes: one design for everything the app tells people in passing, the toasts (Sonner) and
+ * the host's messages on phones and the projector. A chunky bubble with a pressed-in bottom
+ * edge like the buttons, springing in with a little overshoot, and a round icon that pops.
+ * Kinds differ only in colour (`--note-tone`) and in the icon's extra move: errors shake, host
+ * messages toot. `.toaster` is the Toaster's class; it lifts these rules above Sonner's own.
+ */
+.note,
+.toaster [data-sonner-toast] {
+  --note-tone: var(--primary);
+  --note-tone-foreground: var(--primary-foreground);
+}
+.toaster [data-sonner-toast] {
+  transition:
+    transform 550ms var(--ease-spring),
+    opacity 300ms,
+    height 400ms,
+    box-shadow 200ms;
+}
+.note-success,
+.toaster [data-sonner-toast][data-type='success'] {
+  --note-tone: var(--success);
+  --note-tone-foreground: var(--success-foreground);
+}
+.note-error,
+.toaster [data-sonner-toast][data-type='error'] {
+  --note-tone: var(--destructive);
+  --note-tone-foreground: var(--destructive-foreground);
+}
+.note-warning,
+.toaster [data-sonner-toast][data-type='warning'] {
+  --note-tone: var(--warning);
+  --note-tone-foreground: var(--warning-foreground);
+}
+.note,
+.toaster [data-sonner-toast][data-styled='true'] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 10px 10px;
+  border: 2px solid color-mix(in oklch, var(--note-tone) 35%, var(--border));
+  border-radius: 1.25rem;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  font-size: 0.95rem;
+  box-shadow:
+    0 4px 0 color-mix(in oklch, var(--note-tone) 30%, var(--border)),
+    0 14px 30px -10px var(--shadow-color);
+}
+.note {
+  /* How far above its place it flies in from and out to: past the top of the screen. */
+  --note-fly: -180px;
+  font-weight: 800;
+  transform-origin: 50% 0;
+  animation: note-in 0.7s ease-out both;
+}
+.note.note-leaving {
+  animation: note-out 0.6s ease-in-out both;
+}
+.note.note-leaving .note-icon {
+  animation: note-icon-spin-out 0.45s ease-in 0.1s both;
+}
+.toaster [data-sonner-toast][data-styled='true'] [data-title] {
+  font-weight: 800;
+  line-height: 1.3;
+}
+.note-icon,
+.toaster [data-sonner-toast][data-styled='true'] [data-icon] {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--note-tone);
+  color: var(--note-tone-foreground);
+  animation: note-icon-pop 0.6s var(--ease-spring) 0.15s both;
+}
+.note-error .note-icon,
+.toaster [data-sonner-toast][data-type='error'] [data-icon] {
+  animation:
+    note-icon-pop 0.6s var(--ease-spring) 0.15s both,
+    note-icon-shake 0.5s ease-in-out 0.7s;
+}
+/* A host message: the megaphone toots twice after popping in. */
+.note-announce .note-icon {
+  animation:
+    note-icon-pop 0.45s var(--ease-spring) 0.08s both,
+    note-icon-toot 0.8s ease-in-out 0.5s;
+}
+.note-icon svg,
+.toaster [data-sonner-toast][data-styled='true'] [data-icon] svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin: 0;
+}
+/* The projector's version, readable across a room. */
+.note-lg {
+  --note-fly: -260px;
+  gap: 24px;
+  padding: 18px 32px 18px 18px;
+  border-width: 3px;
+  border-radius: 2rem;
+  font-size: 2.25rem;
+  box-shadow:
+    0 8px 0 color-mix(in oklch, var(--note-tone) 30%, var(--border)),
+    0 24px 50px -16px var(--shadow-color);
+}
+.note-lg .note-icon {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+.note-lg .note-icon svg {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+.toaster [data-sonner-toast][data-styled='true'] [data-button] {
+  height: 2.25rem;
+  padding: 0 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 3px 0 var(--primary-edge);
+  transition:
+    transform 200ms var(--ease-spring),
+    box-shadow 200ms;
+}
+.toaster [data-sonner-toast][data-styled='true'] [data-button]:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--primary-edge);
+}
+/*
+ * Bubble gum: shoots in small, splats wide on landing, snaps back tall, and wobbles out the
+ * stretch in smaller and smaller bounces. It never gets wider than at rest (scaleX <= 1): the
+ * banner spans the screen on a phone, and anything wider would be cut off by the screen edge.
+ * The squash is vertical, the stretch narrow and tall.
+ */
+@keyframes note-in {
+  /* Falls in from above the screen, stretched by the speed. */
+  0% {
+    transform: translateY(var(--note-fly)) scale(0.85, 1.15);
+    animation-timing-function: ease-in;
+  }
+  28% {
+    transform: translateY(4px) scale(1, 0.7);
+    animation-timing-function: ease-out;
+  }
+  46% {
+    transform: translateY(-3px) scale(0.9, 1.16);
+  }
+  62% {
+    transform: translateY(0) scale(1, 0.9);
+  }
+  76% {
+    transform: scale(0.96, 1.05);
+  }
+  89% {
+    transform: scale(1, 0.98);
+  }
+  100% {
+    transform: none;
+  }
+}
+/*
+ * Winds up (squash), stretches tall, wobbles with a tilt, then flies back up off the screen,
+ * stretched like gum. Never wider than at rest, like note-in.
+ */
+@keyframes note-out {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  16% {
+    transform: translateY(3px) scale(1, 0.8);
+  }
+  34% {
+    transform: translateY(-5px) scale(0.9, 1.14);
+  }
+  50% {
+    transform: translateY(-2px) scale(0.97, 0.93) rotate(-2deg);
+  }
+  66% {
+    transform: translateY(6px) scale(1, 0.82);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: translateY(var(--note-fly)) scale(0.8, 1.2);
+  }
+}
+@keyframes note-icon-spin-out {
+  30% {
+    transform: scale(1.2) rotate(-25deg);
+  }
+  100% {
+    transform: scale(0) rotate(300deg);
+  }
+}
+@keyframes note-icon-pop {
+  from {
+    transform: scale(0) rotate(-40deg);
+  }
+  60% {
+    transform: scale(1.2) rotate(8deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes note-icon-toot {
+  15%,
+  55% {
+    transform: scale(1.18) rotate(-14deg);
+  }
+  35%,
+  75% {
+    transform: scale(1) rotate(4deg);
+  }
+}
+@keyframes note-icon-shake {
+  20%,
+  60% {
+    transform: rotate(-12deg);
+  }
+  40%,
+  80% {
+    transform: rotate(12deg);
+  }
+}
+
 /* Reduced motion: primitives and app animations end immediately in their final state. */
 @media (prefers-reduced-motion: reduce) {
   *,

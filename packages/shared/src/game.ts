@@ -28,6 +28,8 @@ export interface PlayerPublic {
   name: string
   teamId: string | null
   connected: boolean
+  /** Unix ms when the player's last connection dropped; null while connected. */
+  disconnectedAt: number | null
   score: number
   rank: number
   /** Rank before the current question's points were added; equals `rank` outside a reveal. */
@@ -93,7 +95,23 @@ export interface CurrentAnswer {
   timeMs: number
 }
 
+/** A message the host pushes to every phone and the projector until it is cleared. */
+export interface Announcement {
+  id: string
+  text: string
+  /** Unix ms when it was sent. */
+  at: number
+}
+
+/** Host messages: 1 to 200 characters. */
+export const announcementTextSchema = z.string().trim().min(1).max(200)
+
 export interface GameSnapshotBase {
+  /**
+   * Per-game counter stamped at broadcast time, increasing across server restarts. A client
+   * ignores a snapshot whose `seq` is lower than the one it holds (a direct emit can race a broadcast).
+   */
+  seq: number
   pin: string
   phase: GamePhase
   mode: GameMode
@@ -128,6 +146,8 @@ export interface GameSnapshotBase {
    * host and screen snapshots. `answersHidden` is then true as well (except in the host room).
    */
   resultsPending: boolean
+  /** The host's current message, shown as a banner until cleared. */
+  announcement: Announcement | null
 }
 
 /** What the host control and projector screens receive. */

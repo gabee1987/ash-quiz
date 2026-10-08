@@ -101,7 +101,27 @@
       "showPodium": "Dobogó mutatása",
       "releaseToPlayers": "Eredmények a telefonokon",
       "podiumPendingHint": "A kivetítő még nem mutatja az eredményeket.",
-      "playersWaitingHint": "A játékosok még nem látják az eredményeiket."
+      "playersWaitingHint": "A játékosok még nem látják az eredményeiket.",
+      "connectedOfTotal": "{{connected}} / {{count}} kapcsolódva",
+      "offlineForSeconds": "{{count}} mp óta nincs kapcsolat",
+      "offlineForMinutes": "{{count}} perce nincs kapcsolat",
+      "reconnectingHint_one": "{{count}} játékos újracsatlakozik",
+      "reconnectingHint_other": "{{count}} játékos újracsatlakozik",
+      "roundTrip": "Kapcsolat a szerverrel: {{ms}} ms",
+      "roundTripNone": "A szerver nem válaszol",
+      "message": {
+        "title": "Üzenet mindenkinek",
+        "help": "Minden telefonon és a kivetítőn látható, amíg nem törli, vagy el nem indul a következő kérdés.",
+        "label": "Üzenet",
+        "send": "Küldés",
+        "clear": "Törlés",
+        "showing": "Most látható",
+        "presets": {
+          "getReady": "Készüljetek!",
+          "shortBreak": "Rövid szünet",
+          "lastQuestion": "Utolsó kérdés!"
+        }
+      }
     },
     "review": {
       "title": "Áttekintés",
@@ -285,6 +305,13 @@
     "resume": "Folytatás",
     "paused": "Szünetel"
   },
+  "connection": {
+    "connecting": "Kapcsolódás…",
+    "reconnecting": "Újracsatlakozás… {{seconds}} mp",
+    "offline": "Nincs hálózat… {{seconds}} mp",
+    "reconnected": "Újra kapcsolódva",
+    "announcement": "Üzenet a játékvezetőtől"
+  },
   "questionTypes": {
     "single": "Egy helyes válasz",
     "singleHelp": "Egyetlen helyes lehetőség.",
@@ -458,7 +485,8 @@
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "wrongCurrentPassword": "A jelenlegi jelszó hibás.",
     "samePassword": "Az új jelszónak különböznie kell a jelenlegitől.",
-    "gameNotFinished": "Törlés előtt fejezze be a játékot."
+    "gameNotFinished": "Törlés előtt fejezze be a játékot.",
+    "answerNotSent": "A válaszod nem ment el. Koppints újra."
   },
   "nav": {
     "label": "Szervezői menü",

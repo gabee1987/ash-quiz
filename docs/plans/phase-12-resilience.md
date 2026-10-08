@@ -89,3 +89,21 @@ $env:LOAD_TEST_USERNAME="admin"; $env:LOAD_TEST_PASSWORD="..."; pnpm load-test -
 6. Disconnect two phones and watch the host panel. Expect grey dots, the offline time, and the hint next to the primary action.
 7. Run the load test with `--flap 0.3`. Expect `PASS` and the `seq` assertion reported.
 8. Watch the RTT badge on the host control on venue wifi. Expect a value under 150 ms on a LAN.
+
+## Results
+
+- `engine.test.ts`: host messages (set, trim, length, clear, cleared by start and next, old games without the field), `disconnectedAt` stamped and cleared.
+- `test/realtime.test.ts`: `seq` raised per transition and still higher after a restart that keeps the message; two sockets of one player get strictly increasing `seq`; a message reaches host, projector and phone, survives a rejoin, is cleared; `host:ping` acks the host only; the host sees `disconnectedAt`.
+- `src/lib/socket.test.ts` (fake socket): every state transition, `since` and `attempts`, offline and online events, visibility, kick; lower `seq` ignored; emits held until the rejoin; answer retry, `alreadyAnswered` on the retry, "tap again", no retry once closed; one "Reconnected" toast per recovery and none on the first connect. `primary-action.test.ts`: the reconnecting hint.
+- `e2e/connection.e2e.ts` passes against the production build.
+- Real drop, checked with a script: the server was stopped mid-question, a phone tapped an answer while it was down, the server came back. The answer was recorded without a second tap, the phone showed "Reconnected", and the host could end the game.
+- Load test, 60 players with `--flap 0.3`, three runs against the production bundle: PASS each time. Both messages reached all 60 players, `seq` never went back, fan-out max 8 ms, 0 answers missed.
+
+## Deviations
+
+- **`disconnectedAt` on players.** "Offline for 12 s" needs the time of the drop. The engine stamps it in `disconnectPlayer` (now taking `now`), and restore stamps it for players who were connected. Snapshots carry it.
+- **Every emit in a session waits for the rejoin, not only answers.** The real-drop check found that a host button pressed while the host page was reconnecting reached the server before the re-attach and was rejected as unauthorized (older than this phase). `emitAck` now holds non-attach events until a snapshot arrives on the new connection (up to 5 s).
+- **No toasts for kicked, game ended or session closed.** Those states already replace the page with the reason and a way back, so a toast would say the same thing twice. "Session closed on another device" never happens: two devices with the same token are allowed.
+- **`idle` stays a status** for pages without a game session, next to the five planned ones.
+- **Keepalive** (`pingInterval` 10 s, `pingTimeout` 20 s) was already set in phase 8; this phase documents it in the realtime skill.
+- The socket tests live in `test/realtime.test.ts`; the plan named `socket.test.ts`.

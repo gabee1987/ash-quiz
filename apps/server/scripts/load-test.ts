@@ -15,7 +15,9 @@
  *
  * Asserts: every player is in the final standings and connected; every player answered every
  * question during which they did not drop; command fan-out (host command to the last connected
- * player's snapshot) stays under --max-fanout ms (default 200). Exits 1 on failure.
+ * player's snapshot) stays under --max-fanout ms (default 200); no player ever receives a
+ * snapshot with a lower `seq` than the one before; after two host messages in a row every
+ * player shows the second. Exits 1 on failure.
  */
 import { parseArgs } from 'node:util'
 import type { ClientToServerEvents, HostCommand, HostSnapshot, PlayerSnapshot, ServerToClientEvents } from '@ash-quiz/shared'
@@ -96,6 +98,7 @@ const connect = (headers?: Record<string, string>): AppSocket =>
   })
 
 let reconnects = 0
+const seqRegressions: string[] = []
 
 class Host {
   readonly socket = connect({ cookie })
@@ -156,6 +159,8 @@ class Player {
   }
 
   private onSnapshot(s: PlayerSnapshot) {
+    // Snapshots must never go back in time, across reconnects too (equal is the direct emit on rejoin).
+    if (this.snapshot && s.seq < this.snapshot.seq) seqRegressions.push(`${this.name}: ${this.snapshot.seq} then ${s.seq}`)
     this.snapshot = s
     const key = `${s.phase}:${s.questionIndex}`
     if (!this.arrivals.has(key)) this.arrivals.set(key, performance.now())
@@ -221,6 +226,18 @@ async function fanout(sentAt: number, key: string): Promise<number[]> {
   return connected.flatMap((p) => (p.arrivals.has(key) ? [p.arrivals.get(key)! - sentAt] : []))
 }
 
+/** Two host messages in a row after the first question: every player must end up with the second. */
+async function announcements() {
+  const latest = 'Load message 2'
+  await host.command({ type: 'announce', text: 'Load message 1' })
+  await host.command({ type: 'announce', text: latest })
+  const deadline = Date.now() + 10_000
+  const missing = () => players.filter((p) => p.snapshot?.announcement?.text !== latest)
+  while (missing().length > 0 && Date.now() < deadline) await sleep(25)
+  if (missing().length > 0) failures.push(`latest message missing on ${missing().map((p) => p.name).join(', ')}`)
+  else console.log(`Both messages sent; all ${playerCount} players show the latest`)
+}
+
 const rows: Record<string, string | number>[] = []
 let sentAt = await host.command({ type: 'start' })
 for (let index = 0; index < questionCount; index++) {
@@ -238,6 +255,7 @@ for (let index = 0; index < questionCount; index++) {
   })
   for (const p of players) p.answerMs.length = 0
   if (Math.max(0, ...opened) > maxFanout) failures.push(`question ${index + 1}: fan-out ${Math.round(Math.max(...opened))} ms > ${maxFanout} ms`)
+  if (index === 0) await announcements()
   if (reveal.phase === 'reveal' || reveal.phase === 'scoreboard') {
     await sleep(300)
     sentAt = await host.command({ type: 'next' })
@@ -276,6 +294,8 @@ const missedWhileFlapping = players
 console.log(
   `Finished: ${final.players.length} players, ${reconnects} reconnects, ${missedWhileFlapping} answers missed while disconnected, finish fan-out max ${percentile(finished, 100)} ms`,
 )
+if (seqRegressions.length > 0) failures.push(`snapshot seq went back: ${seqRegressions.slice(0, 5).join('; ')}`)
+else console.log('Snapshot seq never went back on any player')
 
 host.socket.close()
 for (const p of players) p.socket.close()

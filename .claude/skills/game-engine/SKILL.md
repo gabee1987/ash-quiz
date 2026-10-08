@@ -45,7 +45,8 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 |---|---|---|
 | `createGame(quiz, settings, pin, id, now)` | - | lobby state, teams created from `settings.teamNames` in team mode |
 | `joinPlayer({ id, name, teamId, token })` | lobby only (reconnect allowed any time via token) | adds player; name unique case-insensitively, max 60 players (`MAX_PLAYERS` in `packages/shared`); team mode requires a known `teamId` |
-| `reconnectPlayer(token)` / `disconnectPlayer(playerId)` | any | flips `connected` only |
+| `reconnectPlayer(token)` / `disconnectPlayer(playerId, now)` | any | flips `connected`; disconnect stamps `disconnectedAt`, reconnect clears it |
+| `announce({ id, text }, now)` / `clearAnnouncement()` | any | sets or clears `announcement: { id, text, at }` (1 to 200 characters, trimmed); `startGame` and `next` clear it too |
 | `kickPlayer(playerId)` | any except finished | removes player, recomputes nothing (their past points stay out of team totals from then on) |
 | `startGame()` | lobby, at least 1 player, at least 1 question | goes to question 0 |
 | `submitAnswer(playerId, questionId, answer)` | question, before `questionEndsAt`, once per player per question | records answer, answer type must match question type |

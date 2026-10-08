@@ -3,6 +3,7 @@ import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import { AppHeader } from '@/components/app-header'
 import { Backdrop } from '@/components/backdrop'
 import { Toaster } from '@/components/ui/sonner'
+import { installSocketToasts } from '@/lib/socket-toasts'
 import { installSquish } from '@/lib/squish'
 import { useEffect } from 'react'
 
@@ -12,6 +13,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootLayout() {
   useEffect(() => installSquish(), [])
+  useEffect(() => installSocketToasts(), [])
   return (
     <>
       <Backdrop />

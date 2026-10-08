@@ -36,10 +36,19 @@
 ### Look and feel
 - Opening the quiz settings on a laptop is animated: the question list slides out to the left, the question narrows and the settings slide in from the right with a soft spring; closing plays it backwards.
 - Scrollbars in the app's style: a rounded thumb in the theme colour that grows under the pointer.
+- Notifications and host messages share one design: rounded bubbles with a pressed edge in the message's colour (green for done, red for errors, amber for warnings, the theme colour for information and host messages), springing in with a small bounce, with a round icon that pops in. Error icons shake, the host's megaphone toots, and the Undo button is chunky. A host message falls in from the top of the screen like bubble gum (splat, stretch, wobble) and, when cleared, winds up, wobbles and flies back up off the screen; it never grows past the screen edge, and the content below glides down and back up with it instead of jumping. The host's message box previews the banner exactly as phones see it.
 - Springy details: focus rings, switch thumbs (which stretch while held), check marks, dialogs, side panels and menus.
 - Every button, menu item and choice card gives a short elastic "bubble gum" wobble when pressed; icons in buttons tilt on hover, choice cards lift, menus spring open, quiz cards fade in one after the other. Reduced-motion settings switch all of it off.
 - Four subdued themes for formal company events (Navy, Petrol, Stone, Bordeaux, next to Graphite) and two calmer answer colour sets (Muted, Corporate).
 - The results summary on the projector can be paused (button or P), so it no longer has to move on by itself.
+
+### Connection and host messages
+- The connection bar shows how long the connection has been gone ("Reconnecting… 12 s", or "No network" when the device itself is offline), and a short "Reconnected" message appears once it is back. The page reconnects at once when the network returns or the phone is unlocked.
+- An answer tapped during a connection drop is sent as soon as the phone is back in the game, retried once if the server's reply was lost, and stays marked as sending until then. If it still cannot be delivered while the question is open, the player is told to tap again; it is never lost silently.
+- Host buttons pressed while the host's own connection is coming back wait for it and then go through; before, they could be rejected.
+- Phones can no longer show an older state over a newer one after a reconnect: every update is numbered and an older one is ignored.
+- Host control: each player shows how long they have been offline, the header shows "connected / total" and the round-trip time to the server (green, amber, red), and a hint appears next to Start or Next question when more than a fifth of the players are reconnecting.
+- Host messages: "Get ready!", "Short break", "Last question!" or any text up to 200 characters, shown as a banner on every phone and the projector until the host clears it or the next question starts. Reloaded phones and a restarted server keep it.
 
 ### Fixes
 - Rate limiting applies to API requests only. Static files were counted too, so many phones sharing one public IP (venue wifi with a cloud deployment) could get errors and a blank page while loading the app.
