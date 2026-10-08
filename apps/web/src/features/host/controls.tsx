@@ -1,13 +1,15 @@
 import type { HostCommand, HostSnapshot } from '@ash-quiz/shared'
+import { WifiOffIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { alternativeAction, primaryAction } from './primary-action'
+import { alternativeAction, primaryAction, reconnectingCount } from './primary-action'
 
 /** Phase-aware primary button plus the secondary actions of the current phase. */
 export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (command: HostCommand) => void }) {
   const { t } = useTranslation()
   const primary = primaryAction(host)
   const alternative = alternativeAction(host)
+  const reconnecting = reconnectingCount(host)
   const endGame = () => {
     if (window.confirm(t('host.game.confirmEnd'))) onCommand({ type: 'end' })
   }
@@ -17,6 +19,12 @@ export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (
         <Button size="xl" className="w-full" onClick={() => onCommand(primary.command)}>
           {t(primary.label)}
         </Button>
+      )}
+      {reconnecting !== null && (
+        <p role="status" className="flex items-center justify-center gap-2 text-center text-sm font-semibold text-muted-foreground">
+          <WifiOffIcon className="size-4" aria-hidden="true" />
+          {t('host.game.reconnectingHint', { count: reconnecting })}
+        </p>
       )}
       {host.phase === 'lobby' && host.players.length === 0 && (
         <p className="text-center text-muted-foreground">{t('host.game.waitingForPlayers')}</p>

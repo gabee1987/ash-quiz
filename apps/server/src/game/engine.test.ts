@@ -1,7 +1,9 @@
 import type { Answer, GameSettings, Question } from '@ash-quiz/shared'
 import { describe, expect, it } from 'vitest'
 import {
+  announce,
   answersHidden,
+  clearAnnouncement,
   createGame,
   disconnectPlayer,
   endGame,
@@ -149,24 +151,25 @@ describe('lobby commands', () => {
   it('rejects a new join after start but lets a known token back in', () => {
     let state = startGame(withPlayers(1), T0)
     expectCode(() => join(state, 2), 'errors.gameAlreadyStarted')
-    state = disconnectPlayer(state, 'p1')
+    state = disconnectPlayer(state, 'p1', T0)
     state = joinPlayer(state, { id: 'other', name: 'Whatever', token: 'tok-1' })
     expect(Object.keys(state.players)).toEqual(['p1'])
     expect(state.players.p1!.connected).toBe(true)
   })
 
-  it('reconnectPlayer and disconnectPlayer flip connected only', () => {
+  it('reconnectPlayer and disconnectPlayer flip connected and stamp the drop time only', () => {
     const before = withPlayers(1)
-    const off = disconnectPlayer(before, 'p1')
-    expect(off.players.p1).toEqual({ ...before.players.p1, connected: false })
+    const off = disconnectPlayer(before, 'p1', T0 + 5)
+    expect(off.players.p1).toEqual({ ...before.players.p1, connected: false, disconnectedAt: T0 + 5 })
     const on = reconnectPlayer(off, 'tok-1')
     expect(on.players.p1).toEqual(before.players.p1)
+    expectSerialisable(off)
   })
 
   it('reconnectPlayer rejects an unknown token, disconnectPlayer ignores an unknown id', () => {
     const state = withPlayers(1)
     expectCode(() => reconnectPlayer(state, 'nope'), 'errors.playerNotFound')
-    expect(disconnectPlayer(state, 'nope')).toBe(state)
+    expect(disconnectPlayer(state, 'nope', T0)).toBe(state)
   })
 
   it('kickPlayer removes the player, not allowed once finished', () => {
@@ -387,6 +390,45 @@ describe('question flow', () => {
     // Immediately (the default): nothing to release.
     expect(resultsPending(endGame(withPlayers(1), T0))).toBe(false)
     expectCode(() => releaseResults(endGame(withPlayers(1), T0), 'players'), 'errors.invalidTransition')
+  })
+})
+
+describe('host messages', () => {
+  it('announce sets the message in any phase, trimmed and replacing the previous one', () => {
+    const lobby = announce(withPlayers(1), { id: 'm1', text: '  Get ready  ' }, T0 + 1)
+    expect(lobby.announcement).toEqual({ id: 'm1', text: 'Get ready', at: T0 + 1 })
+    const finished = announce(endGame(lobby, T0 + 2), { id: 'm2', text: 'Thanks' }, T0 + 3)
+    expect(finished.announcement).toEqual({ id: 'm2', text: 'Thanks', at: T0 + 3 })
+    expectSerialisable(finished)
+  })
+
+  it('announce rejects an empty or too long text', () => {
+    const state = withPlayers(1)
+    expectCode(() => announce(state, { id: 'm', text: '   ' }, T0), 'errors.invalidInput')
+    expectCode(() => announce(state, { id: 'm', text: 'x'.repeat(201) }, T0), 'errors.invalidInput')
+    expect(announce(state, { id: 'm', text: 'x'.repeat(200) }, T0).announcement?.text).toHaveLength(200)
+  })
+
+  it('clearAnnouncement removes it; without a message it changes nothing', () => {
+    const state = withPlayers(1)
+    expect(clearAnnouncement(announce(state, { id: 'm', text: 'Hi' }, T0)).announcement).toBeNull()
+    expect(clearAnnouncement(state)).toBe(state)
+  })
+
+  it('starting the game and every next question clear it; reveal and scoreboard keep it', () => {
+    let state = announce(withPlayers(1), { id: 'm1', text: 'Get ready' }, T0)
+    state = startGame(state, T0 + 1)
+    expect(state.announcement).toBeNull()
+    state = announce(state, { id: 'm2', text: 'Hurry' }, T0 + 2)
+    state = endQuestion(state)
+    expect(state.announcement?.id).toBe('m2')
+    state = next(state, T0 + 3)
+    expect(state.announcement).toBeNull()
+  })
+
+  it('games saved before messages existed load without one', () => {
+    const { announcement: _dropped, ...old } = withPlayers(1)
+    expect(clearAnnouncement(old)).toBe(old)
   })
 })
 

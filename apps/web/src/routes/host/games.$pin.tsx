@@ -13,8 +13,10 @@ import { Spinner } from '../../components/spinner'
 import { Timer } from '../../components/timer'
 import { Controls } from '../../features/host/controls'
 import { GradingPanel } from '../../features/host/grading-panel'
+import { MessageBox } from '../../features/host/message-box'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
+import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { RankList } from '../../features/play/scoreboard'
 import { ApiError, apiFetch } from '../../lib/api'
 import { toastError } from '../../lib/toast'
@@ -28,7 +30,7 @@ export const Route = createFileRoute('/host/games/$pin')({
 function HostGamePage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
-  const { status, host, clockOffset, closed } = useGameStore()
+  const { status, since, host, clockOffset, closed } = useGameStore()
   useGameTheme(host?.settings)
   const info = useQuery({
     queryKey: ['game', pin],
@@ -45,9 +47,12 @@ function HostGamePage() {
     [pin],
   )
 
-  async function send(command: HostCommand) {
+  /** Resolves true when the server accepted the command; errors become toasts. */
+  async function send(command: HostCommand): Promise<boolean> {
     const res = await emitAck('host:command', command)
-    if ('error' in res) toastError(new ApiError(0, res.error))
+    if (!('error' in res)) return true
+    toastError(new ApiError(0, res.error))
+    return false
   }
 
   if (closed) {
@@ -64,10 +69,11 @@ function HostGamePage() {
 
   return (
     <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-      <ConnectionBar status={status} />
+      <ConnectionBar status={status} since={since} />
       <div className="flex min-w-0 flex-col gap-5">
-        <Header host={host} />
+        <Header host={host} connected={status === 'connected'} />
         <Controls host={host} onCommand={(c) => void send(c)} />
+        <MessageBox announcement={host.announcement} onCommand={send} />
         <PhaseDetail
           host={host}
           clockOffset={clockOffset}
@@ -79,15 +85,16 @@ function HostGamePage() {
         )}
       </div>
       <div className="flex min-w-0 flex-col gap-6">
-        <PlayerPanel host={host} onKick={(playerId) => void send({ type: 'kick', playerId })} />
+        <PlayerPanel host={host} clockOffset={clockOffset} onKick={(playerId) => void send({ type: 'kick', playerId })} />
         <ReviewPanel host={host} />
       </div>
     </div>
   )
 }
 
-function Header({ host }: { host: HostSnapshot }) {
+function Header({ host, connected }: { host: HostSnapshot; connected: boolean }) {
   const { t } = useTranslation()
+  const online = host.players.filter((p) => p.connected).length
   const settings = [
     t(`host.create.modes.${host.settings.mode}`),
     host.settings.speedBonus ? t('host.create.speedBonus') : null,
@@ -111,6 +118,14 @@ function Header({ host }: { host: HostSnapshot }) {
             ` · ${t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}`}
         </p>
         <p className="text-xs text-muted-foreground">{settings.join(' · ')}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          {host.players.length > 0 && (
+            <span className="rounded-full border bg-card px-2.5 py-0.5 text-xs font-bold tabular-nums">
+              {t('host.game.connectedOfTotal', { connected: online, count: host.players.length })}
+            </span>
+          )}
+          <RoundTripBadge connected={connected} />
+        </div>
       </div>
       <Button asChild variant="secondary">
         <a href={`/screen/${host.pin}`} target="_blank" rel="noreferrer">

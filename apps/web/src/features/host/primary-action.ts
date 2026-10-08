@@ -45,6 +45,22 @@ const releaseToPlayers: PrimaryAction = {
   label: 'host.game.releaseToPlayers',
 }
 
+/** Share of disconnected players above which the host is told before starting a question. */
+const RECONNECTING_SHARE = 0.2
+
+/**
+ * Players still reconnecting when the host is about to start a question, if more than 20% are:
+ * a hint next to the primary action, never a block. Null otherwise.
+ */
+export function reconnectingCount(host: HostSnapshot): number | null {
+  const command = primaryAction(host)?.command.type
+  const startsQuestion =
+    command === 'start' || (command === 'next' && host.questionIndex + 1 < host.questionCount)
+  if (!startsQuestion || host.players.length === 0) return null
+  const offline = host.players.filter((p) => !p.connected).length
+  return offline / host.players.length > RECONNECTING_SHARE ? offline : null
+}
+
 /**
  * The other way on from the reveal: straight to the next question, or the scoreboard on demand.
  * After a game with held results: the phones' release while the podium is still held.

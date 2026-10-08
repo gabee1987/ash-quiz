@@ -17,12 +17,18 @@ interface Logger {
   error(obj: unknown, msg?: string): void
 }
 
-type Listener = (game: ManagedGame) => void
+/** `seq` is the game's broadcast counter for the snapshots of this transition. */
+type Listener = (game: ManagedGame, seq: number) => void
 
 interface Entry {
   game: ManagedGame
   timer: ReturnType<typeof setTimeout> | null
   saving: Promise<void>
+  /**
+   * Snapshot order. Seeded from the clock when the game is created or restored and raised by one
+   * per transition, so it keeps increasing across restarts (far fewer transitions than milliseconds).
+   */
+  seq: number
 }
 
 /** A finished game stays in memory this long so late reconnects still see the podium. */
@@ -49,6 +55,11 @@ export class GameManager {
     return this.games.get(pin)?.game
   }
 
+  /** The `seq` of the game's latest snapshots, for a socket that gets its snapshot directly. */
+  seq(pin: string): number {
+    return this.games.get(pin)?.seq ?? 0
+  }
+
   /** Called after every transition, before persistence. */
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener)
@@ -58,7 +69,12 @@ export class GameManager {
   async create(input: { id: string; quiz: GameQuiz; settings: GameSettings; hostId: string; quizId: string | null }) {
     const pin = generatePin((candidate) => this.games.has(candidate))
     const state = createGame(input.quiz, input.settings, pin, input.id, this.now())
-    const entry: Entry = { game: { state, hostId: input.hostId, quizId: input.quizId }, timer: null, saving: Promise.resolve() }
+    const entry: Entry = {
+      game: { state, hostId: input.hostId, quizId: input.quizId },
+      timer: null,
+      saving: Promise.resolve(),
+      seq: this.now(),
+    }
     // Persist before handing out the PIN so the lobby survives a restart.
     await this.store.save(entry.game)
     this.games.set(pin, entry)
@@ -76,10 +92,11 @@ export class GameManager {
     if (next === entry.game.state) return next
 
     entry.game = { ...entry.game, state: next }
+    entry.seq += 1
     this.schedule(pin, entry)
     for (const listener of this.listeners) {
       try {
-        listener(entry.game)
+        listener(entry.game, entry.seq)
       } catch (error) {
         this.log.error(error, 'game listener failed')
       }
@@ -93,10 +110,14 @@ export class GameManager {
    * everyone starts disconnected and timers are re-armed.
    */
   async restore(): Promise<number> {
-    const loaded = await this.store.loadActive(this.now())
+    const now = this.now()
+    const loaded = await this.store.loadActive(now)
     for (const game of loaded) {
       const players = Object.fromEntries(
-        Object.entries(game.state.players).map(([id, player]) => [id, { ...player, connected: false }]),
+        Object.entries(game.state.players).map(([id, player]) => [
+          id,
+          { ...player, connected: false, disconnectedAt: player.connected ? now : (player.disconnectedAt ?? now) },
+        ]),
       )
       // Games saved before a settings field existed get its default.
       const settings = gameSettingsSchema.parse(game.state.settings)
@@ -104,6 +125,7 @@ export class GameManager {
         game: { ...game, state: { ...game.state, settings, players } },
         timer: null,
         saving: Promise.resolve(),
+        seq: now,
       }
       this.games.set(game.state.pin, entry)
       this.schedule(game.state.pin, entry)

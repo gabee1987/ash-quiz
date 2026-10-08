@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MAX_PLAYERS, answerSchema } from './game.js'
+import { MAX_PLAYERS, announcementTextSchema, answerSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
@@ -37,6 +37,9 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   /** Host grading of a text question without accepted answers: listed players are correct. */
   z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(MAX_PLAYERS) }),
   z.object({ type: z.literal('end') }),
+  /** A message on every phone and the projector until cleared (or the next question starts). */
+  z.object({ type: z.literal('announce'), text: announcementTextSchema }),
+  z.object({ type: z.literal('clearAnnouncement') }),
 ])
 export type HostCommand = z.infer<typeof hostCommandSchema>
 
@@ -53,6 +56,8 @@ export interface ClientToServerEvents {
   'host:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:command': (data: HostCommand, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'screen:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
+  /** Round-trip check from the host control; no server state. */
+  'host:ping': (data: Record<string, never>, ack: (res: { ok: true } | ErrorPayload) => void) => void
 }
 
 export interface ServerToClientEvents {

@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { games, quizzes } from '../src/db/schema.js'
-import { endGame, extendTime, joinPlayer, releaseResults, startGame, submitAnswer } from '../src/game/index.js'
+import { announce, endGame, extendTime, joinPlayer, releaseResults, startGame, submitAnswer } from '../src/game/index.js'
 import { fixtureQuiz, fixtureSettings } from '../src/game/fixtures.js'
 import {
   FINISHED_TTL_MS,
@@ -119,6 +119,29 @@ describe('GameManager', () => {
     expect(restored.get(pin)!.state.phase).toBe('question')
     vi.advanceTimersByTime(0)
     expect(restored.get(pin)!.state.phase).toBe('reveal')
+    restored.close()
+  })
+
+  it('raises seq by one per transition and keeps it increasing across a restart, with the message kept', async () => {
+    const { manager, pin } = await started()
+    const seqs: number[] = []
+    manager.subscribe((_game, seq) => seqs.push(seq))
+    const before = manager.seq(pin)
+    manager.apply(pin, (s, now) => announce(s, { id: 'm1', text: 'Short break' }, now))
+    manager.apply(pin, (s) => extendTime(s, 5))
+    expect(seqs).toEqual([before + 1, before + 2])
+    const saved = structuredClone(manager.get(pin)!)
+    manager.close()
+
+    vi.advanceTimersByTime(1000) // restart
+    const store = memoryStore()
+    store.active = [saved]
+    const restored = new GameManager(store, quietLog)
+    await restored.restore()
+    expect(restored.seq(pin)).toBeGreaterThan(before + 2)
+    const state = restored.get(pin)!.state
+    expect(state.announcement?.text).toBe('Short break')
+    expect(state.players.p1).toMatchObject({ connected: false, disconnectedAt: Date.now() })
     restored.close()
   })
 
@@ -376,6 +399,68 @@ describeDb('sockets (database)', () => {
     expect(again.ack).toEqual({ token: a.ack.token })
     expect(again.snapshot.me).toMatchObject({ id: before.me.id, name: 'Anna', score: before.me.score, connected: true })
     expect(again.snapshot.phase).toBe('reveal')
+  })
+
+  it('a player with two sockets receives strictly increasing seq on both, the direct emit included', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const a = await player(pin, 'Anna')
+    const second = await player(pin, 'Anna', a.ack.token)
+    const seen: Record<string, number[]> = { first: [a.snapshot.seq], second: [second.snapshot.seq] }
+    a.socket.on('game:player', (s: PlayerSnapshot) => seen.first!.push(s.seq))
+    second.socket.on('game:player', (s: PlayerSnapshot) => seen.second!.push(s.seq))
+    const last = nextSnapshot<PlayerSnapshot>(second.socket, 'game:player', (s) => s.announcement?.text === 'Three')
+    await command(hostSocket, { type: 'start' })
+    await command(hostSocket, { type: 'announce', text: 'One' })
+    await command(hostSocket, { type: 'extendTime', seconds: 5 })
+    await command(hostSocket, { type: 'announce', text: 'Three' })
+    await last
+    for (const seqs of Object.values(seen)) {
+      for (let i = 1; i < seqs.length; i++) expect(seqs[i]).toBeGreaterThan(seqs[i - 1]!)
+    }
+    // The second socket's direct snapshot is no older than the broadcasts the first one got before it.
+    expect(second.snapshot.seq).toBeGreaterThanOrEqual(a.snapshot.seq)
+  })
+
+  it('a message reaches the host, the projector and phones (also on rejoin), and clearing removes it', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const screen = await connect()
+    await screen.emitWithAck('screen:attach', { pin })
+    const a = await player(pin, 'Anna')
+    const onPhone = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.announcement !== null)
+    const onScreen = nextSnapshot<HostSnapshot>(screen, 'game:host', (s) => s.announcement !== null)
+    const onHost = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.announcement !== null)
+    expect(await command(hostSocket, { type: 'announce', text: '  Short break ' })).toEqual({ ok: true })
+    const [phone, projector, control] = await Promise.all([onPhone, onScreen, onHost])
+    expect(phone.announcement).toMatchObject({ text: 'Short break', id: expect.any(String) })
+    expect(projector.announcement).toEqual(phone.announcement)
+    expect(control.announcement).toEqual(phone.announcement)
+
+    a.socket.disconnect()
+    const again = await player(pin, 'Anna', a.ack.token)
+    expect(again.snapshot.announcement?.text).toBe('Short break')
+
+    const cleared = nextSnapshot<PlayerSnapshot>(again.socket, 'game:player', (s) => s.announcement === null)
+    expect(await command(hostSocket, { type: 'clearAnnouncement' })).toEqual({ ok: true })
+    await cleared
+    expect(await command(hostSocket, { type: 'announce', text: '' })).toEqual({ error: 'errors.invalidInput' })
+    expect(await command(screen, { type: 'announce', text: 'Hi' })).toEqual({ error: 'errors.unauthorized' })
+  })
+
+  it('host:ping acks the host only, and the host sees when a player went offline', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    expect(await hostSocket.emitWithAck('host:ping', {})).toEqual({ ok: true })
+    const a = await player(pin, 'Anna')
+    expect(await a.socket.emitWithAck('host:ping', {})).toEqual({ error: 'errors.unauthorized' })
+
+    const offline = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.players[0]?.connected === false)
+    const before = Date.now()
+    a.socket.disconnect()
+    expect((await offline).players[0]!.disconnectedAt).toBeGreaterThanOrEqual(before)
+    const back = await player(pin, 'Anna', a.ack.token)
+    expect(back.snapshot.me.disconnectedAt).toBeNull()
   })
 
   it('kick sends game:closed to the player', async () => {

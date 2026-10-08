@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { AnnouncementBanner } from '../components/announcement-banner'
 import { ConnectionBar } from '../components/connection-bar'
 import { Spinner } from '../components/spinner'
 import { primaryAction } from '../features/host/primary-action'
@@ -28,7 +29,7 @@ export const Route = createFileRoute('/screen/$pin')({
 function ScreenPage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
-  const { status, host, clockOffset, closed } = useGameStore()
+  const { status, since, host, clockOffset, closed } = useGameStore()
   useGameTheme(host?.settings)
   const me = useQuery({ ...meQueryOptions, throwOnError: false })
   const info = useQuery({
@@ -73,7 +74,8 @@ function ScreenPage() {
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col px-4 py-4 lg:px-12">
-      <ConnectionBar status={status} />
+      <ConnectionBar status={status} since={since} />
+      <AnnouncementBanner announcement={host.announcement} size="screen" />
       <ScreenPhase host={host} clockOffset={clockOffset} joinUrl={info.data?.joinUrl ?? null} />
       {/* The host's next step, for a projector driven with a mouse; the keyboard shortcut still works. */}
       {action && (

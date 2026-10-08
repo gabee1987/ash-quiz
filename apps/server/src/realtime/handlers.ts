@@ -15,6 +15,8 @@ import { SESSION_COOKIE, verifySession } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import {
   EngineError,
+  announce,
+  clearAnnouncement,
   disconnectPlayer,
   endGame,
   endQuestion,
@@ -68,13 +70,13 @@ const rooms = {
 const invalidInput: ErrorPayload = { error: 'errors.invalidInput' }
 
 export function registerSocketHandlers(io: AppSocketServer, { manager, db, parseCookie, log }: SocketDeps) {
-  manager.subscribe(({ state }) => {
+  manager.subscribe(({ state }, seq) => {
     const now = Date.now()
     // The public screen never receives the live answer list.
-    io.to(rooms.host(state.pin)).emit('game:host', toHostSnapshot(state, now, { includeAnswers: true }))
-    io.to(rooms.screen(state.pin)).emit('game:host', toHostSnapshot(state, now))
+    io.to(rooms.host(state.pin)).emit('game:host', toHostSnapshot(state, now, { includeAnswers: true, seq }))
+    io.to(rooms.screen(state.pin)).emit('game:host', toHostSnapshot(state, now, { seq }))
     for (const playerId of Object.keys(state.players)) {
-      io.to(rooms.player(state.pin, playerId)).emit('game:player', toPlayerSnapshot(state, playerId, now))
+      io.to(rooms.player(state.pin, playerId)).emit('game:player', toPlayerSnapshot(state, playerId, now, seq))
     }
   })
 
@@ -103,10 +105,12 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
     const { pin, playerId, role } = socket.data
     const game = pin ? manager.get(pin) : undefined
     if (!game) return
+    // Same seq as the latest broadcast: it shows the same state.
+    const seq = manager.seq(game.state.pin)
     if (role === 'player' && playerId && game.state.players[playerId]) {
-      socket.emit('game:player', toPlayerSnapshot(game.state, playerId, Date.now()))
+      socket.emit('game:player', toPlayerSnapshot(game.state, playerId, Date.now(), seq))
     } else if (role === 'host' || role === 'screen') {
-      socket.emit('game:host', toHostSnapshot(game.state, Date.now(), { includeAnswers: role === 'host' }))
+      socket.emit('game:host', toHostSnapshot(game.state, Date.now(), { includeAnswers: role === 'host', seq }))
     }
   }
 
@@ -213,13 +217,17 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
       }),
     )
 
+    socket.on('host:ping', (_data, ack) =>
+      respond(ack, () => (socket.data.role === 'host' ? { ok: true as const } : { error: 'errors.unauthorized' })),
+    )
+
     socket.on('disconnect', () => {
       const { pin, playerId, role } = socket.data
       if (role !== 'player' || !pin || !playerId || !manager.get(pin)) return
       // The same player may be connected from another tab or device.
       if ((io.sockets.adapter.rooms.get(rooms.player(pin, playerId))?.size ?? 0) > 0) return
       try {
-        manager.apply(pin, (state) => disconnectPlayer(state, playerId))
+        manager.apply(pin, (state, now) => disconnectPlayer(state, playerId, now))
       } catch (error) {
         log.error(error, 'disconnect handling failed')
       }
@@ -249,6 +257,10 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return endGame(state, now)
     case 'releaseResults':
       return releaseResults(state, command.audience)
+    case 'announce':
+      return announce(state, { id: nanoid(8), text: command.text }, now)
+    case 'clearAnnouncement':
+      return clearAnnouncement(state)
   }
 }
 

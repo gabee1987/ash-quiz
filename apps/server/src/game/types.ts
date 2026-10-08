@@ -1,4 +1,4 @@
-import type { Answer, GamePhase, GameSettings, Quiz } from '@ash-quiz/shared'
+import type { Announcement, Answer, GamePhase, GameSettings, Quiz } from '@ash-quiz/shared'
 
 export { MAX_PLAYERS } from '@ash-quiz/shared'
 
@@ -20,6 +20,8 @@ export interface Player {
   /** Secret used to reclaim the player after a reconnect. Never sent in snapshots. */
   token: string
   connected: boolean
+  /** Unix ms when the last connection dropped; null while connected. Missing in games saved before it existed. */
+  disconnectedAt?: number | null
   score: number
   answers: Record<string, PlayerAnswerRecord>
 }
@@ -54,6 +56,8 @@ export interface GameState {
   finishedAt: number | null
   /** Final results released per audience (`finalResults: 'onRelease'`). Missing in games saved before it existed. */
   released?: Record<ResultsAudience, boolean>
+  /** The host's message on every phone and the projector. Missing in games saved before it existed. */
+  announcement?: Announcement | null
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

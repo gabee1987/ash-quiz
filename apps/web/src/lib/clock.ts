@@ -5,6 +5,18 @@ export function remainingMs(endsAt: number, clockOffset: number, localNow: numbe
   return Math.max(0, endsAt - (localNow + clockOffset))
 }
 
+/** Date.now(), refreshed every second while `active` (for "for 12 s" labels). */
+export function useNow(active = true): number {
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    if (!active) return
+    setNow(Date.now())
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [active])
+  return now
+}
+
 /** Remaining ms (rounded up to 100 ms), updated every animation frame until it reaches 0. */
 export function useCountdown(endsAt: number | null, clockOffset: number): number {
   const compute = () => (endsAt === null ? 0 : Math.ceil(remainingMs(endsAt, clockOffset, Date.now()) / 100) * 100)

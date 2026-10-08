@@ -2,6 +2,7 @@ import type { PlayerSnapshot } from '@ash-quiz/shared'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AnnouncementBanner } from '../components/announcement-banner'
 import { ConnectionBar } from '../components/connection-bar'
 import { Button } from '../components/ui/button'
 import { Spinner } from '../components/spinner'
@@ -22,7 +23,7 @@ function PlayPage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
   const navigate = useNavigate()
-  const { status, player, clockOffset, closed } = useGameStore()
+  const { status, since, player, clockOffset, closed } = useGameStore()
   useGameTheme(player?.settings)
 
   useEffect(() => {
@@ -58,8 +59,15 @@ function PlayPage() {
 
   return (
     <>
-      <ConnectionBar status={status} />
-      {!player ? <Spinner /> : <PhaseView snapshot={player} clockOffset={clockOffset} />}
+      <ConnectionBar status={status} since={since} />
+      {!player ? (
+        <Spinner />
+      ) : (
+        <>
+          <AnnouncementBanner announcement={player.announcement} />
+          <PhaseView snapshot={player} clockOffset={clockOffset} />
+        </>
+      )}
     </>
   )
 }

@@ -51,8 +51,9 @@ export function toPublicQuestion(question: Question): PublicQuestion {
  * results held back are concealed as for players. The release flags are the projector's
  * (a host-attached projector hides what it may not show yet itself).
  */
-export function toHostSnapshot(state: GameState, now: number, { includeAnswers = false } = {}): HostSnapshot {
-  const base = baseSnapshot(state, now, 'screen')
+/** `seq` is the realtime layer's broadcast counter, passed through as is. */
+export function toHostSnapshot(state: GameState, now: number, { includeAnswers = false, seq = 0 } = {}): HostSnapshot {
+  const base = baseSnapshot(state, now, 'screen', seq)
   return {
     ...(includeAnswers ? base : conceal(state, base)),
     currentAnswers: includeAnswers ? currentAnswers(state) : null,
@@ -60,8 +61,8 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
   }
 }
 
-export function toPlayerSnapshot(state: GameState, playerId: string, now: number): PlayerSnapshot {
-  const base = conceal(state, baseSnapshot(state, now, 'players'))
+export function toPlayerSnapshot(state: GameState, playerId: string, now: number, seq = 0): PlayerSnapshot {
+  const base = conceal(state, baseSnapshot(state, now, 'players', seq))
   const me = base.players.find((p) => p.id === playerId)
   const player = state.players[playerId]
   if (!me || !player) throw new EngineError('errors.playerNotFound')
@@ -124,7 +125,7 @@ export function isRevealed(state: GameState): boolean {
   return state.phase === 'reveal' || state.phase === 'scoreboard' || state.phase === 'finished'
 }
 
-function baseSnapshot(state: GameState, now: number, audience: ResultsAudience): GameSnapshotBase {
+function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, seq: number): GameSnapshotBase {
   const question = state.quiz.questions[state.questionIndex] ?? null
   const inQuestion = state.phase === 'question' && question !== null
   const revealed = question !== null && isRevealed(state)
@@ -147,6 +148,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience):
     name: p.name,
     teamId: p.teamId,
     connected: p.connected,
+    disconnectedAt: p.connected ? null : (p.disconnectedAt ?? null),
     score: p.score,
     rank: p.rank,
     previousRank: previousPlayerRank.get(p.id) ?? p.rank,
@@ -163,6 +165,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience):
   }))
 
   return {
+    seq,
     pin: state.pin,
     phase: state.phase,
     mode: state.settings.mode,
@@ -181,6 +184,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience):
     settings: state.settings,
     answersHidden: answersHidden(state, audience),
     resultsPending: resultsPendingFor(state, audience),
+    announcement: state.announcement ?? null,
   }
 }
 
