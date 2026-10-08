@@ -1,8 +1,16 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from './button'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
-/** Modal confirmation built on the native <dialog> (focus trap and Escape for free). */
+/** Modal confirmation. Rendered while the question is open; Escape or Cancel calls onCancel. */
 export function ConfirmDialog({
   title,
   children,
@@ -21,35 +29,29 @@ export function ConfirmDialog({
   onCancel: () => void
 }) {
   const { t } = useTranslation()
-  const ref = useRef<HTMLDialogElement>(null)
-  useEffect(() => {
-    ref.current?.showModal()
-  }, [])
   return (
-    <dialog
-      ref={ref}
-      onCancel={onCancel}
-      aria-labelledby="confirm-title"
-      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl bg-brand-dark p-5 text-white backdrop:bg-black/70"
-    >
-      <h2 id="confirm-title" className="mb-2 text-xl font-bold">
-        {title}
-      </h2>
-      {children && <div className="mb-4 text-white/80">{children}</div>}
-      <div className="flex gap-2">
-        <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
-          {t('common.cancel')}
-        </Button>
-        <Button
-          type="button"
-          className={`flex-1 ${danger ? 'bg-red-600!' : ''}`}
-          disabled={pending}
-          onClick={onConfirm}
-          autoFocus
-        >
-          {confirmLabel}
-        </Button>
-      </div>
-    </dialog>
+    <Dialog open onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent showCloseButton={false} className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {children && <DialogDescription asChild><div>{children}</div></DialogDescription>}
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            type="button"
+            variant={danger ? 'destructive' : 'default'}
+            className="flex-1"
+            disabled={pending}
+            onClick={onConfirm}
+            autoFocus
+          >
+            {confirmLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

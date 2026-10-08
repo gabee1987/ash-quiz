@@ -36,6 +36,8 @@ export function toResults(state: GameState): GameResults {
     name: t.name,
     score: t.score,
     rank: t.rank,
+    // Final standings: nothing is pending, so there is no earlier rank to compare with.
+    previousRank: t.rank,
     memberCount: players.filter((p) => p.teamId === t.id).length,
   }))
   const podium: PodiumPlace[] = (state.settings.mode === 'team' ? teams : rankedPlayers)

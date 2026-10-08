@@ -93,6 +93,37 @@ function checkQuestions(questions: Question[], ctx: z.RefinementCtx) {
 export const gameModes = ['classic', 'team'] as const
 export type GameMode = (typeof gameModes)[number]
 
+/**
+ * Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice.
+ * The first seven are playful, the last five (graphite onwards) are subdued for formal company events.
+ */
+export const gameThemes = [
+  'classic',
+  'arcade',
+  'sunset',
+  'mint',
+  'ocean',
+  'berry',
+  'forest',
+  'graphite',
+  'navy',
+  'petrol',
+  'stone',
+  'bordeaux',
+] as const
+export type GameTheme = (typeof gameThemes)[number]
+
+/**
+ * Six fixed answer colours (one per option index), independent of the theme so answers stand out from the background.
+ * Muted and corporate are the low-saturation sets for formal events.
+ */
+export const answerPalettes = ['vivid', 'candy', 'neon', 'earth', 'muted', 'corporate'] as const
+export type AnswerPalette = (typeof answerPalettes)[number]
+
+/** What marks each answer option besides its colour. */
+export const answerSymbols = ['shapes', 'letters', 'numbers', 'icons'] as const
+export type AnswerSymbols = (typeof answerSymbols)[number]
+
 export const gameSettingsSchema = z
   .object({
     mode: z.enum(gameModes).default('classic'),
@@ -106,10 +137,16 @@ export const gameSettingsSchema = z
     revealAnswers: z.enum(['afterQuestion', 'atEnd']).default('afterQuestion'),
     /** Scoreboard after every question, or only when the host asks for it (and at the end). */
     scoreboard: z.enum(['afterQuestion', 'onDemand']).default('afterQuestion'),
-    /** Answer buttons on phones: neutral with letters, or coloured like the projector. */
-    answerStyle: z.enum(['plain', 'colourful']).default('plain'),
+    /** Answer buttons on phones: neutral cards with a coloured symbol badge, or fully coloured like the projector. */
+    answerStyle: z.enum(['plain', 'colourful']).default('colourful'),
+    /** Colours of the answer options on phones (when colourful), the projector and the result bars. */
+    answerPalette: z.enum(answerPalettes).default('vivid'),
+    /** Symbols shown on the answer options next to the text. */
+    answerSymbols: z.enum(answerSymbols).default('shapes'),
     /** Final results (podium, ranks, answer review) on phones and the projector: as soon as the game ends, or when the host releases them. */
     finalResults: z.enum(['immediately', 'onRelease']).default('immediately'),
+    /** Colour theme of the game views. */
+    theme: z.enum(gameThemes).default('classic'),
   })
   .superRefine(checkTeams)
 export type GameSettings = z.infer<typeof gameSettingsSchema>

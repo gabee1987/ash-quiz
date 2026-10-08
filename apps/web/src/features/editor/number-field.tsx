@@ -1,4 +1,6 @@
 import { useId, useState } from 'react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { parseNumber } from '../questions/number-answer'
 
 /** Number input that keeps the typed text (e.g. "-" or "3,") until it parses; accepts a decimal comma. */
@@ -20,9 +22,11 @@ export function NumberField({
   const parsed = parseNumber(text)
   const invalid = parsed === null || (min !== undefined && parsed < min)
   return (
-    <div className="flex flex-col gap-1 text-sm">
-      <label htmlFor={id}>{label}</label>
-      <input
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={id} className="font-semibold">
+        {label}
+      </Label>
+      <Input
         id={id}
         inputMode="decimal"
         value={text}
@@ -33,10 +37,10 @@ export function NumberField({
         }}
         aria-invalid={invalid || error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={`min-h-12 rounded-lg bg-white px-3 text-lg text-black ${invalid || error ? 'ring-2 ring-red-400' : ''}`}
+        className="text-lg"
       />
       {error && (
-        <span id={`${id}-error`} className="text-red-300">
+        <span id={`${id}-error`} className="text-sm font-semibold text-destructive">
           {error}
         </span>
       )}

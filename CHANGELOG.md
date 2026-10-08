@@ -1,5 +1,49 @@
 # Changelog
 
+## Unreleased
+
+### Design
+- New design system: shadcn/ui components on Radix, design tokens for colours, radii and shadows, the Nunito font (served by the app itself), icons.
+- Light, dark and system colour mode on every screen, chosen per device and remembered, applied before the page is drawn (no flash).
+- Four game themes (Classic, Arcade, Sunset, Mint), set per quiz and overridable per game; phones, the projector and the host control follow the game's theme.
+- New layout for hosts: sidebar on laptops, bottom tab bar on phones; restyled login, quiz list (cards), game history (table on laptops, cards on phones), results, users, password, editor forms and host control.
+- Errors from the server that no form field causes are shown as toasts.
+- Accessibility: visible focus rings, contrast checked automatically in both modes, reduced-motion setting respected.
+
+### Game screens
+- Motion everywhere players and the audience look: buttons lift and sink, a soft colour backdrop drifts behind every page, questions and answers pop in, the timer is a ring, points count up, the reveal bars grow, the scoreboard shows who moved up or down, the podium rises third, second, first with confetti.
+- Join page: one box per PIN digit (typing, pasting and SMS-style autofill all work), and a camera button that reads the projector's QR code inside the app (over HTTPS).
+- Answer colours and symbols are game settings: four palettes (Vivid, Candy, Neon, Earth) and four symbol sets (shapes, letters, numbers, icons), independent of the theme so answers stand out from the background. New quizzes get coloured answer buttons on phones by default; quizzes saved before the answer style existed now get them too.
+- Four more themes: Ocean, Berry, Forest and Graphite (a nearly neutral one for formal events).
+- Projector: the reveal shows the question's image, the correct answer in its colour, the bars and the figures in one layout; the podium adds a crown, confetti and the runners-up; the results summary has on-screen arrows and a progress bar; a projector opened by the host shows the next step as a button next to the keyboard shortcut.
+- Phones: rank change arrows on the reveal and the scoreboard, a "Well played" card for everyone outside the top three.
+- Results page: each question's image next to its statistics.
+- Editor: the phone preview renders in the quiz's theme and palette and shows a sample question when none is selected, so every visual setting is previewed at once.
+
+### Quiz editor
+- New layout: the question list, the question being edited and the phone preview side by side on a laptop, with the quiz title, save state and Play in a top bar; on phones the list opens from a bar at the bottom and the preview behind a button. Description and game settings moved into a "Quiz settings" panel.
+- Questions and answer options are reordered by dragging: with the mouse, by pressing and holding on a touch screen, or with the keyboard (Space, arrows, Space). Move up and down stay as buttons; move to top or bottom is in the question's menu.
+- Adding a question shows the types as cards and inserts the new one after the current question. Duplicating needs no confirmation, and deleting needs none either: an "Undo" in the notification brings the question back in place for 10 seconds.
+- Option rows show the colour and symbol the option gets in the game, a large "Correct" toggle, and Enter jumps to the next option or adds one.
+- Images can be dropped or pasted (a screenshot pasted anywhere in the editor becomes the question's image), with an upload progress bar and a "Replace" button.
+- Problems are listed under "N to fix" in the top bar, each taking you to its field, and marked with a red dot in the list; Play explains why it is disabled.
+- Saving tells the truth: saved, saving, offline (sent automatically once the connection is back) or failed (with a retry button). Leaving the editor with changes that cannot be saved asks first.
+- Keyboard shortcuts: Ctrl+D duplicate, Ctrl+Enter add, Alt+Up/Down move, "?" for the list. They never fire while typing in a field.
+- Quiz list: search by title, sort by last edited or title; a duplicated quiz opens straight in the editor.
+- The top bar stays in view while scrolling (tablets and laptops). On a laptop the quiz settings open beside the question and the phone preview instead of over them, so theme and colour choices are previewed as they are made.
+- Drop-down lists (time limit, points, sorting) have the app's own look instead of the browser's.
+
+### Look and feel
+- Opening the quiz settings on a laptop is animated: the question list slides out to the left, the question narrows and the settings slide in from the right with a soft spring; closing plays it backwards.
+- Scrollbars in the app's style: a rounded thumb in the theme colour that grows under the pointer.
+- Springy details: focus rings, switch thumbs (which stretch while held), check marks, dialogs, side panels and menus.
+- Every button, menu item and choice card gives a short elastic "bubble gum" wobble when pressed; icons in buttons tilt on hover, choice cards lift, menus spring open, quiz cards fade in one after the other. Reduced-motion settings switch all of it off.
+- Four subdued themes for formal company events (Navy, Petrol, Stone, Bordeaux, next to Graphite) and two calmer answer colour sets (Muted, Corporate).
+- The results summary on the projector can be paused (button or P), so it no longer has to move on by itself.
+
+### Fixes
+- Rate limiting applies to API requests only. Static files were counted too, so many phones sharing one public IP (venue wifi with a cloud deployment) could get errors and a blank page while loading the app.
+
 ## 1.0.0 – 2026-10-07
 
 First release.

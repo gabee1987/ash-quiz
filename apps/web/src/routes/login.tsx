@@ -2,9 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../components/button'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { toastError } from '@/lib/toast'
 import { TextField } from '../components/text-field'
-import { ApiError, apiFetch } from '../lib/api'
+import { apiFetch } from '../lib/api'
 import { meQueryOptions, type User } from '../lib/auth'
 
 export const Route = createFileRoute('/login')({
@@ -26,6 +28,7 @@ function LoginPage() {
       queryClient.setQueryData(meQueryOptions.queryKey, user)
       void navigate({ to: user.mustChangePassword ? '/host/password' : '/host' })
     },
+    onError: toastError,
   })
 
   const usernameError = submitted && !username.trim() ? t('auth.required') : undefined
@@ -38,41 +41,42 @@ function LoginPage() {
     login.mutate()
   }
 
-  const errorCode = login.error instanceof ApiError ? login.error.code : login.error ? 'errors.internal' : null
-
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-4">
-      <h1 className="text-center text-2xl font-bold">{t('auth.title')}</h1>
-      <form className="flex flex-col gap-3" onSubmit={onSubmit} noValidate>
-        <TextField
-          label={t('auth.username')}
-          name="username"
-          autoComplete="username"
-          autoCapitalize="none"
-          enterKeyHint="next"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          error={usernameError}
-        />
-        <TextField
-          label={t('auth.password')}
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          enterKeyHint="go"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={passwordError}
-        />
-        {errorCode && (
-          <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-3 text-red-200">
-            {t(errorCode)}
-          </p>
-        )}
-        <Button type="submit" disabled={login.isPending}>
-          {login.isPending ? t('common.loading') : t('auth.submit')}
-        </Button>
-      </form>
+    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-center text-2xl">
+            <h1>{t('auth.title')}</h1>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+            <TextField
+              label={t('auth.username')}
+              name="username"
+              autoComplete="username"
+              autoCapitalize="none"
+              enterKeyHint="next"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              error={usernameError}
+            />
+            <TextField
+              label={t('auth.password')}
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              enterKeyHint="go"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={passwordError}
+            />
+            <Button type="submit" size="lg" className="mt-2" disabled={login.isPending}>
+              {login.isPending ? t('common.loading') : t('auth.submit')}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

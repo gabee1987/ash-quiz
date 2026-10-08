@@ -1,55 +1,86 @@
+import type { AnswerSymbols } from '@ash-quiz/shared'
+import { Loader2Icon } from 'lucide-react'
 import type { ButtonHTMLAttributes } from 'react'
-import { CheckIcon, ShapeIcon } from './icons'
-import { optionColour } from './option-colours'
+import { cn } from '@/lib/cn'
+import { CheckIcon, OptionSymbol } from './icons'
+import { optionFill, optionVars } from './option-colours'
 
 /**
- * Answer option. Plain with a letter (A, B, C…), or coloured with a shape. The projector
- * (`large`) is always coloured so the room can follow the bars; phones follow the game setting.
+ * Answer option. Plain (a neutral card with a coloured symbol badge) or coloured in its palette
+ * colour with the symbol on it. The projector (`large`) is always coloured so the room can follow
+ * the bars; phones follow the game's answer style. Presses sink the button like the chunky buttons.
  */
 export function OptionButton({
   index,
   label,
   imageId,
+  symbols = 'shapes',
   selected = false,
   dimmed = false,
+  pending = false,
   large = false,
   colourful = large,
-  className = '',
+  className,
+  style,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   index: number
   label: string
   imageId?: string | undefined
+  symbols?: AnswerSymbols | undefined
   selected?: boolean
   dimmed?: boolean
+  /** The answer is on its way to the server. */
+  pending?: boolean
   /** Projector size. */
   large?: boolean
   colourful?: boolean
 }) {
   const size = large ? 'min-h-28 px-8 py-5 text-4xl' : 'min-h-16 px-4 py-3 text-lg'
   const look = colourful
-    ? `shadow-md ${optionColour(index)} ${selected ? 'ring-4 ring-white' : ''}`
-    : `border ${selected ? 'border-white bg-brand text-white' : 'border-white/25 bg-white/10 text-white enabled:hover:bg-white/15'}`
+    ? cn(
+        optionFill,
+        '[--option-edge:color-mix(in_oklch,var(--option),black_25%)] shadow-[0_5px_0_0_var(--option-edge)]',
+        'enabled:hover:-translate-y-0.5 enabled:hover:shadow-[0_7px_0_0_var(--option-edge)] enabled:hover:brightness-105',
+        'enabled:active:translate-y-1 enabled:active:shadow-none',
+        selected && 'ring-4 ring-foreground ring-offset-2 ring-offset-background',
+      )
+    : cn(
+        'border-2 shadow-[0_4px_0_0_var(--secondary-edge)] enabled:hover:-translate-y-0.5 enabled:active:translate-y-1 enabled:active:shadow-none',
+        selected ? 'border-primary bg-primary text-primary-foreground' : 'bg-card text-card-foreground enabled:hover:border-ring',
+      )
   return (
     <button
       type="button"
       aria-pressed={selected}
       {...props}
-      className={`flex items-center gap-3 rounded-xl text-left font-semibold active:scale-[0.98] disabled:cursor-default ${size} ${look} ${dimmed ? 'opacity-40' : ''} ${className}`}
+      style={{ ...optionVars(index), ...style }}
+      className={cn(
+        'flex items-center gap-3 rounded-2xl text-left font-bold transition-[transform,box-shadow,filter] duration-150 ease-out outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-default motion-reduce:transition-none',
+        size,
+        look,
+        dimmed && 'opacity-40',
+        className,
+      )}
     >
       {colourful ? (
-        <ShapeIcon index={index} className="size-[1.4em] shrink-0" />
+        <OptionSymbol symbols={symbols} index={index} className="size-[1.4em] shrink-0" />
       ) : (
         <span
           aria-hidden="true"
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-base font-bold"
+          style={optionVars(index)}
+          className={cn('flex shrink-0 items-center justify-center rounded-xl', optionFill, large ? 'size-14 text-2xl' : 'size-9 text-base')}
         >
-          {String.fromCharCode(65 + index)}
+          <OptionSymbol symbols={symbols} index={index} className="size-[1.2em]" />
         </span>
       )}
       {imageId && <img src={`/api/images/${imageId}`} alt="" className="h-[2.5em] w-auto shrink-0 rounded object-contain" />}
       <span className="flex-1 wrap-break-word">{label}</span>
-      {selected && <CheckIcon className="size-6 shrink-0" />}
+      {pending ? (
+        <Loader2Icon className="size-6 shrink-0 animate-spin" aria-hidden="true" />
+      ) : (
+        selected && <CheckIcon className="size-6 shrink-0" />
+      )}
     </button>
   )
 }

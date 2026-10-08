@@ -1,9 +1,378 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
-@theme {
-  --color-brand: #4f46e5;
-  --color-brand-dark: #1e1b4b;
+/* `dark:` follows the resolved colour mode on <html data-mode>, set before first paint by public/mode-init.js. */
+@custom-variant dark (&:where([data-mode='dark'], [data-mode='dark'] *));
+
+/*
+ * Design tokens. Components use only the semantic names below (bg-card, text-muted-foreground…).
+ * Colours are built from a theme hue (--hue), an accent hue (--hue-accent) and a chroma multiplier
+ * (--chroma), so a game theme only overrides those and both colour modes keep their contrast.
+ */
+:root {
+  --hue: 277;
+  --hue-accent: 330;
+  --tint: 0.012;
+  --chroma: 1;
+  --radius: 1rem;
+}
+
+/*
+ * The tokens are declared on every [data-theme] element as well as on :root, so a theme set on a
+ * wrapper (the editor's phone preview) recomputes them from its own hues. During a game the theme
+ * sits on <html> (useGameTheme), so dialogs and toasts in portals follow it too.
+ */
+:root,
+[data-theme] {
+  --background: oklch(0.975 calc(var(--tint) * var(--chroma)) var(--hue));
+  --foreground: oklch(0.22 calc(0.045 * var(--chroma)) var(--hue));
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.51 calc(0.22 * var(--chroma)) var(--hue));
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-edge: oklch(0.38 calc(0.18 * var(--chroma)) var(--hue));
+  --secondary: oklch(0.93 calc(0.035 * var(--chroma)) var(--hue));
+  --secondary-foreground: oklch(0.3 calc(0.12 * var(--chroma)) var(--hue));
+  --secondary-edge: oklch(0.85 calc(0.05 * var(--chroma)) var(--hue));
+  --muted: oklch(0.945 calc(0.018 * var(--chroma)) var(--hue));
+  --muted-foreground: oklch(0.46 calc(0.04 * var(--chroma)) var(--hue));
+  --accent: oklch(0.93 calc(0.05 * var(--chroma)) var(--hue-accent));
+  --accent-foreground: oklch(0.32 calc(0.14 * var(--chroma)) var(--hue-accent));
+  --accent-strong: oklch(0.68 calc(0.17 * var(--chroma)) var(--hue-accent));
+  --destructive: oklch(0.55 0.21 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --destructive-edge: oklch(0.42 0.17 27);
+  --success: oklch(0.5 0.14 150);
+  --success-foreground: oklch(0.99 0 0);
+  --success-edge: oklch(0.4 0.12 150);
+  --warning: oklch(0.8 0.15 80);
+  --warning-foreground: oklch(0.25 0.06 60);
+  --border: oklch(0.89 calc(0.02 * var(--chroma)) var(--hue));
+  --input: oklch(0.86 calc(0.025 * var(--chroma)) var(--hue));
+  --ring: oklch(0.55 calc(0.22 * var(--chroma)) var(--hue));
+  --surface-wash: linear-gradient(180deg, oklch(0.96 calc(0.03 * var(--chroma)) var(--hue)) 0%, var(--background) 22rem);
+  --shadow-color: oklch(0.3 calc(0.08 * var(--chroma)) var(--hue) / 0.12);
+  /* Drifting backdrop blobs (components/backdrop.tsx). */
+  --blob-1: oklch(0.78 calc(0.13 * var(--chroma)) var(--hue) / 0.5);
+  --blob-2: oklch(0.8 calc(0.12 * var(--chroma)) var(--hue-accent) / 0.4);
+  --blob-3: oklch(0.82 calc(0.1 * var(--chroma)) calc(var(--hue) + 50) / 0.4);
+  color-scheme: light;
+}
+
+:root[data-mode='dark'],
+:root[data-mode='dark'] [data-theme] {
+  --background: oklch(0.21 calc(0.07 * var(--chroma)) var(--hue));
+  --foreground: oklch(0.97 calc(0.01 * var(--chroma)) var(--hue));
+  --card: oklch(0.27 calc(0.08 * var(--chroma)) var(--hue));
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.29 calc(0.08 * var(--chroma)) var(--hue));
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.55 calc(0.22 * var(--chroma)) var(--hue));
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-edge: oklch(0.4 calc(0.19 * var(--chroma)) var(--hue));
+  --secondary: oklch(0.34 calc(0.08 * var(--chroma)) var(--hue));
+  --secondary-foreground: oklch(0.96 calc(0.02 * var(--chroma)) var(--hue));
+  --secondary-edge: oklch(0.25 calc(0.07 * var(--chroma)) var(--hue));
+  --muted: oklch(0.3 calc(0.07 * var(--chroma)) var(--hue));
+  --muted-foreground: oklch(0.8 calc(0.04 * var(--chroma)) var(--hue));
+  --accent: oklch(0.36 calc(0.1 * var(--chroma)) var(--hue-accent));
+  --accent-foreground: oklch(0.95 calc(0.03 * var(--chroma)) var(--hue-accent));
+  --accent-strong: oklch(0.72 calc(0.16 * var(--chroma)) var(--hue-accent));
+  --destructive: oklch(0.7 0.18 25);
+  --destructive-foreground: oklch(0.2 0.06 25);
+  --destructive-edge: oklch(0.55 0.17 25);
+  --success: oklch(0.75 0.17 150);
+  --success-foreground: oklch(0.2 0.05 150);
+  --success-edge: oklch(0.58 0.15 150);
+  --warning: oklch(0.82 0.15 80);
+  --warning-foreground: oklch(0.22 0.06 60);
+  --border: oklch(0.36 calc(0.07 * var(--chroma)) var(--hue));
+  --input: oklch(0.42 calc(0.07 * var(--chroma)) var(--hue));
+  --ring: oklch(0.72 calc(0.17 * var(--chroma)) var(--hue));
+  --surface-wash: linear-gradient(180deg, oklch(0.26 calc(0.09 * var(--chroma)) var(--hue)) 0%, var(--background) 22rem);
+  --shadow-color: oklch(0.05 calc(0.04 * var(--chroma)) var(--hue) / 0.45);
+  --blob-1: oklch(0.5 calc(0.16 * var(--chroma)) var(--hue) / 0.35);
+  --blob-2: oklch(0.5 calc(0.14 * var(--chroma)) var(--hue-accent) / 0.3);
+  --blob-3: oklch(0.5 calc(0.12 * var(--chroma)) calc(var(--hue) + 50) / 0.28);
+  color-scheme: dark;
+}
+
+/* Game themes: chosen per quiz. Only the hues, the surface tint and the chroma change (lib/themes.ts mirrors them). */
+[data-theme='classic'] {
+  --hue: 277;
+  --hue-accent: 330;
+  --tint: 0.012;
+  --chroma: 1;
+}
+[data-theme='arcade'] {
+  --hue: 305;
+  --hue-accent: 195;
+  --tint: 0.02;
+  --chroma: 1;
+}
+[data-theme='sunset'] {
+  --hue: 35;
+  --hue-accent: 350;
+  --tint: 0.015;
+  --chroma: 1;
+}
+[data-theme='mint'] {
+  --hue: 170;
+  --hue-accent: 230;
+  --tint: 0.014;
+  --chroma: 1;
+}
+[data-theme='ocean'] {
+  --hue: 240;
+  --hue-accent: 185;
+  --tint: 0.016;
+  --chroma: 1;
+}
+[data-theme='berry'] {
+  --hue: 345;
+  --hue-accent: 285;
+  --tint: 0.016;
+  --chroma: 1;
+}
+[data-theme='forest'] {
+  --hue: 135;
+  --hue-accent: 75;
+  --tint: 0.014;
+  --chroma: 1;
+}
+[data-theme='graphite'] {
+  --hue: 255;
+  --hue-accent: 60;
+  --tint: 0.004;
+  --chroma: 0.3;
+}
+/* Subdued themes for formal events: low chroma, one calm hue each. */
+[data-theme='navy'] {
+  --hue: 262;
+  --hue-accent: 225;
+  --tint: 0.006;
+  --chroma: 0.55;
+}
+[data-theme='petrol'] {
+  --hue: 215;
+  --hue-accent: 185;
+  --tint: 0.006;
+  --chroma: 0.5;
+}
+[data-theme='stone'] {
+  --hue: 65;
+  --hue-accent: 40;
+  --tint: 0.008;
+  --chroma: 0.28;
+}
+[data-theme='bordeaux'] {
+  --hue: 12;
+  --hue-accent: 350;
+  --tint: 0.006;
+  --chroma: 0.5;
+}
+
+/*
+ * Answer palettes: six fixed colours by option index (red, blue, yellow, green, orange, purple
+ * families), each with its own readable text colour, the same in both modes and every theme, so
+ * answers never blend into the background. Option buttons and result bars read --option-N.
+ */
+:root,
+[data-palette='vivid'] {
+  --option-1: oklch(0.57 0.22 25);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.5 0.2 262);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.86 0.17 92);
+  --option-3-fg: oklch(0.25 0.05 92);
+  --option-4: oklch(0.55 0.17 145);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.72 0.18 55);
+  --option-5-fg: oklch(0.25 0.06 55);
+  --option-6: oklch(0.5 0.22 300);
+  --option-6-fg: oklch(0.99 0 0);
+}
+[data-palette='candy'] {
+  --option-1: oklch(0.84 0.11 350);
+  --option-1-fg: oklch(0.3 0.13 350);
+  --option-2: oklch(0.84 0.09 235);
+  --option-2-fg: oklch(0.3 0.11 235);
+  --option-3: oklch(0.92 0.12 100);
+  --option-3-fg: oklch(0.32 0.08 100);
+  --option-4: oklch(0.87 0.1 160);
+  --option-4-fg: oklch(0.3 0.08 160);
+  --option-5: oklch(0.86 0.1 50);
+  --option-5-fg: oklch(0.32 0.1 50);
+  --option-6: oklch(0.83 0.09 295);
+  --option-6-fg: oklch(0.3 0.11 295);
+}
+[data-palette='neon'] {
+  --option-1: oklch(0.7 0.24 350);
+  --option-1-fg: oklch(0.15 0.05 350);
+  --option-2: oklch(0.85 0.14 200);
+  --option-2-fg: oklch(0.2 0.05 200);
+  --option-3: oklch(0.93 0.19 100);
+  --option-3-fg: oklch(0.25 0.06 100);
+  --option-4: oklch(0.88 0.22 130);
+  --option-4-fg: oklch(0.22 0.07 130);
+  --option-5: oklch(0.78 0.19 55);
+  --option-5-fg: oklch(0.2 0.06 55);
+  --option-6: oklch(0.66 0.22 300);
+  --option-6-fg: oklch(0.99 0 0);
+}
+[data-palette='earth'] {
+  --option-1: oklch(0.55 0.13 35);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.48 0.08 260);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.74 0.13 85);
+  --option-3-fg: oklch(0.25 0.06 85);
+  --option-4: oklch(0.55 0.1 125);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.52 0.1 200);
+  --option-5-fg: oklch(0.99 0 0);
+  --option-6: oklch(0.48 0.12 330);
+  --option-6-fg: oklch(0.99 0 0);
+}
+/* Low-saturation sets for formal events; the symbols carry the distinction as much as the colours. */
+[data-palette='muted'] {
+  --option-1: oklch(0.52 0.1 25);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.5 0.09 255);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.82 0.09 90);
+  --option-3-fg: oklch(0.28 0.05 90);
+  --option-4: oklch(0.52 0.08 155);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.76 0.09 60);
+  --option-5-fg: oklch(0.28 0.05 60);
+  --option-6: oklch(0.5 0.08 310);
+  --option-6-fg: oklch(0.99 0 0);
+}
+[data-palette='corporate'] {
+  --option-1: oklch(0.42 0.09 260);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.52 0.08 195);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.85 0.05 85);
+  --option-3-fg: oklch(0.3 0.04 85);
+  --option-4: oklch(0.5 0.03 250);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.74 0.1 70);
+  --option-5-fg: oklch(0.27 0.05 70);
+  --option-6: oklch(0.45 0.07 330);
+  --option-6-fg: oklch(0.99 0 0);
+}
+
+/* Angle of the rotating gradient border, animatable thanks to @property. */
+@property --angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-edge: var(--primary-edge);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-edge: var(--secondary-edge);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-strong: var(--accent-strong);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-edge: var(--destructive-edge);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-edge: var(--success-edge);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --shadow-soft: 0 1px 2px var(--shadow-color), 0 8px 24px -8px var(--shadow-color);
+
+  /* "Bubble gum" easings: ease-spring overshoots a little and settles, ease-spring-soft barely. */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring-soft: cubic-bezier(0.3, 1.25, 0.5, 1);
+
+  /*
+   * Motion. Everything below animates transform or opacity only (compositor work, no layout), except
+   * `draw` (an SVG stroke) and `shimmer` (text background), which are used on single small elements.
+   * Lists stagger with an inline animation-delay. Durations are short; `both` keeps the final state.
+   */
   --animate-rise: rise 0.9s ease-out both;
+  --animate-pop: pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-slide-in: slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-grow-x: grow-x 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-grow-y: grow-y 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-wiggle: wiggle 0.7s ease-in-out both;
+  --animate-pulse-ring: pulse-ring 1s ease-in-out infinite;
+  --animate-burst: burst 0.9s ease-out both;
+  --animate-shimmer: shimmer 3s linear infinite;
+  --animate-draw: draw 0.7s ease-out both;
+  --animate-progress: progress linear both;
+  --animate-drift: drift 28s ease-in-out infinite alternate;
+  --animate-dot: dot 1.2s ease-in-out infinite;
+  --animate-spin-angle: spin-angle 6s linear infinite;
+  --animate-menu-pop: menu-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-panel-in: panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-dialog-pop: dialog-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  /* Menus and select lists spring open from their trigger (transform-origin is set by Radix). */
+  @keyframes menu-pop {
+    from {
+      transform: scale(0.88);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes dialog-pop {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes panel-in {
+    from {
+      transform: translateX(32px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
 
   @keyframes rise {
     from {
@@ -15,22 +384,231 @@
       opacity: 1;
     }
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-rise {
-    animation: none;
+  @keyframes pop {
+    from {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes fade-up {
+    from {
+      transform: translateY(14px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes slide-in {
+    from {
+      transform: translateX(-28px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes grow-x {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes grow-y {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-7px);
+    }
+  }
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    25% {
+      transform: rotate(-4deg) scale(1.04);
+    }
+    75% {
+      transform: rotate(4deg) scale(1.04);
+    }
+  }
+  @keyframes pulse-ring {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.08);
+    }
+  }
+  @keyframes burst {
+    from {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: translate(var(--dx), var(--dy)) scale(0.2);
+      opacity: 0;
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 40;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes drift {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(9vmax, 7vmax) scale(1.15);
+    }
+    100% {
+      transform: translate(-7vmax, 11vmax) scale(0.95);
+    }
+  }
+  @keyframes dot {
+    0%,
+    80%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    40% {
+      transform: translateY(-6px);
+      opacity: 1;
+    }
+  }
+  @keyframes spin-angle {
+    to {
+      --angle: 360deg;
+    }
   }
 }
 
-html,
-body,
-#root {
-  height: 100%;
+/* A slowly rotating gradient border (primary to accent), 3 px wide, following the element's radius. */
+@utility glow-border {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    padding: 3px;
+    border-radius: inherit;
+    background: conic-gradient(from var(--angle), var(--primary), var(--accent-strong), var(--primary));
+    /* Keep only the 3 px ring: the content box is cut out of the mask. */
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: var(--animate-spin-angle);
+    pointer-events: none;
+  }
 }
 
-body {
-  @apply bg-brand-dark text-white antialiased;
-  /* Phones: avoid rubber-band scrolling on full-screen game views. */
-  overscroll-behavior: none;
+/*
+ * Scrollbars: a rounded "gum" thumb in the theme colour on a clear track, plumper on hover and
+ * fully coloured while dragged. WebKit/Blink get the full shape; Firefox, which has no scrollbar
+ * pseudo-elements, the thin coloured variant. (Chrome ignores the ::-webkit rules on any element
+ * with scrollbar-color set, hence the @supports split.)
+ */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--primary) 45%, transparent) transparent;
+  }
+}
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  min-height: 48px;
+  border: 4px solid transparent;
+  border-radius: 999px;
+  background-color: color-mix(in oklch, var(--primary) 38%, transparent);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  border-width: 3px;
+  background-color: color-mix(in oklch, var(--primary) 62%, transparent);
+}
+::-webkit-scrollbar-thumb:active {
+  border-width: 2px;
+  background-color: var(--primary);
+}
+
+/* Reduced motion: primitives and app animations end immediately in their final state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    background-image: var(--surface-wash);
+    background-repeat: no-repeat;
+    /* Phones: avoid rubber-band scrolling on full-screen game views. */
+    overscroll-behavior: none;
+  }
 }

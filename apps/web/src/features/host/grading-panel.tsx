@@ -1,7 +1,8 @@
 import type { CurrentAnswer, HostSnapshot } from '@ash-quiz/shared'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../components/button'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface Group {
   key: string
@@ -39,27 +40,33 @@ export function GradingPanel({ host, onGrade }: { host: HostSnapshot; onGrade: (
     onGrade(groups.filter((g) => correct.has(g.key)).flatMap((g) => g.answers.map((a) => a.playerId)))
 
   return (
-    <section className="flex flex-col gap-3 rounded-xl border-2 border-yellow-300/60 p-3">
-      <h2 className="text-lg font-semibold">{t('host.grading.title')}</h2>
-      <p className="text-sm text-white/70">{t('host.grading.help')}</p>
-      {groups.length === 0 && <p className="text-white/60">{t('host.grading.noAnswers')}</p>}
+    <section className="flex flex-col gap-3 rounded-2xl border-2 border-warning bg-card p-4 shadow-soft">
+      <h2 className="text-lg font-extrabold">{t('host.grading.title')}</h2>
+      <p className="text-sm text-muted-foreground">{t('host.grading.help')}</p>
+      {groups.length === 0 && <p className="text-muted-foreground">{t('host.grading.noAnswers')}</p>}
       <ul className="flex flex-col gap-2">
         {groups.map((group) => (
           <li key={group.key}>
             <label
-              className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 ${correct.has(group.key) ? 'bg-green-700' : 'bg-white/10'}`}
+              className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 px-3 py-2 transition-colors ${correct.has(group.key) ? 'border-success bg-success text-success-foreground' : 'bg-card hover:border-ring'}`}
             >
-              <input type="checkbox" className="size-5" checked={correct.has(group.key)} onChange={() => toggle(group.key)} />
+              <Checkbox
+                checked={correct.has(group.key)}
+                onCheckedChange={() => toggle(group.key)}
+                className="border-current data-[state=checked]:border-success-foreground data-[state=checked]:bg-success-foreground data-[state=checked]:text-success"
+              />
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold wrap-break-word">{group.label}</span>
-                <span className="block truncate text-xs text-white/70">{group.answers.map((a) => a.name).join(', ')}</span>
+                <span className="block truncate text-xs opacity-80">{group.answers.map((a) => a.name).join(', ')}</span>
               </span>
               <span className="tabular-nums">×{group.answers.length}</span>
             </label>
           </li>
         ))}
       </ul>
-      <Button onClick={apply}>{t('host.grading.apply')}</Button>
+      <Button size="lg" onClick={apply}>
+        {t('host.grading.apply')}
+      </Button>
     </section>
   )
 }

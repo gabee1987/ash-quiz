@@ -1,10 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useState, type FormEvent } from 'react'
+import { UserPlusIcon } from 'lucide-react'
+import { useId, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../components/button'
+import { toast } from 'sonner'
+import { FormAlert } from '@/components/form-alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TextField } from '../../components/text-field'
-import { ApiError, apiFetch } from '../../lib/api'
+import { apiFetch, errorCode } from '../../lib/api'
 
 interface UserRow {
   id: string
@@ -21,6 +27,7 @@ export const Route = createFileRoute('/host/users')({
 /** Admin only (the API enforces it): list host users and add new ones with an initial password. */
 function UsersPage() {
   const { t, i18n } = useTranslation()
+  const roleId = useId()
   const queryClient = useQueryClient()
   const users = useQuery({
     queryKey: ['users'],
@@ -31,12 +38,11 @@ function UsersPage() {
   const [password, setPassword] = useState('')
   const [role, setRole] = useState<'editor' | 'admin'>('editor')
   const [submitted, setSubmitted] = useState(false)
-  const [created, setCreated] = useState<string | null>(null)
 
   const create = useMutation({
     mutationFn: () => apiFetch('/api/users', { method: 'POST', body: JSON.stringify({ username: username.trim(), password, role }) }),
     onSuccess: () => {
-      setCreated(username.trim())
+      toast.success(t('users.created', { name: username.trim() }))
       setUsername('')
       setPassword('')
       setSubmitted(false)
@@ -48,7 +54,6 @@ function UsersPage() {
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setSubmitted(true)
-    setCreated(null)
     if (!usernameValid || password.length < 10) return
     create.mutate()
   }
@@ -56,10 +61,10 @@ function UsersPage() {
   if (users.isError) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <p role="alert">{t(users.error instanceof ApiError ? users.error.code : 'errors.internal')}</p>
-        <Link to="/host" className="underline">
-          {t('host.game.backToQuizzes')}
-        </Link>
+        <FormAlert>{t(errorCode(users.error))}</FormAlert>
+        <Button asChild variant="secondary">
+          <Link to="/host">{t('host.game.backToQuizzes')}</Link>
+        </Button>
       </div>
     )
   }
@@ -67,26 +72,29 @@ function UsersPage() {
   const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' })
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-      <div className="flex items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold">{t('users.title')}</h1>
-        <Link to="/host" className="underline">
-          {t('host.game.backToQuizzes')}
-        </Link>
-      </div>
+      <h1 className="text-3xl font-black tracking-tight">{t('users.title')}</h1>
 
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card shadow-soft">
         {users.data?.map((user) => (
-          <li key={user.id} className="flex flex-wrap items-center gap-3 rounded-lg bg-white/10 px-4 py-3">
-            <span className="flex-1 font-semibold">{user.username}</span>
-            <span className="text-sm text-white/70">{t(`users.roles.${user.role}`)}</span>
-            {user.mustChangePassword && <span className="rounded bg-yellow-400 px-2 text-xs text-black">{t('users.pendingPassword')}</span>}
-            <span className="text-sm text-white/60">{date.format(new Date(user.createdAt))}</span>
+          <li key={user.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
+            <span
+              aria-hidden="true"
+              className="grid size-10 place-items-center rounded-full bg-secondary font-extrabold text-secondary-foreground uppercase"
+            >
+              {user.username.slice(0, 1)}
+            </span>
+            <span className="min-w-0 flex-1 font-bold wrap-break-word">{user.username}</span>
+            <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>{t(`users.roles.${user.role}`)}</Badge>
+            {user.mustChangePassword && (
+              <Badge className="bg-warning text-warning-foreground">{t('users.pendingPassword')}</Badge>
+            )}
+            <span className="text-sm text-muted-foreground">{date.format(new Date(user.createdAt))}</span>
           </li>
         ))}
       </ul>
 
-      <form className="flex flex-col gap-3 rounded-xl bg-white/5 p-4" onSubmit={onSubmit} noValidate>
-        <h2 className="text-lg font-semibold">{t('users.add')}</h2>
+      <form className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-soft" onSubmit={onSubmit} noValidate>
+        <h2 className="text-xl font-extrabold">{t('users.add')}</h2>
         <TextField
           label={t('auth.username')}
           autoComplete="off"
@@ -103,25 +111,24 @@ function UsersPage() {
           onChange={(e) => setPassword(e.target.value)}
           error={submitted && password.length < 10 ? t('auth.passwordChange.tooShort', { count: 10 }) : undefined}
         />
-        <label className="flex flex-col gap-1 text-sm">
-          {t('users.role')}
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as 'editor' | 'admin')}
-            className="min-h-12 rounded-lg bg-white px-3 text-black"
-          >
-            <option value="editor">{t('users.roles.editor')}</option>
-            <option value="admin">{t('users.roles.admin')}</option>
-          </select>
-        </label>
-        <p className="text-sm text-white/60">{t('users.initialPasswordHint')}</p>
-        {create.error && (
-          <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-3 text-red-200">
-            {t(create.error instanceof ApiError ? create.error.code : 'errors.internal')}
-          </p>
-        )}
-        {created && <p role="status" className="rounded-lg bg-green-700 px-4 py-3">{t('users.created', { name: created })}</p>}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor={roleId} className="font-semibold">
+            {t('users.role')}
+          </Label>
+          <Select value={role} onValueChange={(value) => setRole(value as 'editor' | 'admin')}>
+            <SelectTrigger id={roleId} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="editor">{t('users.roles.editor')}</SelectItem>
+              <SelectItem value="admin">{t('users.roles.admin')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-sm text-muted-foreground">{t('users.initialPasswordHint')}</p>
+        {create.error && <FormAlert>{t(errorCode(create.error))}</FormAlert>}
         <Button type="submit" disabled={create.isPending}>
+          <UserPlusIcon aria-hidden="true" />
           {t('users.add')}
         </Button>
       </form>

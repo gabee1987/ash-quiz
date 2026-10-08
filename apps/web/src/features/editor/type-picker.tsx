@@ -1,28 +1,51 @@
 import { questionTypes, type QuestionType } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
+import {
+  ChartColumnIcon,
+  CircleDotIcon,
+  HashIcon,
+  ListChecksIcon,
+  TextCursorInputIcon,
+  ToggleRightIcon,
+  type LucideIcon,
+} from 'lucide-react'
+import { stagger } from '@/lib/motion'
 
-/** One button per question type with a one-line explanation. */
-export function TypePicker({ onPick, onCancel }: { onPick: (type: QuestionType) => void; onCancel: () => void }) {
+export const typeIcons: Record<QuestionType, LucideIcon> = {
+  single: CircleDotIcon,
+  multiple: ListChecksIcon,
+  truefalse: ToggleRightIcon,
+  text: TextCursorInputIcon,
+  number: HashIcon,
+  poll: ChartColumnIcon,
+}
+
+/** One card per question type: icon, name and a one-line explanation. */
+export function TypePicker({ onPick }: { onPick: (type: QuestionType) => void }) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-col gap-2 rounded-xl bg-white/5 p-3">
-      <p className="font-semibold">{t('editor.pickType')}</p>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {questionTypes.map((type) => (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {questionTypes.map((type, index) => {
+        const Icon = typeIcons[type]
+        // The pop runs on a wrapper: its transform would otherwise override the hover lift.
+        return (
+          <div key={type} style={stagger(index, 40)} className="animate-pop">
           <button
-            key={type}
             type="button"
             onClick={() => onPick(type)}
-            className="flex min-h-14 flex-col items-start justify-center rounded-lg bg-white/10 px-4 py-2 text-left hover:bg-white/20"
+            className="group flex min-h-20 w-full items-center gap-4 rounded-2xl border-2 bg-card p-4 text-left shadow-soft transition-[transform,border-color] outline-none hover:-translate-y-0.5 hover:border-primary focus-visible:ring-[3px] focus-visible:ring-ring active:translate-y-0"
           >
-            <span className="font-semibold">{t(`questionTypes.${type}`)}</span>
-            <span className="text-xs text-white/70">{t(`questionTypes.${type}Help`)}</span>
+            <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-secondary text-secondary-foreground transition-transform group-hover:scale-110 group-hover:-rotate-6">
+              <Icon className="size-6" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block font-extrabold">{t(`questionTypes.${type}`)}</span>
+              <span className="block text-sm text-muted-foreground">{t(`questionTypes.${type}Help`)}</span>
+            </span>
           </button>
-        ))}
-      </div>
-      <button type="button" className="min-h-10 self-start px-2 text-sm underline" onClick={onCancel}>
-        {t('common.cancel')}
-      </button>
+          </div>
+        )
+      })}
     </div>
   )
 }

@@ -93,3 +93,32 @@ $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 7. Go offline in DevTools, edit the title, go online. Expect "offline" then "saved" and the title persisted.
 8. Duplicate a quiz from the list. Expect a copy with "(másolat)" or "(copy)" opened in the editor.
 9. Press `Ctrl+D` while editing an option's text. Expect no duplicate (shortcuts are ignored in fields).
+
+## Results
+
+- `pnpm verify` passes; web tests 14 files (new: `draft.test.ts`, `shortcuts.test.ts`, extended `use-autosave.test.ts` with retry and offline cases, `validate.test.ts` with `locateProblem`).
+- `e2e/editor.e2e.ts` passes together with `game.e2e.ts` and `a11y.e2e.ts` against the production build (4 of 4).
+- A scripted browser run on its own quiz checked: keyboard drag and mouse drag (order stored on the server), delete and Undo (same index and ids), `Ctrl+D` ignored in a field and duplicating outside, `Alt+Down`, `Ctrl+Enter` with the type picker, the problems menu focusing the broken option, Enter adding an option, an edit made offline saved after reconnecting, and duplicating a quiz opening the copy.
+
+## Deviations
+
+- **Three panes from `xl` (1280 px), not `lg`.** At 1024 px the form would be too narrow next to a 375 px phone; `lg` shows list and form with the preview behind a toggle. The preview pane uses 82 % zoom, and the host sidebar is hidden on the editor route so three panes fit a 1280 px laptop.
+- **Duplicate endpoint** already existed (phase 7, with tests); this phase only makes the quiz list open the copy.
+- **Problems are a menu ("N to fix") next to Play**, not a clickable tooltip: tooltips cannot hold interactive content. The disabled Play button still has a tooltip with the first three problems.
+- **Question actions** (move up/down, duplicate, delete, move to top/bottom) sit in a toolbar above the question form instead of on each list row, keeping the rows short enough to drag comfortably.
+- **Paste** works anywhere in the editor for the question image (a screenshot without text in the clipboard), and while an option's image field has focus for that option.
+- **Description** moved from the page into the "Quiz settings" panel with the game settings.
+- **Leaving the editor** asks only when the draft cannot be saved (`invalid`, `offline`, `error`); a waiting save is sent on unmount, as before. Closing the tab asks whenever anything is unsaved.
+- **`game.e2e.ts` helper updated**: it waits for the previous picker dialog to close (a closing dialog hides the page from the accessibility tree) and clicks "Add question" whenever it is visible; the sidebar's "Add question" is hidden while the quiz is empty, where the picker is already inline.
+
+## Follow-up from the first review
+
+Added on the same branch at the user's request after the first delivery:
+
+- Sticky editor top bar (from `sm`; on phones it wraps to two rows and the fixed bottom bar already carries the navigation).
+- Quiz settings dock beside the form and the phone preview at `xl` (the question list makes room), a sheet below.
+- `SelectField` (restyled Radix select) replaces the native selects; menus and selects share the new look and a springy opening.
+- Press wobble on every button, menu item and choice card (`lib/squish.ts`), hover touches on buttons, choice cards and quiz cards.
+- Themes `navy`, `petrol`, `stone`, `bordeaux` and answer palettes `muted`, `corporate` (shared enums extended; older values unchanged, so stored quizzes stay valid).
+- Pause for the projector's results summary (`useSlideshow`, with tests).
+- e2e: the a11y helper waits for finite animations before measuring contrast; the editor spec waits for the drag announcements between keys.

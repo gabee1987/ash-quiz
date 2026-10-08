@@ -79,6 +79,85 @@ describe('toHostSnapshot', () => {
     ])
   })
 
+  describe('previousRank', () => {
+    const answered = (state: GameState, playerId: string, questionId: string, optionId: string) =>
+      submitAnswer(state, { playerId, questionId, answer: { type: 'single', optionId } }, T0)
+    const ranks = (state: GameState) =>
+      toHostSnapshot(state, T0).players.map((p) => [p.name, p.previousRank, p.rank] as const)
+
+    it('equals the rank in the lobby and during a question', () => {
+      expect(ranks(lobby())).toEqual([
+        ['Anna', 1, 1],
+        ['Bela', 1, 1],
+        ['Cecil', 1, 1],
+      ])
+      const state = answered(atQuestion(0), 'p1', 'q-single', 'a')
+      expect(ranks(state).every(([, previous, rank]) => previous === rank)).toBe(true)
+    })
+
+    it('is the rank before the revealed question, so a leader who was overtaken has moved down', () => {
+      // Anna leads after question 1; everyone ties after question 2; Bela alone scores on question 3.
+      let state = endQuestion(answered(atQuestion(0), 'p1', 'q-single', 'a'))
+      expect(ranks(state)).toEqual([
+        ['Anna', 1, 1],
+        ['Bela', 1, 2],
+        ['Cecil', 1, 2],
+      ])
+      state = next(state, T0)
+      state = submitAnswer(state, { playerId: 'p2', questionId: 'q-multiple', answer: { type: 'multiple', optionIds: ['a', 'c'] } }, T0)
+      state = submitAnswer(state, { playerId: 'p3', questionId: 'q-multiple', answer: { type: 'multiple', optionIds: ['a', 'c'] } }, T0)
+      state = endQuestion(state)
+      expect(ranks(state)).toEqual([
+        ['Anna', 1, 1],
+        ['Bela', 2, 1],
+        ['Cecil', 2, 1],
+      ])
+      state = next(state, T0)
+      state = submitAnswer(state, { playerId: 'p2', questionId: 'q-truefalse', answer: { type: 'truefalse', value: true } }, T0)
+      state = endQuestion(state)
+      expect(ranks(state)).toEqual([
+        ['Bela', 1, 1],
+        ['Anna', 1, 2],
+        ['Cecil', 1, 2],
+      ])
+      // The scoreboard and the next question's start keep the same figures until the next reveal.
+      expect(ranks(showScoreboard(state))).toEqual(ranks(state))
+      expect(ranks(next(state, T0)).every(([, previous, rank]) => previous === rank)).toBe(true)
+    })
+
+    it('works for teams: the team rank before the question', () => {
+      let state = createGame(fixtureQuiz(), fixtureSettings({ mode: 'team', teamNames: ['Red', 'Blue'] }), '123456', 'g', T0)
+      state = joinPlayer(state, { id: 'p1', name: 'Anna', teamId: 'team-1', token: 't1' })
+      state = joinPlayer(state, { id: 'p2', name: 'Bela', teamId: 'team-1', token: 't2' })
+      state = joinPlayer(state, { id: 'p3', name: 'Cecil', teamId: 'team-2', token: 't3' })
+      state = endQuestion(answered(startGame(state, T0), 'p3', 'q-single', 'a'))
+      const teams = (s: GameState) => toHostSnapshot(s, T0).teams.map((t) => [t.name, t.previousRank, t.rank] as const)
+      expect(teams(state)).toEqual([
+        ['Blue', 1, 1],
+        ['Red', 1, 2],
+      ])
+      state = next(state, T0)
+      state = submitAnswer(state, { playerId: 'p1', questionId: 'q-multiple', answer: { type: 'multiple', optionIds: ['a', 'c'] } }, T0)
+      state = submitAnswer(state, { playerId: 'p2', questionId: 'q-multiple', answer: { type: 'multiple', optionIds: ['a', 'c'] } }, T0)
+      state = endQuestion(state)
+      expect(teams(state)).toEqual([
+        ['Blue', 1, 1],
+        ['Red', 2, 1],
+      ])
+    })
+
+    it('is concealed with the rank while results are held back', () => {
+      let state = createGame(fixtureQuiz(), fixtureSettings({ revealAnswers: 'atEnd' }), '123456', 'g', T0)
+      state = joinPlayer(state, { id: 'p1', name: 'Anna', token: 't1' })
+      state = joinPlayer(state, { id: 'p2', name: 'Bela', token: 't2' })
+      state = endQuestion(answered(startGame(state, T0), 'p1', 'q-single', 'a'))
+      expect(toPlayerSnapshot(state, 'p2', T0).players.map((p) => [p.previousRank, p.rank])).toEqual([
+        [1, 1],
+        [1, 1],
+      ])
+    })
+  })
+
   it('counts the distribution per option id with zeroes for unpicked options', () => {
     let state = atQuestion(1)
     state = submitAnswer(state, { playerId: 'p1', questionId: 'q-multiple', answer: { type: 'multiple', optionIds: ['a', 'c'] } }, T0)

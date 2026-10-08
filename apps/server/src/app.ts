@@ -22,9 +22,11 @@ import { userRoutes } from './routes/users.js'
 export interface AppDeps {
   db: Db
   manager: GameManager
+  /** Built web app to serve. Defaults to apps/web/dist in production; tests pass a fixture directory. */
+  webDist?: string
 }
 
-export async function buildApp(config: Config, { db, manager }: AppDeps) {
+export async function buildApp(config: Config, { db, manager, webDist: webDistOverride }: AppDeps) {
   const app = Fastify({
     logger:
       config.NODE_ENV === 'development'
@@ -63,6 +65,9 @@ export async function buildApp(config: Config, { db, manager }: AppDeps) {
   await app.register(rateLimit, {
     max: 300,
     timeWindow: '1 minute',
+    // API calls only. A page load fetches ~25 static files, and at an event every phone on the
+    // venue wifi can share one public IP: limiting those would leave phones with a blank page.
+    allowList: (request) => !request.url.startsWith('/api/'),
     errorResponseBuilder: () => ({ statusCode: 429, error: 'errors.rateLimited' }),
   })
 
@@ -97,8 +102,10 @@ export async function buildApp(config: Config, { db, manager }: AppDeps) {
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
   await app.register(resultRoutes, { db, manager })
 
-  if (config.NODE_ENV === 'production') {
-    const webDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../web/dist')
+  const webDist =
+    webDistOverride ??
+    (config.NODE_ENV === 'production' ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../web/dist') : null)
+  if (webDist) {
     await app.register(fastifyStatic, { root: webDist, wildcard: false })
     // SPA fallback: every non-API route serves index.html.
     app.setNotFoundHandler((req, reply) => {

@@ -1,4 +1,4 @@
-import type { Answer, PublicQuestion } from '@ash-quiz/shared'
+import type { Answer, AnswerSymbols, PublicQuestion } from '@ash-quiz/shared'
 import { MultipleChoice } from './multiple-choice'
 import { NumberAnswer } from './number-answer'
 import { Poll } from './poll'
@@ -12,8 +12,10 @@ export function QuestionInput(props: {
   question: PublicQuestion
   mode: QuestionMode
   disabled?: boolean
+  pending?: boolean
   large?: boolean
   colourful?: boolean
+  symbols?: AnswerSymbols | undefined
   onSubmit?: (answer: Answer) => void
 }) {
   const { question, ...rest } = props

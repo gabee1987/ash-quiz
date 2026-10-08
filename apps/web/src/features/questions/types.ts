@@ -1,4 +1,4 @@
-import type { Answer, PublicQuestion } from '@ash-quiz/shared'
+import type { Answer, AnswerSymbols, PublicQuestion } from '@ash-quiz/shared'
 
 export type QuestionMode = 'answer' | 'display'
 
@@ -7,9 +7,13 @@ export interface QuestionProps<Q extends PublicQuestion['type']> {
   question: Extract<PublicQuestion, { type: Q }>
   mode: QuestionMode
   disabled?: boolean
+  /** The player's answer is on its way to the server: the chosen option shows a spinner. */
+  pending?: boolean
   /** Projector size (display mode on the screen). */
   large?: boolean
-  /** Coloured option buttons with shapes; the projector (`large`) always has them. */
+  /** Coloured option buttons; the projector (`large`) always has them. */
   colourful?: boolean
+  /** Symbol set of the options (game setting). */
+  symbols?: AnswerSymbols | undefined
   onSubmit?: (answer: Answer) => void
 }

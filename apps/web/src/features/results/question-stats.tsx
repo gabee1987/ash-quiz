@@ -27,18 +27,23 @@ export function QuestionStats({ question, playerCount }: { question: ResultQuest
   const { t } = useTranslation()
   const figures = useQuestionFigures(question, playerCount)
   return (
-    <li className="flex flex-col gap-3 rounded-lg bg-white/10 px-4 py-3">
-      <div>
-        <p className="text-sm text-white/60">
-          {t('results.questionNumber', { index: question.index + 1 })} · {t(`questionTypes.${question.question.type}`)}
-        </p>
-        <p className="text-lg font-semibold wrap-break-word">{question.question.text}</p>
-        <div className="[&>p]:text-left">
-          <CorrectAnswer question={question.question} />
+    <li className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft">
+      <div className="flex gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-muted-foreground">
+            {t('results.questionNumber', { index: question.index + 1 })} · {t(`questionTypes.${question.question.type}`)}
+          </p>
+          <p className="text-lg font-extrabold wrap-break-word">{question.question.text}</p>
+          <div className="mt-1 [&>div]:items-start [&>div]:text-left">
+            <CorrectAnswer question={question.question} />
+          </div>
         </div>
+        {question.question.imageId && (
+          <img src={`/api/images/${question.question.imageId}`} alt="" className="size-20 shrink-0 rounded-xl object-cover" />
+        )}
       </div>
       <DistributionBars reveal={question} />
-      <p className="text-sm text-white/70">{figures.join(' · ')}</p>
+      <p className="text-sm text-muted-foreground">{figures.join(' · ')}</p>
     </li>
   )
 }

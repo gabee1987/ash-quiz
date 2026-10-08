@@ -49,6 +49,35 @@ export function copyQuestion(question: Question): Question {
   }
 }
 
+/** `question` inserted at `at` (clamped to the list). */
+export function insertQuestion(list: readonly Question[], question: Question, at: number): Question[] {
+  const index = Math.max(0, Math.min(at, list.length))
+  return [...list.slice(0, index), question, ...list.slice(index)]
+}
+
+/** A copy of the question at `index` with new ids, placed right after it. */
+export function duplicateQuestion(list: readonly Question[], index: number): { questions: Question[]; copy: Question } {
+  const copy = copyQuestion(list[index]!)
+  return { questions: insertQuestion(list, copy, index + 1), copy }
+}
+
+export interface RemovedQuestion {
+  question: Question
+  index: number
+}
+
+/** The list without the question at `index`, plus what is needed to undo it. */
+export function removeQuestion(list: readonly Question[], index: number): { questions: Question[]; removed: RemovedQuestion } {
+  return { questions: list.filter((_, i) => i !== index), removed: { question: list[index]!, index } }
+}
+
+/** Undo of `removeQuestion`: back at its old index with the same ids (a no-op if it is already there). */
+export function restoreQuestion(list: readonly Question[], { question, index }: RemovedQuestion): Question[] {
+  if (list.some((q) => q.id === question.id)) return [...list]
+  return insertQuestion(list, question, index)
+}
+
+/** Moves one item; used for questions and options alike. */
 export function move<T>(list: readonly T[], from: number, to: number): T[] {
   if (from === to || from < 0 || to < 0 || from >= list.length || to >= list.length) return [...list]
   const copy = [...list]

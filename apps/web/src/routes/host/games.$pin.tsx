@@ -1,8 +1,11 @@
 import type { GameHostInfo, HostCommand, HostSnapshot } from '@ash-quiz/shared'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { MonitorIcon, TrophyIcon } from 'lucide-react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
+import { useGameTheme } from '@/lib/themes'
 import { ConnectionBar } from '../../components/connection-bar'
 import { DistributionBars } from '../../components/distribution-bars'
 import { QrCode } from '../../components/qr-code'
@@ -13,7 +16,8 @@ import { GradingPanel } from '../../features/host/grading-panel'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
 import { RankList } from '../../features/play/scoreboard'
-import { apiFetch } from '../../lib/api'
+import { ApiError, apiFetch } from '../../lib/api'
+import { toastError } from '../../lib/toast'
 import { closeSession, emitAck, startSession, useGameStore } from '../../lib/socket'
 
 export const Route = createFileRoute('/host/games/$pin')({
@@ -25,7 +29,7 @@ function HostGamePage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
   const { status, host, clockOffset, closed } = useGameStore()
-  const [error, setError] = useState<string | null>(null)
+  useGameTheme(host?.settings)
   const info = useQuery({
     queryKey: ['game', pin],
     queryFn: () => apiFetch<GameHostInfo>(`/api/games/${pin}`),
@@ -42,18 +46,17 @@ function HostGamePage() {
   )
 
   async function send(command: HostCommand) {
-    setError(null)
     const res = await emitAck('host:command', command)
-    if ('error' in res) setError(res.error)
+    if ('error' in res) toastError(new ApiError(0, res.error))
   }
 
   if (closed) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <p className="text-xl">{t(closed)}</p>
-        <Link to="/host" className="underline">
-          {t('host.game.backToQuizzes')}
-        </Link>
+        <p className="text-xl font-semibold">{t(closed)}</p>
+        <Button asChild variant="secondary">
+          <Link to="/host">{t('host.game.backToQuizzes')}</Link>
+        </Button>
       </div>
     )
   }
@@ -64,11 +67,6 @@ function HostGamePage() {
       <ConnectionBar status={status} />
       <div className="flex min-w-0 flex-col gap-5">
         <Header host={host} />
-        {error && (
-          <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-3 text-red-200">
-            {t(error)}
-          </p>
-        )}
         <Controls host={host} onCommand={(c) => void send(c)} />
         <PhaseDetail
           host={host}
@@ -102,26 +100,24 @@ function Header({ host }: { host: HostSnapshot }) {
     host.settings.finalResults === 'onRelease' ? t('host.create.finalResultsOptions.onRelease') : null,
   ].filter(Boolean)
   return (
-    <header className="flex flex-wrap items-start justify-between gap-3">
+    <header className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border bg-card p-4 shadow-soft">
       <div className="min-w-0">
-        <p className="text-sm text-white/60 wrap-break-word">{host.quizTitle}</p>
-        <p className="text-4xl font-bold tracking-widest tabular-nums">{host.pin}</p>
-        <p className="text-sm text-white/70">
+        <p className="text-sm font-semibold text-muted-foreground wrap-break-word">{host.quizTitle}</p>
+        <p className="text-4xl font-black tracking-widest text-primary tabular-nums dark:text-foreground">{host.pin}</p>
+        <p className="text-sm font-semibold">
           {t(`host.game.phase.${host.phase}`)}
           {host.phase !== 'lobby' &&
             host.phase !== 'finished' &&
             ` · ${t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}`}
         </p>
-        <p className="text-xs text-white/50">{settings.join(' · ')}</p>
+        <p className="text-xs text-muted-foreground">{settings.join(' · ')}</p>
       </div>
-      <a
-        href={`/screen/${host.pin}`}
-        target="_blank"
-        rel="noreferrer"
-        className="flex min-h-12 items-center rounded-lg bg-white/10 px-4 font-semibold"
-      >
-        {t('host.game.openScreen')}
-      </a>
+      <Button asChild variant="secondary">
+        <a href={`/screen/${host.pin}`} target="_blank" rel="noreferrer">
+          <MonitorIcon aria-hidden="true" />
+          {t('host.game.openScreen')}
+        </a>
+      </Button>
     </header>
   )
 }
@@ -149,9 +145,9 @@ function PhaseDetail({
     case 'question':
       return host.question && host.questionEndsAt !== null ? (
         <div className="flex flex-col gap-2">
-          <p className="text-xl font-semibold wrap-break-word">{host.question.text}</p>
+          <p className="text-xl font-extrabold wrap-break-word">{host.question.text}</p>
           <Timer endsAt={host.questionEndsAt} totalMs={host.question.timeLimitSec * 1000} clockOffset={clockOffset} />
-          <p className="text-white/70">
+          <p className="font-semibold text-muted-foreground">
             {t('host.game.answered', { answered: host.answeredCount, count: host.players.length })}
           </p>
         </div>
@@ -160,20 +156,20 @@ function PhaseDetail({
     case 'scoreboard':
       return host.reveal ? (
         <div className="flex flex-col gap-3">
-          <p className="text-xl font-semibold wrap-break-word">{host.reveal.question.text}</p>
-          <DistributionBars reveal={host.reveal} />
+          <p className="text-xl font-extrabold wrap-break-word">{host.reveal.question.text}</p>
+          <DistributionBars reveal={host.reveal} symbols={host.settings.answerSymbols} />
         </div>
       ) : null
     case 'finished':
       return (
         <section className="flex flex-col gap-2">
-          <h2 className="text-xl font-semibold">{t('play.podium')}</h2>
+          <h2 className="text-xl font-extrabold">{t('play.podium')}</h2>
           {host.mode === 'team' ? (
             <ol className="flex flex-col gap-2">
               {host.teams
                 .filter((team) => team.rank <= 3)
                 .map((team) => (
-                  <li key={team.id} className="flex gap-3 rounded-lg bg-white/10 px-4 py-2">
+                  <li key={team.id} className="flex gap-3 rounded-xl border bg-card px-4 py-2">
                     <span className="w-8 font-bold">{team.rank}.</span>
                     <span className="flex-1">{team.name}</span>
                     <span className="font-semibold tabular-nums">{team.score}</span>
@@ -184,17 +180,16 @@ function PhaseDetail({
             <RankList players={host.players.filter((p) => p.rank <= 3)} limit={10} />
           )}
           {gameId && (
-            <Link
-              to="/host/results/$gameId"
-              params={{ gameId }}
-              className="flex min-h-12 items-center justify-center rounded-lg bg-brand px-4 text-lg font-semibold text-white"
-            >
-              {t('host.game.results')}
-            </Link>
+            <Button asChild size="lg">
+              <Link to="/host/results/$gameId" params={{ gameId }}>
+                <TrophyIcon aria-hidden="true" />
+                {t('host.game.results')}
+              </Link>
+            </Button>
           )}
-          <Link to="/host" className="underline">
-            {t('host.game.backToQuizzes')}
-          </Link>
+          <Button asChild variant="ghost">
+            <Link to="/host">{t('host.game.backToQuizzes')}</Link>
+          </Button>
         </section>
       )
   }

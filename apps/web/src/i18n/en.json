@@ -1,7 +1,17 @@
 {
   "app": {
     "name": "ASH Quiz",
-    "language": "Language"
+    "language": "Language",
+    "mode": "Appearance",
+    "modes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "languages": {
+      "hu": "Magyar",
+      "en": "English"
+    }
   },
   "join": {
     "title": "Join a game",
@@ -13,7 +23,12 @@
     "submit": "Join",
     "hostLogin": "Host login",
     "pinInvalid": "Enter the 6-digit PIN.",
-    "nameRequired": "Enter a name."
+    "nameRequired": "Enter a name.",
+    "scan": "Scan QR code",
+    "scanHint": "Point the camera at the QR code on the screen.",
+    "cameraDenied": "Camera access was refused. Type the PIN instead.",
+    "cameraUnavailable": "The camera is not available. Type the PIN instead.",
+    "pinDigit": "Digit {{n}}"
   },
   "common": {
     "loading": "Loading…",
@@ -21,7 +36,9 @@
     "cancel": "Cancel",
     "add": "Add",
     "delete": "Delete",
-    "removeItem": "Remove {{name}}"
+    "removeItem": "Remove {{name}}",
+    "close": "Close",
+    "actions": "Actions"
   },
   "auth": {
     "title": "Host login",
@@ -151,14 +168,55 @@
         "immediately": "When the game ends",
         "onRelease": "When I release them"
       },
-      "finalResultsHelp": "After the game, the projector and the phones wait. You show the podium on the projector and the results on the phones separately."
+      "finalResultsHelp": "After the game, the projector and the phones wait. You show the podium on the projector and the results on the phones separately.",
+      "theme": "Theme",
+      "themeHelp": "Colours on the phones, the projector and the host control. Light or dark mode is each device's own choice. Graphite, Navy, Petrol, Stone and Bordeaux are subdued, for formal events.",
+      "themeOptions": {
+        "classic": "Classic",
+        "arcade": "Arcade",
+        "sunset": "Sunset",
+        "mint": "Mint",
+        "ocean": "Ocean",
+        "berry": "Berry",
+        "forest": "Forest",
+        "graphite": "Graphite",
+        "navy": "Navy",
+        "petrol": "Petrol",
+        "stone": "Stone",
+        "bordeaux": "Bordeaux"
+      },
+      "answerPalette": "Answer colours",
+      "answerPaletteHelp": "The answer buttons and the result bars on the phones and the projector, independent of the theme. Muted and Corporate are the calmer sets.",
+      "answerPaletteOptions": {
+        "vivid": "Vivid",
+        "candy": "Candy",
+        "neon": "Neon",
+        "earth": "Earth",
+        "muted": "Muted",
+        "corporate": "Corporate"
+      },
+      "answerSymbols": "Answer symbols",
+      "answerSymbolsOptions": {
+        "shapes": "Shapes",
+        "letters": "Letters",
+        "numbers": "Numbers",
+        "icons": "Icons"
+      }
     },
     "newQuiz": "New quiz",
     "edit": "Edit",
     "duplicate": "Duplicate",
     "copyTitle": "{{title}} (copy)",
     "deleteTitle": "Delete this quiz?",
-    "deleteBody": "“{{title}}” will be deleted permanently. Results of games already played are kept."
+    "deleteBody": "“{{title}}” will be deleted permanently. Results of games already played are kept.",
+    "moreActions": "More actions for {{title}}",
+    "search": "Search quizzes",
+    "sort": "Sort",
+    "sortOptions": {
+      "updated": "Last edited",
+      "title": "Title"
+    },
+    "noMatches": "No quiz matches “{{query}}”."
   },
   "play": {
     "youAreIn": "You're in, {{name}}!",
@@ -203,7 +261,13 @@
     "backToHome": "Back to home",
     "yourAnswers": "Your answers",
     "yourAnswer": "Your answer",
-    "resultsComing": "The results will be shown soon."
+    "resultsComing": "The results will be shown soon.",
+    "movedUp_one": "Up {{count}} place",
+    "movedUp_other": "Up {{count}} places",
+    "movedDown_one": "Down {{count}} place",
+    "movedDown_other": "Down {{count}} places",
+    "wellPlayed": "Well played!",
+    "champion": "Winner"
   },
   "screen": {
     "joinAt": "Join at",
@@ -211,7 +275,15 @@
     "answerOnPhone": "Type your answer on your phone",
     "other": "Other",
     "correctCount_one": "{{correct}} of {{count}} answered correctly",
-    "correctCount_other": "{{correct}} of {{count}} answered correctly"
+    "correctCount_other": "{{correct}} of {{count}} answered correctly",
+    "qrCode": "QR code to join the game",
+    "runnersUp": "Runners-up",
+    "previous": "Previous",
+    "next": "Next",
+    "keyHint": "Space",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused": "Paused"
   },
   "questionTypes": {
     "single": "Single choice",
@@ -240,7 +312,7 @@
     "pickType": "Choose the question type",
     "questionText": "Question",
     "questionImage": "Question image",
-    "addImage": "Add image (JPG, PNG or WebP, max 5 MB)",
+    "addImage": "Add an image",
     "addImageShort": "Add image",
     "removeImage": "Remove image",
     "options": "Options",
@@ -266,21 +338,19 @@
     "pointsValue_other": "{{count}} points",
     "moveUp": "Move up",
     "moveDown": "Move down",
-    "dragToReorder": "Drag to reorder",
     "duplicateQuestion": "Duplicate",
     "deleteQuestion": "Delete question",
-    "deleteQuestionTitle": "Delete this question?",
     "needsFixing": "Fix",
     "preview": "Phone preview",
     "showPreview": "Show phone preview",
     "hidePreview": "Hide phone preview",
-    "previewEmpty": "Select a question to preview it.",
     "status": {
       "saved": "Saved",
       "pending": "Unsaved changes…",
       "saving": "Saving…",
       "invalid": "Not saved: some fields are incomplete",
-      "error": "Saving failed, retrying on the next change"
+      "error": "Saving failed",
+      "offline": "Offline: saved once back online"
     },
     "errors": {
       "required": "Required.",
@@ -293,6 +363,59 @@
       "markCorrect": "Mark the correct option.",
       "duplicateOptions": "Options must be distinct.",
       "duplicateQuestions": "Duplicate question ids; duplicate the question again."
+    },
+    "sampleQuestion": "Which is the largest planet in the Solar System?",
+    "sampleOption1": "Jupiter",
+    "sampleOption2": "Mars",
+    "sampleOption3": "Venus",
+    "sampleOption4": "Saturn",
+    "previewSample": "A sample question to preview the settings.",
+    "addImageHint": "Drop, paste or choose a file. JPG, PNG or WebP, max 5 MB.",
+    "replaceImage": "Replace image",
+    "uploading": "Uploading…",
+    "questionN": "Question {{n}}",
+    "questionNOfCount": "Question {{n}} of {{count}}",
+    "dragQuestion": "Reorder question {{n}}",
+    "dragOption": "Reorder option {{n}}",
+    "correctOption": "Correct: option {{n}}",
+    "retrySave": "Try saving again",
+    "problemCount_one": "{{count}} to fix",
+    "problemCount_other": "{{count}} to fix",
+    "problemsTitle": "Fix these before playing",
+    "problemAt": "{{where}}: {{message}}",
+    "playNeedsQuestion": "Add a question first.",
+    "playNeedsFixes": "Fix these first:",
+    "settings": "Quiz settings",
+    "emptyHelp": "Pick the type of the first question. You can add more, reorder and duplicate them later.",
+    "listHelp": "Tap a question to edit it. Press and hold to drag it to a new place.",
+    "moreQuestionActions": "More question actions",
+    "moveToTop": "Move to top",
+    "moveToBottom": "Move to bottom",
+    "questionDuplicated": "Question duplicated",
+    "questionDeleted": "Question {{n}} deleted",
+    "undo": "Undo",
+    "leaveTitle": "Leave the editor?",
+    "leave": "Leave",
+    "leaveBody": {
+      "invalid": "Some fields are incomplete, so the latest changes are not saved. They are lost if you leave now.",
+      "offline": "You are offline and the latest changes are not saved yet. They are lost if you leave now.",
+      "error": "The latest changes could not be saved. They are lost if you leave now."
+    },
+    "shortcuts": {
+      "title": "Keyboard shortcuts",
+      "help": "Show this list",
+      "duplicate": "Duplicate the question",
+      "add": "Add a question",
+      "moveUp": "Move the question up",
+      "moveDown": "Move the question down"
+    },
+    "dnd": {
+      "instructions": "To reorder, press Space, move with the arrow keys, then press Space again to drop or Escape to cancel.",
+      "pickedUp": "Picked up {{item}}, position {{position}} of {{count}}.",
+      "movedOver": "{{item}} moved to position {{position}} of {{count}}.",
+      "outside": "{{item}} is outside the list.",
+      "dropped": "{{item}} dropped at position {{position}} of {{count}}.",
+      "cancelled": "Reordering cancelled, {{item}} is back in place."
     }
   },
   "users": {
@@ -341,7 +464,8 @@
     "label": "Host menu",
     "quizzes": "Quizzes",
     "signedInAs": "Signed in as",
-    "games": "Games"
+    "games": "Games",
+    "account": "Account"
   },
   "history": {
     "title": "Games",
@@ -351,7 +475,12 @@
     "results": "Results",
     "control": "Control",
     "deleteTitle": "Delete game?",
-    "deleteBody": "The results of \"{{title}}\" ({{date}}) will be deleted permanently."
+    "deleteBody": "The results of \"{{title}}\" ({{date}}) will be deleted permanently.",
+    "quiz": "Quiz",
+    "date": "Date",
+    "mode": "Mode",
+    "playerCount": "Players",
+    "status": "Status"
   },
   "results": {
     "title": "Results",
@@ -378,6 +507,6 @@
     "members": "Members",
     "sortedAscending": "sorted ascending",
     "sortedDescending": "sorted descending",
-    "screenHint": "Space or → next, ← back"
+    "screenHint": "Space or → next, ← back, P pause"
   }
 }

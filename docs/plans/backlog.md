@@ -7,6 +7,8 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Feature | Why | Effort | Notes |
 |---|---|---|---|
 | Answer streak bonus | Rewards consistency, standard in Kahoot | S | Engine only: `streak` per player, bonus per setting; shown on reveal |
+| Partial-credit multiple choice ("some of these") | Several correct options where picking some is enough | M | New question type in the shared schema (keeps `multiple` as "all must be picked"); scoring option per question: same points for any correct pick, or points per correct option; wrong picks subtract or void, to decide; phone UI as multiple choice |
+| Phone end-of-game answer review redesign | The current list on the podium screen is cramped: question, own answer, correct answer and points all in one small card | S | One card per question with the result colour as a stripe, the own answer and the correct answer on separate lines, collapsible per question; requested after phase 9 |
 | Ordering question type ("put in order") | Common in Kahoot, good for process questions | M | New type in shared schema, engine scoring (exact or partial), drag on the phone (reuses phase 11 sortable), projector display |
 | Slider or range question | Estimation questions with a visual answer | M | Like number with min/max/step and a slider input; distribution as a histogram |
 | Avatars or emoji per player | Lobby and scoreboard feel personal | S | Chosen at join from a fixed set, stored on the player; no uploads |
@@ -21,6 +23,7 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Feature | Why | Effort | Notes |
 |---|---|---|---|
 | Pause game | Breaks, technical problems | M | Engine must shift `questionEndsAt`; needs phase 12's message system to tell players |
+| Re-show an answered question | Discuss a question again, or recover from a projector problem | S | Host command `showQuestion(index)` that puts an already revealed question back on the projector and the phones in a read-only reveal state (no re-answering, no score change); requested after phase 9 |
 | Play again with the same players | Second round at an event | S | New game from the same quiz, players' tokens re-join from the lobby link |
 | Question bank | Reuse questions across quizzes | L | New table, picker in the editor, tags |
 | Import questions from CSV or Excel | Build quizzes outside the app | M | Column format documented; validation report |

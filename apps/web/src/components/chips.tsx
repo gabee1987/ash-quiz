@@ -1,6 +1,9 @@
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from './button'
+import { XIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 /** A list of short strings edited as removable chips plus an input (Enter or Add appends). */
 export function ChipsInput({
@@ -29,28 +32,28 @@ export function ChipsInput({
   }
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-sm">
+      <Label htmlFor={id} className="font-semibold">
         {label}
-      </label>
+      </Label>
       {values.length > 0 && (
         <ul className="flex flex-wrap gap-2">
           {values.map((value, i) => (
-            <li key={`${value}-${i}`} className="flex items-center gap-1 rounded-full bg-white/15 py-1 pr-1 pl-3">
+            <li key={`${value}-${i}`} className="flex items-center gap-1 rounded-full bg-secondary py-1 pr-1 pl-3 font-semibold text-secondary-foreground">
               <span className="wrap-break-word">{value}</span>
               <button
                 type="button"
-                className="flex size-8 items-center justify-center rounded-full hover:bg-white/20"
+                className="flex size-8 items-center justify-center rounded-full hover:bg-background/60 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
                 aria-label={t('common.removeItem', { name: value })}
                 onClick={() => onChange(values.filter((_, j) => j !== i))}
               >
-                ×
+                <XIcon className="size-4" aria-hidden="true" />
               </button>
             </li>
           ))}
         </ul>
       )}
       <div className="flex gap-2">
-        <input
+        <Input
           id={id}
           value={draft}
           maxLength={maxLength}
@@ -62,7 +65,7 @@ export function ChipsInput({
               add()
             }
           }}
-          className="min-h-12 min-w-0 flex-1 rounded-lg bg-white px-3 text-black"
+          className="flex-1"
         />
         <Button type="button" variant="secondary" onClick={add}>
           {t('common.add')}

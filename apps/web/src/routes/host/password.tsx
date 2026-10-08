@@ -2,9 +2,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../components/button'
+import { FormAlert } from '@/components/form-alert'
+import { Button } from '@/components/ui/button'
 import { TextField } from '../../components/text-field'
-import { ApiError, apiFetch } from '../../lib/api'
+import { apiFetch, errorCode } from '../../lib/api'
 import { meQueryOptions, type User } from '../../lib/auth'
 
 const MIN_LENGTH = 10
@@ -47,9 +48,13 @@ function PasswordPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-4">
-      <h1 className="text-center text-2xl font-bold">{t('auth.passwordChange.title')}</h1>
-      {user.mustChangePassword && <p className="rounded-lg bg-white/10 px-4 py-3 text-sm">{t('auth.passwordChange.mustChange')}</p>}
-      <form className="flex flex-col gap-3" onSubmit={onSubmit} noValidate>
+      <h1 className="text-center text-3xl font-black tracking-tight">{t('auth.passwordChange.title')}</h1>
+      {user.mustChangePassword && (
+        <p className="rounded-xl bg-warning px-4 py-3 text-sm font-semibold text-warning-foreground">
+          {t('auth.passwordChange.mustChange')}
+        </p>
+      )}
+      <form className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-soft" onSubmit={onSubmit} noValidate>
         <TextField
           label={t('auth.passwordChange.current')}
           type="password"
@@ -74,17 +79,16 @@ function PasswordPage() {
           onChange={(e) => setRepeat(e.target.value)}
           error={repeatError}
         />
-        {change.error && (
-          <p role="alert" className="rounded-lg bg-red-500/20 px-4 py-3 text-red-200">
-            {t(change.error instanceof ApiError ? change.error.code : 'errors.internal')}
-          </p>
-        )}
-        <Button type="submit" disabled={change.isPending}>
+        {change.error && <FormAlert>{t(errorCode(change.error))}</FormAlert>}
+        <Button type="submit" size="lg" className="mt-2" disabled={change.isPending}>
           {t('auth.passwordChange.submit')}
         </Button>
       </form>
       {!user.mustChangePassword && (
-        <Link to="/host" className="text-center underline">
+        <Link
+          to="/host"
+          className="self-center rounded-md font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
           {t('host.game.backToQuizzes')}
         </Link>
       )}

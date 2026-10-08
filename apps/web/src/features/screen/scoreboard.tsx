@@ -1,11 +1,17 @@
 import type { HostSnapshot, PlayerPublic } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/lib/cn'
+import { CountUp } from '../../components/count-up'
+import { RankArrow } from '../../components/rank-arrow'
+import { stagger } from '../../lib/motion'
+
+const medals = ['bg-yellow-400 text-black', 'bg-slate-300 text-black', 'bg-orange-400 text-black']
 
 export function ScreenScoreboard({ host }: { host: HostSnapshot }) {
   const { t } = useTranslation()
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <h1 className="text-5xl font-bold">{t('play.leaderboard')}</h1>
+      <h1 className="animate-fade-up text-5xl font-black">{t('play.leaderboard')}</h1>
       {host.mode === 'team' ? <TeamBoard host={host} /> : <PlayerRows players={host.players.slice(0, 10)} />}
     </div>
   )
@@ -13,13 +19,33 @@ export function ScreenScoreboard({ host }: { host: HostSnapshot }) {
 
 function PlayerRows({ players, compact = false }: { players: PlayerPublic[]; compact?: boolean }) {
   return (
-    <ol className={`flex flex-col ${compact ? 'gap-1 text-2xl' : 'gap-3 text-4xl'}`}>
-      {players.map((player) => (
-        <li key={player.id} className="flex items-center gap-4 rounded-xl bg-white/10 px-6 py-2">
-          <span className="w-16 font-bold tabular-nums">{player.rank}.</span>
-          <span className="flex-1 truncate">{player.name}</span>
-          {player.roundPoints > 0 && <span className="text-green-300 tabular-nums">+{player.roundPoints}</span>}
-          <span className="w-40 text-right font-bold tabular-nums">{player.score}</span>
+    <ol className={cn('flex flex-col', compact ? 'gap-1 text-2xl' : 'gap-3 text-4xl')}>
+      {players.map((player, i) => (
+        <li
+          key={player.id}
+          className="flex animate-slide-in items-center gap-4 rounded-2xl border bg-card px-6 py-2 shadow-soft"
+          style={stagger(i, 90)}
+        >
+          <span
+            className={cn(
+              'grid shrink-0 place-items-center rounded-full font-black tabular-nums',
+              compact ? 'size-10' : 'size-16',
+              player.rank <= 3 ? medals[player.rank - 1] : 'bg-muted text-muted-foreground',
+            )}
+          >
+            {player.rank}
+          </span>
+          <span className="flex-1 truncate font-semibold">{player.name}</span>
+          <RankArrow previous={player.previousRank} rank={player.rank} className="text-[0.75em]" />
+          {player.roundPoints > 0 && (
+            <span
+              className="animate-pop rounded-full bg-success/15 px-3 py-0.5 text-[0.75em] font-bold text-success"
+              style={stagger(i, 90, 400)}
+            >
+              +{player.roundPoints}
+            </span>
+          )}
+          <CountUp value={player.score} className={cn('text-right font-black', compact ? 'w-28' : 'w-44')} />
         </li>
       ))}
     </ol>
@@ -30,12 +56,20 @@ function PlayerRows({ players, compact = false }: { players: PlayerPublic[]; com
 function TeamBoard({ host }: { host: HostSnapshot }) {
   return (
     <ol className="grid gap-4 xl:grid-cols-2">
-      {host.teams.map((team) => (
-        <li key={team.id} className="flex flex-col gap-2 rounded-2xl bg-white/10 p-4">
-          <div className="flex items-center gap-4 text-4xl font-bold">
-            <span className="w-16 tabular-nums">{team.rank}.</span>
+      {host.teams.map((team, i) => (
+        <li key={team.id} className="flex animate-slide-in flex-col gap-2 rounded-2xl border bg-card p-4 shadow-soft" style={stagger(i, 120)}>
+          <div className="flex items-center gap-4 text-4xl font-black">
+            <span
+              className={cn(
+                'grid size-16 shrink-0 place-items-center rounded-full tabular-nums',
+                team.rank <= 3 ? medals[team.rank - 1] : 'bg-muted text-muted-foreground',
+              )}
+            >
+              {team.rank}
+            </span>
             <span className="flex-1 truncate">{team.name}</span>
-            <span className="tabular-nums">{team.score}</span>
+            <RankArrow previous={team.previousRank} rank={team.rank} className="text-3xl" />
+            <CountUp value={team.score} />
           </div>
           <PlayerRows players={host.players.filter((p) => p.teamId === team.id).slice(0, 5)} compact />
         </li>

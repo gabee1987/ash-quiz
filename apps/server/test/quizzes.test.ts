@@ -123,9 +123,24 @@ describeDb('quiz routes (database)', () => {
 
   it('stores game settings with the quiz, fills defaults, and copies them on duplicate', async () => {
     const plain = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
-    expect(plain.settings).toMatchObject({ mode: 'classic', revealAnswers: 'afterQuestion', answerStyle: 'plain' })
+    expect(plain.settings).toMatchObject({
+      mode: 'classic',
+      revealAnswers: 'afterQuestion',
+      answerStyle: 'colourful',
+      answerPalette: 'vivid',
+      answerSymbols: 'shapes',
+      theme: 'classic',
+    })
 
-    const settings = { revealAnswers: 'atEnd', answerStyle: 'colourful', mode: 'team', teamNames: ['Red', 'Blue'] }
+    const settings = {
+      revealAnswers: 'atEnd',
+      answerStyle: 'plain',
+      answerPalette: 'candy',
+      answerSymbols: 'icons',
+      mode: 'team',
+      teamNames: ['Red', 'Blue'],
+      theme: 'arcade',
+    }
     const quiz = (await req(alice, 'POST', '/api/quizzes', { ...quizBody, settings })).json().quiz
     expect(quiz.settings).toMatchObject(settings)
     expect((await req(alice, 'GET', `/api/quizzes/${quiz.id}`)).json().quiz.settings).toMatchObject(settings)

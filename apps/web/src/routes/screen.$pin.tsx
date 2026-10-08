@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 import { ConnectionBar } from '../components/connection-bar'
 import { Spinner } from '../components/spinner'
 import { primaryAction } from '../features/host/primary-action'
@@ -14,6 +15,7 @@ import { ScreenScoreboard } from '../features/screen/scoreboard'
 import { apiFetch } from '../lib/api'
 import { meQueryOptions } from '../lib/auth'
 import { closeSession, emitAck, startSession, useGameStore } from '../lib/socket'
+import { useGameTheme } from '../lib/themes'
 
 export const Route = createFileRoute('/screen/$pin')({
   component: ScreenPage,
@@ -27,6 +29,7 @@ function ScreenPage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
   const { status, host, clockOffset, closed } = useGameStore()
+  useGameTheme(host?.settings)
   const me = useQuery({ ...meQueryOptions, throwOnError: false })
   const info = useQuery({
     queryKey: ['gamePublic', pin],
@@ -66,11 +69,23 @@ function ScreenPage() {
     return <p className="flex flex-1 items-center justify-center text-4xl">{t(closed)}</p>
   }
   if (!host) return <Spinner />
+  const action = isHost ? primaryAction(host) : null
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col px-4 py-4 lg:px-12">
       <ConnectionBar status={status} />
       <ScreenPhase host={host} clockOffset={clockOffset} joinUrl={info.data?.joinUrl ?? null} />
+      {/* The host's next step, for a projector driven with a mouse; the keyboard shortcut still works. */}
+      {action && (
+        <Button
+          size="lg"
+          className="fixed right-6 bottom-6 z-40 animate-pop"
+          onClick={() => void emitAck('host:command', action.command)}
+        >
+          {t(action.label)}
+          <kbd className="rounded-md bg-primary-foreground/20 px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>
+        </Button>
+      )}
     </div>
   )
 }

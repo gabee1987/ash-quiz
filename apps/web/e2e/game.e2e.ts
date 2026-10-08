@@ -43,14 +43,16 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
   })
 
   await test.step('host builds a quiz with three questions', async () => {
-    await page.getByRole('button', { name: 'New quiz' }).click()
+    // Exact: each quiz card also has a "More actions for <title>" button, and a quiz may be called "New quiz".
+    await page.getByRole('button', { name: 'New quiz', exact: true }).click()
     await page.getByLabel('Quiz title').fill(title)
 
-    // An empty quiz opens with the type picker; later questions need "Add question" first.
+    // An empty quiz shows the type picker inline; later questions need "Add question" first.
     const addQuestion = async (type: RegExp) => {
-      if (!(await page.getByText('Choose the question type').isVisible())) {
-        await page.getByRole('button', { name: 'Add question' }).click()
-      }
+      // The previous picker dialog, while closing, still hides the page from the accessibility tree.
+      await expect(page.getByRole('dialog')).toHaveCount(0)
+      const add = page.getByRole('button', { name: 'Add question' })
+      if (await add.isVisible()) await add.click()
       await page.getByRole('button', { name: type }).click()
     }
     await addQuestion(/^Single choice/)
