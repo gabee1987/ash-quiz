@@ -17,5 +17,7 @@ export function formatAnswer(answer: Answer, question: Question | PublicQuestion
       return answer.value
     case 'number':
       return new Intl.NumberFormat(locale).format(answer.value)
+    case 'order':
+      return answer.optionIds.map(optionText).join(', ')
   }
 }

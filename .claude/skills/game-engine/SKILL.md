@@ -44,7 +44,8 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | Command | Allowed in | Effect |
 |---|---|---|
 | `createGame(quiz, settings, pin, id, now)` | - | lobby state, teams created from `settings.teamNames` in team mode |
-| `joinPlayer({ id, name, teamId, token })` | lobby only (reconnect allowed any time via token) | adds player; name unique case-insensitively, max 60 players (`MAX_PLAYERS` in `packages/shared`); team mode requires a known `teamId` |
+| `joinPlayer({ id, name, teamId, token, avatar })` | lobby only (reconnect allowed any time via token) | adds player; name unique case-insensitively and allowed by `isNameAllowed` (`names.ts`, else `errors.nameNotAllowed`), max 60 players (`MAX_PLAYERS` in `packages/shared`); team mode requires a known `teamId`; `avatar` from `avatars`, else `fallbackAvatar(id)`; a token rejoin keeps the stored name and avatar |
+| `setNextGame(pin)` | finished | "Play again": `nextPin` points phones and the projector to the next round |
 | `reconnectPlayer(token)` / `disconnectPlayer(playerId, now)` | any | flips `connected`; disconnect stamps `disconnectedAt`, reconnect clears it |
 | `announce({ id, text }, now)` / `clearAnnouncement()` | any | sets or clears `announcement: { id, text, at }` (1 to 200 characters, trimmed); `startGame` and `next` clear it too |
 | `kickPlayer(playerId)` | any except finished | removes player, recomputes nothing (their past points stay out of team totals from then on) |
@@ -67,6 +68,7 @@ Let `P` = question points, `T` = time limit in ms, `t` = answer time minus `ques
 - Correct answer, speed bonus off: `P`.
 - Wrong or missing answer: `0`.
 - Poll: always `0`, `correct` is `null`.
+- Streak: a correct answer raises the player's `streak`, a wrong or missing one resets it to 0; polls, skipped questions and answers waiting for host grading leave it unchanged (grading then moves it). With `settings.streakBonus` a correct answer's points include `streakBonusFor(streak)` = `min(streak - 1, 5) * 100`, also stored as `bonus` on the answer record.
 
 Correctness per type:
 
@@ -77,6 +79,9 @@ Correctness per type:
 | truefalse | `value === correct` |
 | text | `normalise(value)` equals `normalise(a)` for some accepted answer; with no accepted answers, `correct` stays `null` until `gradeText` |
 | number | `abs(value - correct) <= tolerance` |
+| order | `optionIds` equals the stored option order exactly (all or nothing); the answer must be a permutation of the options |
+
+Ordering questions store the correct order as the option order. `toPublicQuestion` shows them shuffled with `displayOrder` (`order.ts`): seeded by the question id, never the correct order, the same for everyone. Their reveal distribution counts, per option, the players who put it in its right place.
 
 `normalise`: trim, lowercase, NFD then strip combining marks (so "Győr" matches "gyor"), collapse internal whitespace.
 

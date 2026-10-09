@@ -1,5 +1,6 @@
 import type { PodiumPlace } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
+import { PlayerAvatar } from '../../components/player-avatar'
 
 const medal = ['bg-yellow-400 text-black', 'bg-slate-300 text-black', 'bg-orange-400 text-black']
 
@@ -15,6 +16,7 @@ export function ResultsPodium({ places }: { places: PodiumPlace[] }) {
             <span className={`flex size-10 shrink-0 items-center justify-center rounded-full font-black ${medal[place.rank - 1]}`}>
               {place.rank}
             </span>
+            <PlayerAvatar avatar={place.avatar} size="md" />
             <span className="min-w-0 flex-1 text-lg font-bold wrap-break-word">{place.name}</span>
             <span className="text-lg font-extrabold tabular-nums">{place.score}</span>
           </li>

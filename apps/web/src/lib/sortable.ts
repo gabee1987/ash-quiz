@@ -26,6 +26,19 @@ export function useSortableSensors() {
   )
 }
 
+/**
+ * Sensors for a short list dragged by the whole item (a player's ordering answer): mouse and touch
+ * drags start after a few pixels of movement, no press-and-hold. The items must be `touch-none`,
+ * so a swipe on them drags instead of scrolling the page.
+ */
+export function useInstantSortableSensors() {
+  return useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+}
+
 /** Translated screen reader texts for a sortable list of `ids`; `name(id)` says what an item is ("Question 3"). */
 export function useSortableAccessibility(
   ids: readonly UniqueIdentifier[],

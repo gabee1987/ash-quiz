@@ -17,6 +17,7 @@ One file per phase. Each phase is one `feature/*` branch off `develop`, implemen
 | 10 | [Game screens, animations, answer styles and themes](phase-10-game-screens.md) | `feature/game-screens` | done |
 | 11 | [Quiz editor overhaul](phase-11-editor.md) | `feature/editor-v2` | done |
 | 12 | [Connection resilience, status toasts and host messages](phase-12-resilience.md) | `feature/resilience` | done |
+| 13 | [Play features: streak bonus, ordering question, avatars, nickname help, play again](phase-13-play-features.md) | `feature/play-features` | done |
 
 Order matters: each phase builds on the previous one. Phase 1 and this planning material are the first two commits on `main` and `develop`.
 

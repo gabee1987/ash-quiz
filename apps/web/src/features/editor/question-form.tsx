@@ -11,8 +11,8 @@ import { NumberField } from './number-field'
 import { OptionsEditor } from './options-editor'
 import type { FieldErrors } from './validate'
 
-const TIME_LIMITS = [5, 10, 20, 30, 45, 60, 90, 120, 180]
-const POINTS = [0, 500, 1000, 2000]
+export const TIME_LIMITS = [5, 10, 20, 30, 45, 60, 90, 120, 180]
+export const POINTS = [0, 500, 1000, 2000]
 
 /** Per-type form for one question. `path` is its error prefix, e.g. "questions.2". */
 export function QuestionForm({
@@ -96,6 +96,18 @@ export function QuestionForm({
         <OptionsEditor
           options={question.options}
           marker="none"
+          correctIds={[]}
+          onOptions={(options) => onChange({ ...question, options })}
+          onCorrect={() => {}}
+          errors={errors}
+          path={path}
+          symbols={symbols}
+        />
+      )}
+      {question.type === 'order' && (
+        <OptionsEditor
+          options={question.options}
+          marker="order"
           correctIds={[]}
           onOptions={(options) => onChange({ ...question, options })}
           onCorrect={() => {}}

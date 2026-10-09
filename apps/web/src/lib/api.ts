@@ -3,6 +3,8 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     readonly code: string,
+    /** Field issues of a 400 `errors.invalidInput`, e.g. `{ path: 'names.3', code: 'custom' }`. */
+    readonly issues: { path: string; code: string }[] = [],
   ) {
     super(code)
     this.name = 'ApiError'
@@ -34,7 +36,8 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
       typeof body === 'object' && body !== null && typeof (body as { error?: unknown }).error === 'string'
         ? (body as { error: string }).error
         : 'errors.internal'
-    throw new ApiError(res.status, code)
+    const issues = (body as { issues?: unknown } | null)?.issues
+    throw new ApiError(res.status, code, Array.isArray(issues) ? issues : [])
   }
   return body as T
 }

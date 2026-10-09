@@ -56,7 +56,7 @@ describeDb('quiz routes (database)', () => {
     await cleanup()
   })
 
-  const req = (who: { cookie: string }, method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, payload?: object) =>
+  const req = (who: { cookie: string }, method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, payload?: object) =>
     built.app.inject({ method, url, headers: { cookie: who.cookie }, ...(payload ? { payload } : {}) })
 
   it('requires a session', async () => {
@@ -156,6 +156,79 @@ describeDb('quiz routes (database)', () => {
       expect(res.statusCode).toBe(400)
       expect(res.json().issues).toContainEqual({ path: 'settings.teamNames', code: 'custom' })
     }
+  })
+
+  it('batch deletes own quizzes, and none when one of them is missing or someone else’s', async () => {
+    const create = async (who: { cookie: string }) => (await req(who, 'POST', '/api/quizzes', quizBody)).json().quiz.id as string
+    const [a1, a2, a3, b1] = [await create(alice), await create(alice), await create(alice), await create(bob)]
+
+    for (const ids of [[a1, b1], [a1, 'missing']]) {
+      const res = await req(alice, 'POST', '/api/quizzes/batch-delete', { ids })
+      expect(res.statusCode).toBe(404)
+      expect(res.json()).toEqual({ error: 'errors.notFound' })
+    }
+    expect((await req(alice, 'GET', `/api/quizzes/${a1}`)).statusCode).toBe(200)
+    expect((await req(bob, 'GET', `/api/quizzes/${b1}`)).statusCode).toBe(200)
+    expect((await req(alice, 'POST', '/api/quizzes/batch-delete', { ids: [] })).statusCode).toBe(400)
+
+    const res = await req(alice, 'POST', '/api/quizzes/batch-delete', { ids: [a1, a2, a2] })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ deleted: 2 })
+    expect((await req(alice, 'GET', `/api/quizzes/${a1}`)).statusCode).toBe(404)
+    expect((await req(alice, 'GET', `/api/quizzes/${a2}`)).statusCode).toBe(404)
+    expect((await req(alice, 'GET', `/api/quizzes/${a3}`)).statusCode).toBe(200)
+  })
+
+  it('batch updates the given settings and question defaults, keeping everything else', async () => {
+    const first = (await req(alice, 'POST', '/api/quizzes', { ...quizBody, settings: { theme: 'arcade', speedBonus: false } })).json()
+      .quiz
+    const second = (await req(alice, 'POST', '/api/quizzes', { ...quizBody, settings: { answerPalette: 'candy' } })).json().quiz
+    const res = await req(alice, 'PATCH', '/api/quizzes/batch', {
+      ids: [first.id, second.id],
+      settings: { theme: 'navy', streakBonus: true },
+      questions: { timeLimitSec: 45 },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ updated: 2 })
+
+    const [a, b] = [
+      (await req(alice, 'GET', `/api/quizzes/${first.id}`)).json().quiz,
+      (await req(alice, 'GET', `/api/quizzes/${second.id}`)).json().quiz,
+    ]
+    expect(a.settings).toMatchObject({ theme: 'navy', streakBonus: true, speedBonus: false, answerPalette: 'vivid' })
+    expect(b.settings).toMatchObject({ theme: 'navy', streakBonus: true, speedBonus: true, answerPalette: 'candy' })
+    for (const quiz of [a, b]) {
+      expect(quiz.title).toBe('Test quiz')
+      expect(quiz.questions.map((q: { timeLimitSec: number; points: number }) => [q.timeLimitSec, q.points])).toEqual([
+        [45, 1000],
+        [45, 1000],
+      ])
+      expect(quiz.questions.map((q: { id: string }) => q.id)).toEqual(
+        (quiz.id === first.id ? first : second).questions.map((q: { id: string }) => q.id),
+      )
+    }
+  })
+
+  it('batch update changes nothing when a merged quiz is invalid or a quiz is not the user’s', async () => {
+    const quiz = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
+    const bobs = (await req(bob, 'POST', '/api/quizzes', quizBody)).json().quiz
+    const cases = [
+      { body: { ids: [quiz.id], settings: { mode: 'team' } }, status: 400 },
+      { body: { ids: [quiz.id], questions: { points: 99_999 } }, status: 400 },
+      { body: { ids: [quiz.id], settings: { theme: 'nope' } }, status: 400 },
+      { body: { ids: [quiz.id, bobs.id], settings: { theme: 'navy' } }, status: 404 },
+    ]
+    for (const { body, status } of cases) expect((await req(alice, 'PATCH', '/api/quizzes/batch', body)).statusCode).toBe(status)
+    const after = (await req(alice, 'GET', `/api/quizzes/${quiz.id}`)).json().quiz
+    expect(after.settings).toEqual(quiz.settings)
+    expect(after.questions).toEqual(quiz.questions)
+    expect(after.updatedAt).toBe(quiz.updatedAt)
+
+    const team = await req(alice, 'PATCH', '/api/quizzes/batch', {
+      ids: [quiz.id],
+      settings: { mode: 'team', teamNames: ['Red', 'Blue'] },
+    })
+    expect(team.statusCode).toBe(200)
   })
 
   it('answers 400 with issues for an invalid body', async () => {

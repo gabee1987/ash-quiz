@@ -19,6 +19,8 @@
     "pinPlaceholder": "6 számjegy",
     "name": "Neved",
     "namePlaceholder": "Hogy hívjunk?",
+    "surprise": "Lepj meg!",
+    "avatar": "A figurád",
     "team": "Csapat",
     "submit": "Csatlakozom",
     "hostLogin": "Játékvezető belépés",
@@ -28,7 +30,17 @@
     "scanHint": "Irányítsd a kamerát a kivetítőn látható QR-kódra.",
     "cameraDenied": "Nincs engedély a kamera használatára. Írd be a PIN-t.",
     "cameraUnavailable": "A kamera nem érhető el. Írd be a PIN-t.",
-    "pinDigit": "{{n}}. számjegy"
+    "pinDigit": "{{n}}. számjegy",
+    "pinOk": "OK",
+    "surpriseNeedsPin": "Előbb add meg a PIN-t",
+    "avatarChange": "Másikat",
+    "avatarDone": "Kész",
+    "avatarGroups": {
+      "animals": "Állatok",
+      "food": "Finomságok",
+      "fantasy": "Mesés lények",
+      "fun": "Játék és sport"
+    }
   },
   "common": {
     "loading": "Betöltés…",
@@ -77,6 +89,8 @@
       },
       "answered_one": "{{count}} játékosból {{answered}} válaszolt",
       "answered_other": "{{count}} játékosból {{answered}} válaszolt",
+      "notAnswered_one": "{{count}} játékos még nem válaszolt:",
+      "notAnswered_other": "{{count}} játékos még nem válaszolt:",
       "start": "Start",
       "endQuestion": "Kérdés lezárása",
       "extend": "+30 mp",
@@ -102,6 +116,7 @@
       "releaseToPlayers": "Eredmények a telefonokon",
       "podiumPendingHint": "A kivetítő még nem mutatja az eredményeket.",
       "playersWaitingHint": "A játékosok még nem látják az eredményeiket.",
+      "playAgain": "Új kör",
       "connectedOfTotal": "{{connected}} / {{count}} kapcsolódva",
       "offlineForSeconds": "{{count}} mp óta nincs kapcsolat",
       "offlineForMinutes": "{{count}} perce nincs kapcsolat",
@@ -163,6 +178,8 @@
       "duplicateTeams": "A csapatneveknek különbözniük kell.",
       "speedBonus": "Gyorsasági bónusz",
       "speedBonusHelp": "A gyorsabb helyes válasz több pontot ér.",
+      "streakBonus": "Sorozatbónusz",
+      "streakBonusHelp": "Az egymás utáni helyes válaszok extra pontot érnek: a másodiktól +100, legfeljebb +500.",
       "shuffle": "Válaszlehetőségek keverése",
       "submit": "Játék létrehozása",
       "changeForGame": "Beállítások módosítása erre a játékra",
@@ -230,6 +247,38 @@
     "deleteTitle": "Törli ezt a kvízt?",
     "deleteBody": "A(z) „{{title}}” véglegesen törlődik. A már lejátszott játékok eredményei megmaradnak.",
     "moreActions": "További műveletek: {{title}}",
+    "select": "Kijelölés",
+    "batch": {
+      "selected_one": "{{count}} kijelölve",
+      "selected_other": "{{count}} kijelölve",
+      "selectAll": "Összes kijelölése",
+      "clearSelection": "Kijelölés megszüntetése",
+      "exit": "Kijelölés befejezése",
+      "selectQuiz": "{{title}} kijelölése",
+      "edit": "Beállítások módosítása",
+      "editTitle_one": "{{count}} kvíz módosítása",
+      "editTitle_other": "{{count}} kvíz módosítása",
+      "editHelp": "Jelölje be, mit szeretne módosítani. A többi beállítás kvízenként változatlan marad.",
+      "apply_one": "Alkalmazás {{count}} kvízre",
+      "apply_other": "Alkalmazás {{count}} kvízre",
+      "groups": {
+        "look": "Megjelenés",
+        "lookHelp": "Téma, válaszszínek, jelek és stílus",
+        "scoring": "Pontozás",
+        "scoringHelp": "Gyorsasági bónusz, sorozatbónusz, válaszlehetőségek keverése",
+        "flow": "Játékmenet",
+        "flowHelp": "Játékmód és csapatok, a helyes válaszok és az eredménytábla megjelenítése, végeredmény",
+        "questions": "Minden kérdés",
+        "questionsHelp": "Az összes kérdés időkorlátja és pontértéke"
+      },
+      "deleteTitle_one": "Törli a kijelölt {{count}} kvízt?",
+      "deleteTitle_other": "Törli a kijelölt {{count}} kvízt?",
+      "deleteBody": "A kvízek véglegesen törlődnek. A már lejátszott játékok eredményei megmaradnak.",
+      "deleted_one": "{{count}} kvíz törölve",
+      "deleted_other": "{{count}} kvíz törölve",
+      "updated_one": "{{count}} kvíz módosítva",
+      "updated_other": "{{count}} kvíz módosítva"
+    },
     "search": "Kvízek keresése",
     "sort": "Rendezés",
     "sortOptions": {
@@ -266,6 +315,15 @@
     "points_one": "+{{count}} pont",
     "points_other": "+{{count}} pont",
     "correctAnswer": "Helyes válasz",
+    "correctOrder": "Helyes sorrend",
+    "orderHint": "Húzd a helyes sorrendbe az elemeket",
+    "dragItem": "{{item}} áthelyezése",
+    "moveUp": "{{item}} feljebb",
+    "moveDown": "{{item}} lejjebb",
+    "streak_one": "{{count}} egymás után",
+    "streak_other": "{{count}} egymás után",
+    "nextRoundReady": "A játékvezető új kört indított!",
+    "joinNextRound": "Csatlakozás a következő körhöz",
     "totalScore": "Pontszám: {{score}}",
     "rank": "Helyezés: {{rank}}.",
     "yourRank": "Helyezésed",
@@ -324,7 +382,9 @@
     "number": "Szám",
     "numberHelp": "A játékosok számot írnak be, megadható tűréssel.",
     "poll": "Szavazás",
-    "pollHelp": "Véleménykérés, pontozás nélkül."
+    "pollHelp": "Véleménykérés, pontozás nélkül.",
+    "order": "Sorba rendezés",
+    "orderHelp": "A játékosok helyes sorrendbe rakják az elemeket."
   },
   "editor": {
     "title": "Kvíz címe",
@@ -345,6 +405,8 @@
     "options": "Válaszlehetőségek",
     "optionsMarkOne": "Válaszlehetőségek: jelölje a helyeset",
     "optionsMarkAll": "Válaszlehetőségek: jelölje az összes helyeset",
+    "optionsInOrder": "Elemek a helyes sorrendben",
+    "orderHint": "A játékosok összekeverve látják őket, és ebbe a sorrendbe kell rendezniük. Húzással átrendezhető.",
     "optionText": "{{n}}. lehetőség",
     "optionImage": "A(z) {{n}}. lehetőség képe",
     "removeOption": "A(z) {{n}}. lehetőség törlése",
@@ -421,6 +483,8 @@
     "questionDuplicated": "Kérdés másolva",
     "questionDeleted": "A(z) {{n}}. kérdés törölve",
     "undo": "Visszavonás",
+    "deleteQuiz": "Kvíz törlése",
+    "deleteQuizHelp": "A kvíz véglegesen törlődik. A már lejátszott játékok eredményei megmaradnak.",
     "leaveTitle": "Kilép a szerkesztőből?",
     "leave": "Kilépés",
     "leaveBody": {
@@ -445,6 +509,28 @@
       "cancelled": "Átrendezés visszavonva, {{item}} a helyén maradt."
     }
   },
+  "nicknames": {
+    "nav": "Nevek",
+    "title": "„Lepj meg!” nevek",
+    "help": "A játékosok ezek közül kapnak egyet véletlenszerűen, amikor a csatlakozási oldalon a „Lepj meg!” gombot választják: az oldaluk nyelvének listájából, és soha nem olyat, amely a játékban már foglalt.",
+    "languages": {
+      "hu": "Magyar",
+      "en": "Angol"
+    },
+    "label": "Nevek, soronként egy",
+    "hint": "Legfeljebb 24 karakter. Az ismétlődő nevek kimaradnak; a sértő neveket a rendszer elutasítja, mint a csatlakozásnál.",
+    "count_one": "{{count}} név",
+    "count_other": "{{count}} név",
+    "builtIn": "Beépített lista",
+    "custom": "Szerkesztett",
+    "save": "Mentés",
+    "saved": "A nevek mentve",
+    "tooLong": "hosszabb 24 karakternél",
+    "restore": "Beépített lista visszaállítása",
+    "restoreTitle": "Visszaállítja a beépített listát?",
+    "restoreBody": "Ennek a nyelvnek a szerkesztett nevei helyére a beépített nevek kerülnek.",
+    "restored": "A beépített lista visszaállítva"
+  },
   "users": {
     "title": "Felhasználók",
     "add": "Felhasználó hozzáadása",
@@ -464,6 +550,7 @@
     "gameFull": "A játék megtelt.",
     "gameAlreadyStarted": "A játék már elindult.",
     "nameTaken": "Ez a név már foglalt.",
+    "nameNotAllowed": "Kérjük, válassz másik nevet.",
     "invalidInput": "Hibás adat.",
     "notFound": "Nem található.",
     "connectionLost": "Megszakadt a kapcsolat, újracsatlakozás…",
@@ -485,7 +572,7 @@
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "wrongCurrentPassword": "A jelenlegi jelszó hibás.",
     "samePassword": "Az új jelszónak különböznie kell a jelenlegitől.",
-    "gameNotFinished": "Törlés előtt fejezze be a játékot.",
+    "gameNotFinished": "Előbb fejezze be a játékot.",
     "answerNotSent": "A válaszod nem ment el. Koppints újra."
   },
   "nav": {

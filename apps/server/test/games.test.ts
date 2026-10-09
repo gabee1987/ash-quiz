@@ -3,6 +3,7 @@ import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { quizzes } from '../src/db/schema.js'
 import { fixtureQuiz } from '../src/game/fixtures.js'
+import { endGame } from '../src/game/index.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
 
@@ -100,5 +101,28 @@ describeDb('game routes (database)', () => {
     const missing = await built.app.inject({ method: 'GET', url: '/api/games/999999/public' })
     expect(missing.statusCode).toBe(404)
     expect(missing.json()).toEqual({ error: 'errors.gameNotFound' })
+  })
+
+  it('play again: a new lobby with the same quiz and settings, pointed to by the finished game, owner only', async () => {
+    const { pin } = (await create(alice, { quizId: 'quiz-test_alice', settings: { streakBonus: true, theme: 'navy' } })).json()
+    const old = built.manager.get(pin)!
+    const again = (cookie: string) =>
+      built.app.inject({ method: 'POST', url: `/api/games/${old.state.id}/again`, headers: { cookie } })
+
+    expect((await again(alice)).json()).toEqual({ error: 'errors.gameNotFinished' })
+    built.manager.apply(pin, (state, now) => endGame(state, now))
+    expect((await again(bob)).statusCode).toBe(403)
+
+    const res = await again(alice)
+    expect(res.statusCode).toBe(201)
+    const next = built.manager.get(res.json().pin)!
+    expect(next.state).toMatchObject({ phase: 'lobby', quiz: { id: 'quiz-test_alice' }, settings: { streakBonus: true, theme: 'navy' } })
+    expect(next.state.id).not.toBe(old.state.id)
+    expect(built.manager.get(pin)!.state.nextPin).toBe(next.state.pin)
+
+    // A second press (double click, second tab) gets the same round.
+    const twice = await again(alice)
+    expect([twice.statusCode, twice.json().pin]).toEqual([200, next.state.pin])
+    expect((await built.app.inject({ method: 'POST', url: '/api/games/nope/again', headers: { cookie: alice } })).statusCode).toBe(404)
   })
 })

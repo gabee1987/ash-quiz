@@ -7,6 +7,7 @@ import { ConnectionBar } from '../components/connection-bar'
 import { Button } from '../components/ui/button'
 import { Spinner } from '../components/spinner'
 import { Lobby } from '../features/play/lobby'
+import { NextRound } from '../features/play/next-round'
 import { Podium } from '../features/play/podium'
 import { Question } from '../features/play/question'
 import { Reveal } from '../features/play/reveal'
@@ -65,6 +66,7 @@ function PlayPage() {
       ) : (
         <>
           <AnnouncementBanner announcement={player.announcement} />
+          <NextRound snapshot={player} pin={pin} />
           <PhaseView snapshot={player} clockOffset={clockOffset} />
         </>
       )}

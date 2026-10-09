@@ -3,7 +3,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useBlocker, useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeftIcon, EyeIcon, KeyboardIcon, ListOrderedIcon, PlayIcon, PlusIcon, Settings2Icon, XIcon } from 'lucide-react'
+import {
+  ArrowLeftIcon,
+  EyeIcon,
+  KeyboardIcon,
+  ListOrderedIcon,
+  PlayIcon,
+  PlusIcon,
+  Settings2Icon,
+  Trash2Icon,
+  XIcon,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
 import { Button } from '@/components/ui/button'
@@ -117,6 +127,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [starting, setStarting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  // Set while the quiz is being deleted and after: no more saves, and leaving needs no confirmation.
+  const deleted = useRef(false)
   // Field errors of a question show once the user has left it (or it came from the server),
   // so a brand-new question is not covered in "Required." before anything was typed.
   const [visited, setVisited] = useState<Set<string>>(() => new Set(quiz.questions.map((q) => q.id)))
@@ -143,6 +156,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
     valid,
     isOffline: (error) => (error instanceof ApiError && error.status === 0) || navigator.onLine === false,
     save: async (value) => {
+      if (deleted.current) return
       try {
         const res = await apiFetch<{ quiz: Quiz }>(`/api/quizzes/${quiz.id}`, { method: 'PUT', body: JSON.stringify(value) })
         queryClient.setQueryData(['quiz', quiz.id], res.quiz)
@@ -158,8 +172,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
   // Closing the tab cannot wait for a save; moving inside the app can (a waiting save is sent on unmount),
   // unless the draft cannot be saved at all.
   const blocker = useBlocker({
-    shouldBlockFn: () => UNSAVABLE.includes(status),
-    enableBeforeUnload: () => status !== 'saved',
+    shouldBlockFn: () => !deleted.current && UNSAVABLE.includes(status),
+    enableBeforeUnload: () => !deleted.current && status !== 'saved',
     withResolver: true,
   })
 
@@ -284,6 +298,21 @@ function Editor({ quiz }: { quiz: Quiz }) {
     onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
     onError: toastError,
   })
+  const remove = useMutation({
+    mutationFn: () => apiFetch(`/api/quizzes/${quiz.id}`, { method: 'DELETE' }),
+    onMutate: () => {
+      deleted.current = true
+    },
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ['quiz', quiz.id] })
+      void queryClient.invalidateQueries({ queryKey: ['quizzes'] })
+      void navigate({ to: '/host' })
+    },
+    onError: (error) => {
+      deleted.current = false
+      toastError(error)
+    },
+  })
   const playBlocker =
     questions.length === 0
       ? t('editor.playNeedsQuestion')
@@ -332,6 +361,14 @@ function Editor({ quiz }: { quiz: Quiz }) {
         <h3 className="font-extrabold">{t('editor.gameSettings')}</h3>
         <p className="text-sm text-muted-foreground">{t('editor.gameSettingsHelp')}</p>
         <GameSettingsForm value={draft.settings} onChange={(settings) => setDraft((d) => ({ ...d, settings }))} />
+      </div>
+      <div className="flex flex-col gap-2 border-t pt-5">
+        <h3 className="font-extrabold">{t('editor.deleteQuiz')}</h3>
+        <p className="text-sm text-muted-foreground">{t('editor.deleteQuizHelp')}</p>
+        <Button variant="destructive" className="self-start" onClick={() => setDeleting(true)}>
+          <Trash2Icon aria-hidden="true" />
+          {t('editor.deleteQuiz')}
+        </Button>
       </div>
     </div>
   )
@@ -564,6 +601,19 @@ function Editor({ quiz }: { quiz: Quiz }) {
               play.reset()
             }}
           />
+        )}
+
+        {deleting && (
+          <ConfirmDialog
+            title={t('host.deleteTitle')}
+            confirmLabel={t('common.delete')}
+            danger
+            pending={remove.isPending}
+            onConfirm={() => remove.mutate()}
+            onCancel={() => setDeleting(false)}
+          >
+            {t('host.deleteBody', { title: draft.title })}
+          </ConfirmDialog>
         )}
 
         {blocker.status === 'blocked' && (

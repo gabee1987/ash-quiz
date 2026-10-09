@@ -1,18 +1,20 @@
-import type {
-  Answer,
-  CurrentAnswer,
-  GameSnapshotBase,
-  HostSnapshot,
-  PlayerPublic,
-  PlayerQuestionResult,
-  PlayerSnapshot,
-  PublicQuestion,
-  Question,
-  QuestionStat,
-  RevealInfo,
-  TeamPublic,
+import {
+  fallbackAvatar,
+  type Answer,
+  type CurrentAnswer,
+  type GameSnapshotBase,
+  type HostSnapshot,
+  type PlayerPublic,
+  type PlayerQuestionResult,
+  type PlayerSnapshot,
+  type PublicQuestion,
+  type Question,
+  type QuestionStat,
+  type RevealInfo,
+  type TeamPublic,
 } from '@ash-quiz/shared'
 import { normalise } from './normalise.js'
+import { displayOrder } from './order.js'
 import { answersHidden, resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
 import { EngineError, type GameState, type Player, type ResultsAudience } from './types.js'
@@ -42,6 +44,9 @@ export function toPublicQuestion(question: Question): PublicQuestion {
     }
     case 'poll':
       return { ...question }
+    case 'order':
+      // The stored order is the answer: players get the items shuffled.
+      return { ...question, options: displayOrder(question.id, question.options) }
   }
 }
 
@@ -54,9 +59,11 @@ export function toPublicQuestion(question: Question): PublicQuestion {
 /** `seq` is the realtime layer's broadcast counter, passed through as is. */
 export function toHostSnapshot(state: GameState, now: number, { includeAnswers = false, seq = 0 } = {}): HostSnapshot {
   const base = baseSnapshot(state, now, 'screen', seq)
+  const question = state.quiz.questions[state.questionIndex]
   return {
     ...(includeAnswers ? base : conceal(state, base)),
     currentAnswers: includeAnswers ? currentAnswers(state) : null,
+    live: includeAnswers && state.phase === 'question' && question ? revealInfo(state, question) : null,
     playersWaiting: includeAnswers && resultsPendingFor(state, 'players'),
   }
 }
@@ -73,6 +80,7 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     me,
     myAnswer: record?.answer ?? null,
     lastPoints: base.reveal ? (record?.points ?? 0) : null,
+    lastBonus: base.reveal ? (record?.bonus ?? 0) : null,
     lastCorrect: base.reveal ? (record?.correct ?? null) : null,
     myResults: state.phase === 'finished' && !base.answersHidden ? playerResults(state, player) : null,
   }
@@ -90,7 +98,7 @@ function conceal(state: GameState, base: GameSnapshotBase): GameSnapshotBase {
     ...base,
     question: base.reveal && question ? toPublicQuestion(question) : base.question,
     reveal: null,
-    players: base.players.map((p) => ({ ...p, score: 0, rank: 1, previousRank: 1, correctCount: 0, roundPoints: 0 })),
+    players: base.players.map((p) => ({ ...p, score: 0, rank: 1, previousRank: 1, correctCount: 0, roundPoints: 0, streak: 0 })),
     teams: base.teams.map((t) => ({ ...t, score: 0, rank: 1, previousRank: 1 })),
     questionStats: base.questionStats.map((q) => ({ ...q, correctCount: 0 })),
   }
@@ -118,6 +126,9 @@ export function distributionKeys(answer: Answer): string[] {
       return [normalise(answer.value)]
     case 'number':
       return [String(answer.value)]
+    case 'order':
+      // The whole order as one bucket (identical orders group together).
+      return [answer.optionIds.join(',')]
   }
 }
 
@@ -147,6 +158,8 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     id: p.id,
     name: p.name,
     teamId: p.teamId,
+    avatar: p.avatar ?? fallbackAvatar(p.id),
+    streak: p.streak ?? 0,
     connected: p.connected,
     disconnectedAt: p.connected ? null : (p.disconnectedAt ?? null),
     score: p.score,
@@ -185,6 +198,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     answersHidden: answersHidden(state, audience),
     resultsPending: resultsPendingFor(state, audience),
     announcement: state.announcement ?? null,
+    nextPin: state.nextPin ?? null,
   }
 }
 
@@ -206,7 +220,11 @@ export function revealInfo(state: GameState, question: Question): RevealInfo {
     if (!record) continue
     answeredCount += 1
     if (record.correct === true) correctCount += 1
-    const keys = distributionKeys(record.answer)
+    // Ordering: per item, how many players put it in its right place.
+    const keys =
+      question.type === 'order' && record.answer.type === 'order'
+        ? record.answer.optionIds.filter((id, i) => question.options[i]?.id === id)
+        : distributionKeys(record.answer)
     for (const key of keys) distribution[key] = (distribution[key] ?? 0) + 1
     // Number answers within tolerance and host-graded text are correct per answer, not per key list.
     if (record.correct === true && (question.type === 'number' || question.type === 'text')) {
@@ -228,6 +246,7 @@ function staticCorrectKeys(question: Question): string[] {
       return question.acceptedAnswers.map(normalise)
     case 'number':
     case 'poll':
+    case 'order':
       return []
   }
 }

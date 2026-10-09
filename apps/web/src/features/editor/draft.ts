@@ -31,6 +31,8 @@ export function newQuestion(type: QuestionType): Question {
       return { ...base, type, correct: 0, tolerance: 0 }
     case 'poll':
       return { ...base, type, options: emptyOptions(), points: 0 }
+    case 'order':
+      return { ...base, type, options: emptyOptions(), timeLimitSec: 30 }
   }
 }
 
@@ -45,6 +47,7 @@ export function copyQuestion(question: Question): Question {
     case 'multiple':
       return { ...question, id: newId(), options, correctOptionIds: question.correctOptionIds.map((id) => ids.get(id) ?? id) }
     case 'poll':
+    case 'order':
       return { ...question, id: newId(), options }
   }
 }

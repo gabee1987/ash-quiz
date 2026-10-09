@@ -38,6 +38,12 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/quizzes/:id` | owner | full quiz |
 | `PUT /api/quizzes/:id` | owner | replace from `quizInputSchema` |
 | `DELETE /api/quizzes/:id` | owner | |
+| `POST /api/quizzes/batch-delete` | owner of all | `{ ids }` -> `{ deleted }`; 404 and nothing deleted if any id is missing or not owned |
+| `GET /api/nicknames` | admin | "Surprise me" lists per language: `{ lists: { hu: { names, custom }, en: … } }`, built-in until saved |
+| `PUT /api/nicknames/:language` | admin | `{ names }` (1–500 player names, each passing the name filter) -> saved without duplicates |
+| `DELETE /api/nicknames/:language` | admin | back to the built-in list |
+| `GET /api/games/:pin/nickname?lang=` | - | `{ name }`: a name from the list nobody in that game has yet |
+| `PATCH /api/quizzes/batch` | owner of all | `{ ids, settings?, questions?: { timeLimitSec?, points? } }` -> `{ updated }`; merged per quiz and fully validated, all or nothing |
 | `POST /api/images` | session | multipart, returns `{ id }` |
 | `GET /api/images/:id` | - | image bytes, long cache headers |
 | `POST /api/games` | session | `{ quizId, settings }` -> creates lobby, returns `{ pin }` |

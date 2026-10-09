@@ -19,7 +19,7 @@ const MIN_OPTIONS = 2
 const MAX_OPTIONS = 6
 
 /**
- * Option rows for single, multiple and poll questions, reordered by dragging the handle.
+ * Option rows for single, multiple, poll and ordering questions, reordered by dragging the handle.
  * Each row shows the colour and symbol the option gets in the game at that position.
  * The correct marker is a toggle: one of them (single), any of them (multiple) or none (poll).
  * Enter in an option jumps to the next one, and in the last one adds a new option.
@@ -35,7 +35,8 @@ export function OptionsEditor({
   symbols,
 }: {
   options: Option[]
-  marker: 'one' | 'many' | 'none'
+  /** `order`: the list order is the correct order; rows show their position instead of a correct toggle. */
+  marker: 'one' | 'many' | 'none' | 'order'
   correctIds: string[]
   onOptions: (options: Option[]) => void
   onCorrect: (ids: string[]) => void
@@ -84,8 +85,15 @@ export function OptionsEditor({
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-2 font-semibold">
-        {marker === 'none' ? t('editor.options') : marker === 'one' ? t('editor.optionsMarkOne') : t('editor.optionsMarkAll')}
+        {marker === 'order'
+          ? t('editor.optionsInOrder')
+          : marker === 'none'
+            ? t('editor.options')
+            : marker === 'one'
+              ? t('editor.optionsMarkOne')
+              : t('editor.optionsMarkAll')}
       </legend>
+      {marker === 'order' && <p className="-mt-1 mb-1 text-sm text-muted-foreground">{t('editor.orderHint')}</p>}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -150,7 +158,7 @@ function OptionRow({
   option: Option
   index: number
   symbols: AnswerSymbols
-  marker: 'one' | 'many' | 'none'
+  marker: 'one' | 'many' | 'none' | 'order'
   correct: boolean
   textError: string | undefined
   field: string
@@ -188,9 +196,16 @@ function OptionRow({
         >
           <GripVerticalIcon className="size-4" aria-hidden="true" />
         </button>
-        <span style={optionVars(index)} className={cn('flex size-10 shrink-0 items-center justify-center rounded-xl', optionFill)}>
-          <OptionSymbol symbols={symbols} index={index} className="size-5" />
-        </span>
+        {marker === 'order' ? (
+          // Its place in the correct order.
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-lg font-black text-secondary-foreground tabular-nums">
+            {n}
+          </span>
+        ) : (
+          <span style={optionVars(index)} className={cn('flex size-10 shrink-0 items-center justify-center rounded-xl', optionFill)}>
+            <OptionSymbol symbols={symbols} index={index} className="size-5" />
+          </span>
+        )}
         <Input
           ref={inputRef}
           value={option.text}
@@ -208,7 +223,7 @@ function OptionRow({
           aria-invalid={textError ? true : undefined}
           className="min-w-0 flex-1"
         />
-        {marker !== 'none' && (
+        {(marker === 'one' || marker === 'many') && (
           <button
             type="button"
             aria-pressed={correct}
@@ -243,14 +258,17 @@ function OptionRow({
           <XIcon className="size-5" aria-hidden="true" />
         </button>
       </div>
-      <div className="pl-19">
-        <ImageField
-          compact
-          label={t('editor.optionImage', { n })}
-          imageId={option.imageId}
-          onChange={(imageId) => onChange(withImage(option, imageId))}
-        />
-      </div>
+      {/* Ordering items are text only: the phone's sortable list has no room for pictures. */}
+      {marker !== 'order' && (
+        <div className="pl-19">
+          <ImageField
+            compact
+            label={t('editor.optionImage', { n })}
+            imageId={option.imageId}
+            onChange={(imageId) => onChange(withImage(option, imageId))}
+          />
+        </div>
+      )}
       {textError && <p className="pl-19 text-sm font-semibold text-destructive">{t(textError)}</p>}
     </div>
   )

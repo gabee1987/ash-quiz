@@ -76,3 +76,11 @@ export const games = pgTable('games', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   finishedAt: timestamp('finished_at', { withTimezone: true }),
 })
+
+// Names offered by "Surprise me" on the join page, one list per language, edited by admins.
+// A language without a row uses the built-in list.
+export const nicknameLists = pgTable('nickname_lists', {
+  language: text('language').primaryKey(),
+  names: jsonb('names').$type<string[]>().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})

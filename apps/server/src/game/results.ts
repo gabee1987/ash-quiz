@@ -1,4 +1,4 @@
-import type { GameResults, PodiumPlace, ResultPlayer, ResultQuestion } from '@ash-quiz/shared'
+import { fallbackAvatar, type GameResults, type PodiumPlace, type ResultPlayer, type ResultQuestion } from '@ash-quiz/shared'
 import { resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
 import { isRevealed, revealInfo } from './snapshots.js'
@@ -25,6 +25,7 @@ export function toResults(state: GameState): GameResults {
   const rankedPlayers: ResultPlayer[] = denseRank(players).map((p) => ({
     id: p.id,
     name: p.name,
+    avatar: p.avatar ?? fallbackAvatar(p.id),
     teamId: p.teamId,
     score: p.score,
     rank: p.rank,
@@ -40,9 +41,11 @@ export function toResults(state: GameState): GameResults {
     previousRank: t.rank,
     memberCount: players.filter((p) => p.teamId === t.id).length,
   }))
-  const podium: PodiumPlace[] = (state.settings.mode === 'team' ? teams : rankedPlayers)
+  const podium: PodiumPlace[] = (
+    state.settings.mode === 'team' ? teams.map((t) => ({ ...t, avatar: null })) : rankedPlayers
+  )
     .filter((place) => place.rank <= 3)
-    .map(({ id, name, score, rank }) => ({ id, name, score, rank }))
+    .map(({ id, name, avatar, score, rank }) => ({ id, name, avatar, score, rank }))
 
   return {
     gameId: state.id,

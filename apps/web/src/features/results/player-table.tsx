@@ -1,6 +1,7 @@
 import type { ResultPlayer, TeamPublic } from '@ash-quiz/shared'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { sortPlayers, toggleSort, type Sort, type SortKey } from './sort'
 
 const cell = 'px-3 py-2'
@@ -60,7 +61,12 @@ export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams
             {sorted.map((player) => (
               <tr key={player.id} className="border-t">
                 <td className={cell}>{player.rank}.</td>
-                <td className={`${cell} wrap-break-word`}>{player.name}</td>
+                <td className={`${cell} wrap-break-word`}>
+                  <span className="flex items-center gap-2">
+                    <PlayerAvatar avatar={player.avatar} />
+                    {player.name}
+                  </span>
+                </td>
                 {teams.length > 0 && <td className={cell}>{player.teamId ? teamNames.get(player.teamId) : ''}</td>}
                 <td className={`${cell} text-right`}>{player.correctCount}</td>
                 <td className={`${cell} text-right font-semibold`}>{player.score}</td>

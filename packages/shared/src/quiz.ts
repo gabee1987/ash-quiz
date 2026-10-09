@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 // ---- Question types -------------------------------------------------------
 
-export const questionTypes = ['single', 'multiple', 'truefalse', 'text', 'number', 'poll'] as const
+export const questionTypes = ['single', 'multiple', 'truefalse', 'text', 'number', 'poll', 'order'] as const
 export type QuestionType = (typeof questionTypes)[number]
 
 export const optionSchema = z.object({
@@ -55,6 +55,12 @@ export const pollQuestionSchema = baseQuestion.extend({
   options: z.array(optionSchema).min(2).max(6),
 })
 
+/** "Put in order": the options in their correct order. Players see them shuffled. */
+export const orderQuestionSchema = baseQuestion.extend({
+  type: z.literal('order'),
+  options: z.array(optionSchema).min(2).max(6),
+})
+
 export const questionSchema = z.discriminatedUnion('type', [
   singleChoiceQuestionSchema,
   multipleChoiceQuestionSchema,
@@ -62,6 +68,7 @@ export const questionSchema = z.discriminatedUnion('type', [
   textQuestionSchema,
   numberQuestionSchema,
   pollQuestionSchema,
+  orderQuestionSchema,
 ])
 export type Question = z.infer<typeof questionSchema>
 
@@ -129,6 +136,8 @@ export const gameSettingsSchema = z
     mode: z.enum(gameModes).default('classic'),
     /** Faster correct answers earn more points (Kahoot style). */
     speedBonus: z.boolean().default(true),
+    /** Correct answers in a row earn extra points: +100 from the second, up to +500. */
+    streakBonus: z.boolean().default(false),
     /** Shuffle answer options per game. */
     shuffleOptions: z.boolean().default(false),
     /** Team names prepared by the host (team mode only). Players pick one when joining. */

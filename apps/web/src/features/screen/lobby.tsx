@@ -1,5 +1,6 @@
 import type { HostSnapshot, PlayerPublic } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { QrCode } from '../../components/qr-code'
 
 export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: string | null }) {
@@ -44,7 +45,11 @@ function Names({ players }: { players: PlayerPublic[] }) {
   return (
     <ul className="flex flex-wrap gap-3">
       {players.map((player) => (
-        <li key={player.id} className="animate-pop rounded-full border bg-card px-4 py-1 text-2xl font-semibold shadow-soft">
+        <li
+          key={player.id}
+          className="flex animate-pop items-center gap-2 rounded-full border bg-card py-1 pr-4 pl-1.5 text-2xl font-semibold shadow-soft"
+        >
+          <PlayerAvatar avatar={player.avatar} size="md" />
           {player.name}
         </li>
       ))}

@@ -54,6 +54,7 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
   return {
     mode: 'classic',
     speedBonus: true,
+    streakBonus: false,
     shuffleOptions: false,
     teamNames: [],
     revealAnswers: 'afterQuestion',

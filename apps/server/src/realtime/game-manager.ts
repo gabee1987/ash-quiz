@@ -55,6 +55,12 @@ export class GameManager {
     return this.games.get(pin)?.game
   }
 
+  /** A game still in memory by its id (PINs are reused, ids are not). */
+  byId(gameId: string): ManagedGame | undefined {
+    for (const entry of this.games.values()) if (entry.game.state.id === gameId) return entry.game
+    return undefined
+  }
+
   /** The `seq` of the game's latest snapshots, for a socket that gets its snapshot directly. */
   seq(pin: string): number {
     return this.games.get(pin)?.seq ?? 0

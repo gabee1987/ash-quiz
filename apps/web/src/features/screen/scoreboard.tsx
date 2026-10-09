@@ -2,6 +2,7 @@ import type { HostSnapshot, PlayerPublic } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { CountUp } from '../../components/count-up'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { RankArrow } from '../../components/rank-arrow'
 import { stagger } from '../../lib/motion'
 
@@ -35,6 +36,7 @@ function PlayerRows({ players, compact = false }: { players: PlayerPublic[]; com
           >
             {player.rank}
           </span>
+          <PlayerAvatar avatar={player.avatar} size={compact ? 'md' : 'lg'} />
           <span className="flex-1 truncate font-semibold">{player.name}</span>
           <RankArrow previous={player.previousRank} rank={player.rank} className="text-[0.75em]" />
           {player.roundPoints > 0 && (

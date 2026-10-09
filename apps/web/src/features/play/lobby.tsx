@@ -1,6 +1,6 @@
 import type { PlayerSnapshot } from '@ash-quiz/shared'
-import { PartyPopperIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { WaitingDots } from '../../components/waiting-dots'
 
 export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
@@ -9,9 +9,7 @@ export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
       <div className="glow-border flex w-full max-w-sm animate-pop flex-col items-center gap-3 rounded-3xl bg-card p-6 shadow-soft">
-        <span className="grid size-16 animate-float place-items-center rounded-2xl bg-accent text-accent-foreground">
-          <PartyPopperIcon className="size-8" aria-hidden="true" />
-        </span>
+        <PlayerAvatar avatar={snapshot.me.avatar} size="xl" className="animate-float bg-accent" />
         <p className="text-sm font-semibold text-muted-foreground wrap-break-word">{snapshot.quizTitle}</p>
         <h1 className="text-3xl font-black wrap-break-word">{t('play.youAreIn', { name: snapshot.me.name })}</h1>
         {team && (

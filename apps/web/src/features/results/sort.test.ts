@@ -5,6 +5,7 @@ import { sortPlayers, toggleSort } from './sort'
 const player = (name: string, score: number): ResultPlayer => ({
   id: name,
   name,
+  avatar: '🐶',
   teamId: null,
   score,
   rank: 0,
