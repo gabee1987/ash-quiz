@@ -54,15 +54,15 @@ test('admin edits the Surprise me names and a phone gets one of them', async ({ 
       await expect(box).toHaveValue('Disco Potato\nTurbo Snail')
     })
 
-    await test.step('Surprise me on a phone picks from the list, and waits for the PIN', async () => {
+    await test.step('the name and Surprise me appear once the PIN has found the game, which picks from the list', async () => {
       const phone = await (await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, locale: 'en-US' })).newPage()
       await phone.addInitScript(() => localStorage.setItem('quizmoo.lang', 'en'))
       await phone.goto('/')
-      await expect(phone.getByRole('button', { name: 'Surprise me' })).toBeDisabled()
+      await expect(phone.getByRole('button', { name: 'Surprise me' })).toHaveCount(0)
+      await expect(phone.getByLabel('Your name')).toHaveCount(0)
       await phone.getByRole('button', { name: 'OK', exact: true }).click()
       await expect(phone.getByText('Enter the 6-digit PIN.')).toBeVisible()
       await phone.goto(`/?pin=${pin}`)
-      await phone.getByRole('button', { name: 'OK', exact: true }).click()
       await phone.getByRole('button', { name: 'Surprise me' }).click()
       await expect(phone.getByLabel('Your name')).toHaveValue(/^(Disco Potato|Turbo Snail)$/)
     })

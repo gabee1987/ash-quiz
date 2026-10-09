@@ -65,7 +65,7 @@ function PlayPage() {
         <Spinner />
       ) : (
         <>
-          <AnnouncementBanner announcement={player.announcement} />
+          <AnnouncementBanner announcement={player.announcement} clockOffset={clockOffset} />
           <NextRound snapshot={player} pin={pin} />
           <PhaseView snapshot={player} clockOffset={clockOffset} />
         </>

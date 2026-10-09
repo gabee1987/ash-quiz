@@ -32,7 +32,7 @@
     "cameraUnavailable": "A kamera nem érhető el. Írd be a PIN-t.",
     "pinDigit": "{{n}}. számjegy",
     "pinOk": "OK",
-    "surpriseNeedsPin": "Előbb add meg a PIN-t",
+    "findingGame": "Játék keresése…",
     "avatarChange": "Másikat",
     "avatarDone": "Kész",
     "avatarGroups": {

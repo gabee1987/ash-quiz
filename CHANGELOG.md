@@ -68,7 +68,8 @@
 
 ### Host control
 - Pause and Resume during a question: the clock stops on the host control, the projector and every phone ("Paused"), and nobody can answer until the host resumes. The time left and the speed points stay as they were before the pause. Space on the projector resumes, and a server restart keeps the game paused.
-- Host messages can disappear by themselves after 10 s, 30 s or 60 s; the host's message box shows the time left. "Until cleared" stays the default.
+- Host messages can disappear by themselves after 10 s, 30 s or 60 s. The message itself shows the time left as a striped bar that drains on every phone, the projector and the host's preview, and turns warm and wobbles near the end. "Until cleared" stays the default.
+- Join page: only the PIN is asked first. The name, avatar and team appear once the PIN has found the game (with the quiz's title), and the phone's keyboard closes by itself after the last digit.
 - Show again: between questions the host can put any question already played back on the projector and the phones (from "Questions so far" in the review panel) to talk it through. Each phone shows its own result on it; scores and ranks do not change. "Back to the game" returns to where the game was.
 - After the podium is shown, the host control says it is on the projector and has an "Open projector" button. Opening the projector again brings up the window that is already open instead of opening a second one.
 

@@ -702,6 +702,75 @@
   width: 2.4rem;
   height: 2.4rem;
 }
+/*
+ * A host message that clears itself: a striped candy bar along the bottom of the bubble drains
+ * over the message's time (--note-time, started --note-elapsed in), stripes rolling, and turns
+ * warm and wobbles in its last stretch.
+ */
+.note-timed {
+  position: relative;
+  padding-bottom: 24px;
+}
+.note-time {
+  position: absolute;
+  right: 14px;
+  bottom: 9px;
+  left: 14px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--note-tone) 16%, transparent);
+}
+.note-time-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--note-tone);
+  animation: note-time var(--note-time) linear var(--note-elapsed) both;
+}
+.note-time-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.32) 0 5px, transparent 5px 10px);
+  background-size: 14.14px 100%;
+  animation: note-time-stripes 0.5s linear infinite;
+}
+.note-lg.note-timed {
+  padding-bottom: 40px;
+}
+.note-lg .note-time {
+  right: 28px;
+  bottom: 14px;
+  left: 28px;
+  height: 14px;
+}
+@keyframes note-time {
+  from {
+    width: 100%;
+  }
+  80% {
+    background: var(--note-tone);
+    translate: 0 0;
+  }
+  86% {
+    translate: 0 -2px;
+  }
+  92% {
+    translate: 0 1px;
+  }
+  to {
+    width: 0%;
+    background: var(--warning);
+    translate: 0 0;
+  }
+}
+@keyframes note-time-stripes {
+  to {
+    background-position: 14.14px 0;
+  }
+}
 .toaster [data-sonner-toast][data-styled='true'] [data-button] {
   height: 2.25rem;
   padding: 0 0.9rem;
@@ -825,6 +894,10 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  /* The message's time bar is information, not decoration: it still drains (its stripes stand still). */
+  .note-time-fill {
+    animation-duration: var(--note-time) !important;
   }
 }
 

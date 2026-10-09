@@ -32,7 +32,7 @@
     "cameraUnavailable": "The camera is not available. Type the PIN instead.",
     "pinDigit": "Digit {{n}}",
     "pinOk": "OK",
-    "surpriseNeedsPin": "Enter the PIN first",
+    "findingGame": "Finding the game…",
     "avatarChange": "Change",
     "avatarDone": "Done",
     "avatarGroups": {

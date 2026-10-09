@@ -58,7 +58,11 @@ export function MessageBox({
           </span>
           {/* What the phones and the projector show, with the way to take it down. */}
           <div className="flex items-center gap-3">
-            <AnnouncementBanner announcement={announcement} className="mb-0 min-w-0 flex-1 text-base" />
+            <AnnouncementBanner
+              announcement={announcement}
+              clockOffset={clockOffset}
+              className="mb-0 min-w-0 flex-1 text-base"
+            />
             <Button variant="outline" size="sm" onClick={() => void onCommand({ type: 'clearAnnouncement' })}>
               <XIcon aria-hidden="true" />
               {t('host.game.message.clear')}
