@@ -43,7 +43,9 @@ export function OptionButton({
         '[--option-edge:color-mix(in_oklch,var(--option),black_25%)] shadow-[0_5px_0_0_var(--option-edge)]',
         'enabled:hover:-translate-y-0.5 enabled:hover:shadow-[0_7px_0_0_var(--option-edge)] enabled:hover:brightness-105',
         'enabled:active:translate-y-1 enabled:active:shadow-none',
-        selected && 'ring-4 ring-foreground ring-offset-2 ring-offset-background',
+        // Selected: pressed down, with a ring in the option's own text colour drawn inside its edge,
+        // so it stays within the option instead of reaching into the neighbours.
+        selected && 'translate-y-1 shadow-[0_1px_0_0_var(--option-edge)] ring-4 ring-(--option-fg) ring-inset',
       )
     : cn(
         'border-2 shadow-[0_4px_0_0_var(--secondary-edge)] enabled:hover:-translate-y-0.5 enabled:active:translate-y-1 enabled:active:shadow-none',

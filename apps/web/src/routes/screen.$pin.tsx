@@ -82,7 +82,7 @@ function ScreenPage() {
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col px-4 py-4 lg:px-12">
       <ConnectionBar status={status} since={since} />
-      <AnnouncementBanner announcement={host.announcement} size="screen" />
+      <AnnouncementBanner announcement={host.announcement} size="screen" clockOffset={clockOffset} />
       <ScreenPhase host={host} clockOffset={clockOffset} joinUrl={info.data?.joinUrl ?? null} />
       {/* The host's next step, for a projector driven with a mouse; the keyboard shortcut still works. */}
       {action && (

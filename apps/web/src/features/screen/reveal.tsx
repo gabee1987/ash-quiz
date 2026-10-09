@@ -22,7 +22,12 @@ export function ScreenReveal({ host }: { host: HostSnapshot }) {
       reveal={reveal}
       symbols={host.settings.answerSymbols}
       awaitingGrading={host.awaitingGrading}
-      heading={<span>{t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}</span>}
+      heading={
+        <span>
+          {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
+          {host.reviewing && ` · ${t('play.shownAgain')}`}
+        </span>
+      }
       stats={stats}
     />
   )

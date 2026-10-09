@@ -19,7 +19,7 @@ Order inside `apply`: run engine command (may throw `EngineError`), replace in m
 
 `seq` orders snapshots: a per-game counter seeded from the clock when the game is created or restored and raised by one per transition, so it keeps increasing across restarts. Every snapshot carries it (`toHostSnapshot(..., { seq })`, `toPlayerSnapshot(..., seq)`); the direct emit to a freshly attached socket uses the current value (`manager.seq(pin)`). Clients drop a snapshot whose `seq` is lower than the one they hold.
 
-Timers: one `setTimeout` per game for `questionEndsAt - now`. On fire, call `endQuestion`. Clear on phase change, `extendTime`, `skip`, `end`. Timers are not persisted; `restoreGames()` on boot recomputes them from `questionEndsAt`, firing immediately for games whose deadline passed while the server was down.
+Timers: one `setTimeout` per game for `questionEndsAt - now`. On fire, call `endQuestion`. Clear on phase change, `extendTime`, `skip`, `end`. A paused question (`pausedAt`) gets no deadline timer; `resume` re-arms it. A second timer per game clears a host message with `expiresAt` through `expireAnnouncement(id)`. Both are re-armed on every transition. Timers are not persisted; `restoreGames()` on boot recomputes them from `questionEndsAt`, firing immediately for games whose deadline passed while the server was down.
 
 Restore on boot: load games where `phase != 'finished'` (plus finished ones whose results still wait for release) and `created_at` is within 12 hours, mark every player `connected: false` with `disconnectedAt` set, re-arm timers. Older unfinished games are marked finished.
 
@@ -36,7 +36,8 @@ Keepalive: `pingInterval: 10000`, `pingTimeout: 20000` in `app.ts`. A phone that
 - `host:attach` requires a valid session cookie whose user is the game's host (parse the cookie from `socket.handshake.headers.cookie`). `screen:attach` is public read-only by pin: the projector laptop is not logged in.
 - On `disconnect`: `disconnectPlayer` (stamps `disconnectedAt`, shown to the host as "offline for 12 s") only if no other socket of that player remains in the room.
 - `host:ping` acks `{ ok: true }` to an attached host (round-trip badge), with no state.
-- Host messages are game state (`announcement`), set by the `announce` / `clearAnnouncement` host commands and cleared by `start` and `next`; a reconnecting phone and a restarted server keep them.
+- Host messages are game state (`announcement`), set by the `announce` / `clearAnnouncement` host commands and cleared by `start` and `next`; a reconnecting phone and a restarted server keep them. With `durationSec` the manager's message timer clears them.
+- `pause` / `resume` and `showQuestion` / `closeQuestion` are host commands too; their state (`pausedAt`, `reviewIndex`) is persisted like everything else, so a restart keeps a paused or re-shown question.
 
 ## Snapshots
 

@@ -1,5 +1,5 @@
 import type { HostCommand, HostSnapshot } from '@quizmoo/shared'
-import { WifiOffIcon } from 'lucide-react'
+import { PauseIcon, WifiOffIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { alternativeAction, primaryAction, reconnectingCount } from './primary-action'
@@ -40,6 +40,16 @@ export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (
           )}
         </p>
       )}
+      {host.phase === 'question' && host.pausedAt && (
+        <p role="status" className="rounded-xl bg-warning px-4 py-2 text-center font-semibold text-warning-foreground">
+          {t('host.game.pausedHint')}
+        </p>
+      )}
+      {host.reviewing && (
+        <p role="status" className="rounded-xl bg-secondary px-4 py-2 text-center font-semibold text-secondary-foreground">
+          {t('host.game.shownAgainHint', { index: host.questionIndex + 1 })}
+        </p>
+      )}
       {host.phase === 'reveal' && host.awaitingGrading && (
         <p className="rounded-xl bg-warning px-4 py-2 text-center font-semibold text-warning-foreground">
           {t('host.game.gradeFirst')}
@@ -53,6 +63,13 @@ export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (
         )}
         {host.phase === 'question' && (
           <>
+            {/* While paused, Resume is the primary button. */}
+            {!host.pausedAt && (
+              <Button variant="secondary" className="flex-1" onClick={() => onCommand({ type: 'pause' })}>
+                <PauseIcon aria-hidden="true" />
+                {t('host.game.pause')}
+              </Button>
+            )}
             <Button variant="secondary" className="flex-1" onClick={() => onCommand({ type: 'extendTime', seconds: 30 })}>
               {t('host.game.extend')}
             </Button>

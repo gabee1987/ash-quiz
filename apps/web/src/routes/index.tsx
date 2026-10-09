@@ -2,7 +2,7 @@ import type { Avatar, GamePublicInfo } from '@quizmoo/shared'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { CameraIcon, CheckIcon, DicesIcon, Loader2Icon, PlayIcon } from 'lucide-react'
-import { Suspense, lazy, useRef, useState, type FormEvent } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { AvatarPicker } from '@/components/avatar-picker'
@@ -52,7 +52,17 @@ function JoinPage() {
     enabled: pinValid,
     retry: false,
   })
-  const teamMode = info.data?.mode === 'team'
+  const game = info.data
+  const teamMode = game?.mode === 'team'
+
+  // Typed the last digit and the game is there: close the keyboard and bring the name field up.
+  const pinBox = useRef<HTMLDivElement>(null)
+  const quizTitle = game?.quizTitle
+  useEffect(() => {
+    if (!quizTitle || !pinBox.current?.contains(document.activeElement)) return
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+    nameSection.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [quizTitle])
 
   const infoError = info.error && 'code' in info.error ? (info.error as { code: string }).code : null
   const pinError = (submitted || pinChecked) && !pinValid ? t('join.pinInvalid') : infoError ? t(infoError) : undefined
@@ -78,6 +88,8 @@ function JoinPage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
+    // Enter in the PIN boxes before the game is found: the same as OK.
+    if (!game) return confirmPin()
     setSubmitted(true)
     setError(null)
     if (!pinValid || !name.trim() || (teamMode && !teamId)) return
@@ -114,7 +126,7 @@ function JoinPage() {
         onSubmit={(e) => void onSubmit(e)}
         noValidate
       >
-        <div className="flex flex-col gap-2">
+        <div ref={pinBox} className="flex flex-col gap-2">
           <div className="flex min-h-10 items-center justify-between gap-2">
             <span className="font-semibold">{t('join.pin')}</span>
             {canScan && (
@@ -130,58 +142,68 @@ function JoinPage() {
               {pinError}
             </p>
           )}
-          <Button type="button" variant="secondary" onClick={confirmPin}>
-            <CheckIcon aria-hidden="true" />
-            {t('join.pinOk')}
-          </Button>
+          {/* Until the game is found: OK closes the keyboard and checks the PIN. */}
+          {!game &&
+            (pinValid && info.isFetching ? (
+              <p role="status" className="flex min-h-11 items-center justify-center gap-2 font-semibold text-muted-foreground">
+                <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
+                {t('join.findingGame')}
+              </p>
+            ) : (
+              <Button type="button" variant="secondary" onClick={confirmPin}>
+                <CheckIcon aria-hidden="true" />
+                {t('join.pinOk')}
+              </Button>
+            ))}
         </div>
-        <div ref={nameSection} className="flex scroll-mt-4 flex-col gap-5">
-          {info.data && (
-            <p className="animate-pop rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
-              {info.data.quizTitle}
+        {/* Name, avatar and team come once the PIN has found a game: they belong to that game. */}
+        {game ? (
+          <div ref={nameSection} className="flex animate-pop scroll-mt-4 flex-col gap-5">
+            <p className="rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
+              {game.quizTitle}
             </p>
-          )}
-          <TextField
-            label={t('join.name')}
-            name="name"
-            maxLength={24}
-            autoComplete="off"
-            enterKeyHint="go"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t('join.namePlaceholder')}
-            error={nameError}
-          />
-          {/* The names come from the game's server, so the button waits for a valid PIN. */}
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="-mt-3 self-start"
-            disabled={!info.data || surprise.isPending}
-            title={info.data ? undefined : t('join.surpriseNeedsPin')}
-            onClick={() => surprise.mutate()}
-          >
-            {surprise.isPending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <DicesIcon aria-hidden="true" />}
-            {t('join.surprise')}
-          </Button>
-          <AvatarPicker value={avatar} onChange={setAvatar} />
-          {teamMode && (
-            <ChoiceCards
-              legend={t('join.team')}
-              value={teamId ?? ''}
-              columns={1}
-              choices={(info.data?.teams ?? []).map((team) => ({ value: team.id, label: team.name }))}
-              onChange={setTeamId}
-              help={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
+            <TextField
+              label={t('join.name')}
+              name="name"
+              maxLength={24}
+              autoComplete="off"
+              enterKeyHint="go"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('join.namePlaceholder')}
+              error={nameError}
             />
-          )}
-        </div>
-        {error && <FormAlert>{t(error)}</FormAlert>}
-        <Button type="submit" size="xl" disabled={pending}>
-          {pending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
-          {pending ? t('common.loading') : t('join.submit')}
-        </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="-mt-3 self-start"
+              disabled={surprise.isPending}
+              onClick={() => surprise.mutate()}
+            >
+              {surprise.isPending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <DicesIcon aria-hidden="true" />}
+              {t('join.surprise')}
+            </Button>
+            <AvatarPicker value={avatar} onChange={setAvatar} />
+            {teamMode && (
+              <ChoiceCards
+                legend={t('join.team')}
+                value={teamId ?? ''}
+                columns={1}
+                choices={game.teams.map((team) => ({ value: team.id, label: team.name }))}
+                onChange={setTeamId}
+                help={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
+              />
+            )}
+            {error && <FormAlert>{t(error)}</FormAlert>}
+            <Button type="submit" size="xl" disabled={pending}>
+              {pending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
+              {pending ? t('common.loading') : t('join.submit')}
+            </Button>
+          </div>
+        ) : (
+          error && <FormAlert>{t(error)}</FormAlert>
+        )}
       </form>
       <Link
         to="/login"

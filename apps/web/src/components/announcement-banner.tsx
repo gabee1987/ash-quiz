@@ -1,6 +1,6 @@
 import type { Announcement } from '@quizmoo/shared'
 import { MegaphoneIcon } from 'lucide-react'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 
@@ -17,12 +17,15 @@ export function AnnouncementBanner({
   announcement,
   size = 'phone',
   flush = false,
+  clockOffset = 0,
   className,
 }: {
   announcement: Announcement | null
   size?: 'phone' | 'screen'
   /** No space below (when it sits in a row instead of above content). */
   flush?: boolean
+  /** Server minus local clock, for the time bar of a message that clears itself. */
+  clockOffset?: number
   className?: string
 }) {
   const { t } = useTranslation()
@@ -105,15 +108,41 @@ export function AnnouncementBanner({
             aria-label={t('connection.announcement')}
             // Keyed by id so a new message springs in again.
             key={shown.id}
-            className={cn('note note-announce', size === 'screen' ? 'note-lg' : 'text-lg', leaving && 'note-leaving')}
+            className={cn(
+              'note note-announce',
+              size === 'screen' ? 'note-lg' : 'text-lg',
+              shown.expiresAt && 'note-timed',
+              leaving && 'note-leaving',
+            )}
           >
             <span className="note-icon" aria-hidden="true">
               <MegaphoneIcon />
             </span>
             <p className="min-w-0 wrap-break-word">{shown.text}</p>
+            {shown.expiresAt && <TimeBar announcement={shown} expiresAt={shown.expiresAt} clockOffset={clockOffset} />}
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * The time a self-clearing message has left: a striped candy bar along the bubble's bottom that
+ * drains in real time and turns warm near the end. One CSS animation over the message's whole
+ * duration, started part-way through (negative delay) when the page joins late, so phones, the
+ * projector and the host stay in step without timers.
+ */
+function TimeBar({ announcement, expiresAt, clockOffset }: { announcement: Announcement; expiresAt: number; clockOffset: number }) {
+  // Fixed per message: re-renders must not restart the animation.
+  const [style] = useState(() => {
+    const total = Math.max(1, expiresAt - announcement.at)
+    const elapsed = Math.min(total, Math.max(0, Date.now() + clockOffset - announcement.at))
+    return { '--note-time': `${total}ms`, '--note-elapsed': `-${elapsed}ms` } as CSSProperties
+  })
+  return (
+    <span className="note-time" aria-hidden="true">
+      <span className="note-time-fill" style={style} />
+    </span>
   )
 }

@@ -25,6 +25,12 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
+      {/* The host put an earlier question back on the screens: this is how it went for you. */}
+      {snapshot.reviewing && (
+        <p className="rounded-full bg-secondary px-4 py-1 text-sm font-bold text-secondary-foreground">
+          {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })} · {t('play.shownAgain')}
+        </p>
+      )}
       <div className={cn('relative flex w-full animate-pop flex-col items-center gap-3 rounded-3xl px-4 py-8 shadow-soft', tone)}>
         {correct === true && <Sparkles />}
         {correct === true && (

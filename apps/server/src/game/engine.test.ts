@@ -396,9 +396,9 @@ describe('question flow', () => {
 describe('host messages', () => {
   it('announce sets the message in any phase, trimmed and replacing the previous one', () => {
     const lobby = announce(withPlayers(1), { id: 'm1', text: '  Get ready  ' }, T0 + 1)
-    expect(lobby.announcement).toEqual({ id: 'm1', text: 'Get ready', at: T0 + 1 })
+    expect(lobby.announcement).toEqual({ id: 'm1', text: 'Get ready', at: T0 + 1, expiresAt: null })
     const finished = announce(endGame(lobby, T0 + 2), { id: 'm2', text: 'Thanks' }, T0 + 3)
-    expect(finished.announcement).toEqual({ id: 'm2', text: 'Thanks', at: T0 + 3 })
+    expect(finished.announcement).toEqual({ id: 'm2', text: 'Thanks', at: T0 + 3, expiresAt: null })
     expectSerialisable(finished)
   })
 

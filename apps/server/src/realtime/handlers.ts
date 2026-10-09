@@ -17,6 +17,7 @@ import {
   EngineError,
   announce,
   clearAnnouncement,
+  closeQuestion,
   disconnectPlayer,
   endGame,
   endQuestion,
@@ -25,7 +26,10 @@ import {
   joinPlayer,
   kickPlayer,
   next,
+  pause,
   releaseResults,
+  resume,
+  showQuestion,
   showScoreboard,
   skipQuestion,
   startGame,
@@ -258,9 +262,17 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
     case 'releaseResults':
       return releaseResults(state, command.audience)
     case 'announce':
-      return announce(state, { id: nanoid(8), text: command.text }, now)
+      return announce(state, { id: nanoid(8), text: command.text, durationSec: command.durationSec }, now)
     case 'clearAnnouncement':
       return clearAnnouncement(state)
+    case 'pause':
+      return pause(state, now)
+    case 'resume':
+      return resume(state, now)
+    case 'showQuestion':
+      return showQuestion(state, command.index)
+    case 'closeQuestion':
+      return closeQuestion(state)
   }
 }
 

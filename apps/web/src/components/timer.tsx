@@ -5,26 +5,37 @@ import { useCountdown } from '../lib/clock'
 const RADIUS = 20
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
-/** Shrinking bar plus a ring with the seconds, counting down to the server's `questionEndsAt`. The last five seconds turn red and pulse. */
+/**
+ * Shrinking bar plus a ring with the seconds, counting down to the server's `questionEndsAt`. The last
+ * five seconds turn red and pulse. While the host has paused the question it stands still at the time
+ * left when the pause began (both server times, so no clock offset is involved).
+ */
 export function Timer({
   endsAt,
   totalMs,
   clockOffset,
+  pausedAt = null,
   large = false,
 }: {
   endsAt: number
   totalMs: number
   clockOffset: number
+  pausedAt?: number | null
   /** Projector size. */
   large?: boolean
 }) {
   const { t } = useTranslation()
-  const remaining = useCountdown(endsAt, clockOffset)
+  const counting = useCountdown(pausedAt === null ? endsAt : null, clockOffset)
+  const remaining = pausedAt === null ? counting : Math.max(0, endsAt - pausedAt)
   const seconds = Math.ceil(remaining / 1000)
   const fraction = totalMs > 0 ? Math.min(1, remaining / totalMs) : 0
-  const urgent = seconds <= 5 && remaining > 0
+  const urgent = pausedAt === null && seconds <= 5 && remaining > 0
   return (
-    <div className="flex items-center gap-4" role="timer" aria-label={t('play.secondsLeft', { count: seconds })}>
+    <div
+      className={cn('flex items-center gap-4', pausedAt !== null && 'opacity-60')}
+      role="timer"
+      aria-label={pausedAt === null ? t('play.secondsLeft', { count: seconds }) : t('play.pausedSecondsLeft', { count: seconds })}
+    >
       <div className={cn('flex-1 overflow-hidden rounded-full bg-muted', large ? 'h-6' : 'h-3')}>
         <div
           className={cn('h-full rounded-full transition-colors', urgent ? 'bg-destructive' : 'bg-primary')}

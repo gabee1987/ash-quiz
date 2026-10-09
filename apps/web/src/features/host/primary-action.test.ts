@@ -46,6 +46,21 @@ describe('host actions after a question', () => {
   it('nothing while a text question waits for grading', () => {
     expect(labels({ ...reveal({}), awaitingGrading: true })).toEqual([null, null])
   })
+
+  it('a question shown again: only the way back to the game', () => {
+    const shown = { ...reveal({}), reviewing: true } as HostSnapshot
+    expect(labels(shown)).toEqual(['host.game.backToGame', null])
+    expect(primaryAction(shown)?.command).toEqual({ type: 'closeQuestion' })
+  })
+})
+
+describe('host action during a question', () => {
+  const question = (pausedAt: number | null) => ({ ...reveal({}), phase: 'question', pausedAt }) as HostSnapshot
+
+  it('ends the question while it runs, resumes it while paused', () => {
+    expect(primaryAction(question(null))?.command).toEqual({ type: 'endQuestion' })
+    expect(primaryAction(question(1_000))).toEqual({ command: { type: 'resume' }, label: 'host.game.resume' })
+  })
 })
 
 describe('host action after the game', () => {

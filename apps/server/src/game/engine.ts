@@ -50,6 +50,8 @@ export function createGame(
     released: { screen: false, players: false },
     announcement: null,
     nextPin: null,
+    pausedAt: null,
+    reviewIndex: null,
   }
 }
 
@@ -134,6 +136,7 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
   if (state.phase !== 'question' || state.questionEndsAt === null || now > state.questionEndsAt) {
     throw new EngineError('errors.questionClosed')
   }
+  if (state.pausedAt) throw new EngineError('errors.gamePaused')
   const question = currentQuestion(state)
   if (question.id !== input.questionId) throw new EngineError('errors.questionClosed')
   if (player.answers[question.id]) throw new EngineError('errors.alreadyAnswered')
@@ -161,7 +164,7 @@ export function endQuestion(state: GameState): GameState {
   const awaitingGrading = question.type === 'text' && question.acceptedAnswers.length === 0
   const players = scorePlayers(state, question, (answer) => isCorrect(question, answer))
   const teams = awaitingGrading ? state.teams : addTeamGains(state.teams, players, question.id)
-  return { ...state, phase: 'reveal', players, teams, awaitingGrading }
+  return { ...state, phase: 'reveal', players, teams, awaitingGrading, pausedAt: null }
 }
 
 /** Host grading of a text question without accepted answers. Listed players are correct, every other answer wrong. */
@@ -181,7 +184,7 @@ export function gradeText(state: GameState, correctPlayerIds: readonly string[])
 /** Next question (or finish after the last one), from the reveal or the scoreboard. */
 export function next(state: GameState, now: number): GameState {
   if ((state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard') {
-    return advance({ ...state, announcement: null }, now)
+    return advance({ ...state, announcement: null, reviewIndex: null }, now)
   }
   throw new EngineError('errors.invalidTransition')
 }
@@ -191,7 +194,7 @@ export function showScoreboard(state: GameState): GameState {
   if (state.phase !== 'reveal' || state.awaitingGrading || answersHidden(state, 'screen')) {
     throw new EngineError('errors.invalidTransition')
   }
-  return { ...state, phase: 'scoreboard' }
+  return { ...state, phase: 'scoreboard', reviewIndex: null }
 }
 
 /**
@@ -206,7 +209,7 @@ export function skipQuestion(state: GameState, now: number): GameState {
     const { [questionId]: _discarded, ...answers } = player.answers
     players[player.id] = { ...player, answers }
   }
-  const skipped = { ...state, players }
+  const skipped = { ...state, players, pausedAt: null }
   return scoreboardAfterEachQuestion(state) ? { ...skipped, phase: 'scoreboard' } : advance(skipped, now)
 }
 
@@ -217,7 +220,56 @@ export function extendTime(state: GameState, seconds: number): GameState {
 
 export function endGame(state: GameState, now: number): GameState {
   if (state.phase === 'finished') return state
-  return { ...state, phase: 'finished', finishedAt: now, awaitingGrading: false }
+  return { ...state, phase: 'finished', finishedAt: now, awaitingGrading: false, pausedAt: null, reviewIndex: null }
+}
+
+/** Stops the running question's clock: no answers and no deadline until `resume`. */
+export function pause(state: GameState, now: number): GameState {
+  if (state.phase !== 'question' || state.questionEndsAt === null || state.pausedAt) {
+    throw new EngineError('errors.invalidTransition')
+  }
+  // The deadline has passed and the timer is about to end the question: nothing left to stop.
+  if (now >= state.questionEndsAt) throw new EngineError('errors.questionClosed')
+  return { ...state, pausedAt: now }
+}
+
+/**
+ * Restarts the clock with the time it had: the start and the deadline move by the pause, so
+ * answers after it are timed without the pause (answers before it keep their stored time).
+ */
+export function resume(state: GameState, now: number): GameState {
+  if (state.phase !== 'question' || !state.pausedAt) throw new EngineError('errors.invalidTransition')
+  const shift = Math.max(0, now - state.pausedAt)
+  return {
+    ...state,
+    pausedAt: null,
+    questionStartedAt: state.questionStartedAt === null ? null : state.questionStartedAt + shift,
+    questionEndsAt: state.questionEndsAt === null ? null : state.questionEndsAt + shift,
+  }
+}
+
+/**
+ * Between questions, puts a revealed question back on every screen as its reveal, read only.
+ * Not while an answer waits for grading or answers are held back until the end.
+ */
+export function showQuestion(state: GameState, index: number): GameState {
+  if (
+    (state.phase !== 'reveal' && state.phase !== 'scoreboard') ||
+    state.awaitingGrading ||
+    answersHidden(state, 'screen') ||
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index > state.questionIndex
+  ) {
+    throw new EngineError('errors.invalidTransition')
+  }
+  return { ...state, reviewIndex: index }
+}
+
+/** Back from a question shown again to where the game was. */
+export function closeQuestion(state: GameState): GameState {
+  if (state.reviewIndex === null || state.reviewIndex === undefined) return state
+  return { ...state, reviewIndex: null }
 }
 
 /** Shows the held-back final results to one audience: the projector or the players. Each once, in any order. */
@@ -234,10 +286,26 @@ export function setNextGame(state: GameState, pin: string): GameState {
 }
 
 /** Shows a message on every phone and the projector, replacing the current one. Allowed in any phase. */
-export function announce(state: GameState, input: { id: string; text: string }, now: number): GameState {
+export function announce(
+  state: GameState,
+  input: { id: string; text: string; durationSec?: number | undefined },
+  now: number,
+): GameState {
   const text = input.text.trim()
   if (text.length < 1 || text.length > 200) throw new EngineError('errors.invalidInput')
-  return { ...state, announcement: { id: input.id, text, at: now } }
+  const { durationSec } = input
+  if (durationSec !== undefined && (!Number.isInteger(durationSec) || durationSec < 5 || durationSec > 600)) {
+    throw new EngineError('errors.invalidInput')
+  }
+  const expiresAt = durationSec === undefined ? null : now + durationSec * 1000
+  return { ...state, announcement: { id: input.id, text, at: now, expiresAt } }
+}
+
+/** Clears the message `id` once its time is up; a newer message, or one that stays, is left alone. */
+export function expireAnnouncement(state: GameState, id: string, now: number): GameState {
+  const current = state.announcement
+  if (!current || current.id !== id || !current.expiresAt || now < current.expiresAt) return state
+  return { ...state, announcement: null }
 }
 
 export function clearAnnouncement(state: GameState): GameState {
@@ -307,6 +375,8 @@ function openQuestion(state: GameState, index: number, now: number): GameState {
     questionStartedAt: now,
     questionEndsAt: now + question.timeLimitSec * 1000,
     awaitingGrading: false,
+    pausedAt: null,
+    reviewIndex: null,
   }
 }
 
@@ -368,13 +438,9 @@ function scorePlayers(
     const streak = correct === true ? (player.streak ?? 0) + 1 : correct === false ? 0 : (player.streak ?? 0)
     const bonus = correct === true && state.settings.streakBonus ? streakBonusFor(streak) : 0
     const points =
-      pointsFor(
-        question.points,
-        correct,
-        record.at - (state.questionStartedAt ?? record.at),
-        question.timeLimitSec * 1000,
-        state.settings.speedBonus,
-      ) + bonus
+      // The stored answer time, not `at - questionStartedAt`: a resume moves the start, and an
+      // answer given before the pause keeps the time it took.
+      pointsFor(question.points, correct, record.timeMs, question.timeLimitSec * 1000, state.settings.speedBonus) + bonus
     players[player.id] = {
       ...player,
       streak,

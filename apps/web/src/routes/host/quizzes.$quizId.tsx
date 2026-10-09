@@ -457,7 +457,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
           <div className="hidden min-w-0 items-start justify-end self-stretch lg:flex xl:overflow-x-clip" inert={docked}>
             <aside
               className={cn(
-                'sticky top-22 flex max-h-[calc(100dvh-6.5rem)] w-[17rem] shrink-0 flex-col gap-3 overflow-y-auto rounded-2xl border bg-card p-3 shadow-soft xl:mr-6',
+                'sticky top-22 flex max-h-[calc(100dvh-11rem)] w-[17rem] shrink-0 flex-col gap-3 overflow-y-auto rounded-2xl border bg-card p-3 shadow-soft xl:mr-6',
                 'transition-[translate,opacity] duration-500 ease-spring',
                 docked && '-translate-x-10 opacity-0',
               )}
@@ -513,7 +513,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
             <aside
               aria-labelledby="settings-panel-title"
               className={cn(
-                'sticky top-22 ml-6 flex max-h-[calc(100dvh-6.5rem)] w-[26rem] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft',
+                // Fits the window from where it starts (below the top bar), so a short question
+                // never makes the page scroll next to the panel's own scrollbar.
+                'sticky top-22 ml-6 flex max-h-[calc(100dvh-11rem)] w-[26rem] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft',
                 'transition-[translate,opacity] duration-600 ease-spring',
                 !docked && 'translate-x-16 opacity-0',
               )}

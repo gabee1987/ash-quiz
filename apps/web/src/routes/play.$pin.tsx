@@ -65,7 +65,7 @@ function PlayPage() {
         <Spinner />
       ) : (
         <>
-          <AnnouncementBanner announcement={player.announcement} />
+          <AnnouncementBanner announcement={player.announcement} clockOffset={clockOffset} />
           <NextRound snapshot={player} pin={pin} />
           <PhaseView snapshot={player} clockOffset={clockOffset} />
         </>
@@ -81,7 +81,8 @@ function PhaseView({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; clockO
     case 'question':
       return <Question key={snapshot.question?.id} snapshot={snapshot} clockOffset={clockOffset} />
     case 'reveal':
-      return <Reveal snapshot={snapshot} />
+      // Keyed by the question, so a question the host shows again springs in afresh.
+      return <Reveal key={snapshot.questionIndex} snapshot={snapshot} />
     case 'scoreboard':
       return <Scoreboard snapshot={snapshot} />
     case 'finished':

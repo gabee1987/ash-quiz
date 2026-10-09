@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { games, quizzes } from '../src/db/schema.js'
-import { announce, endGame, extendTime, joinPlayer, releaseResults, startGame, submitAnswer } from '../src/game/index.js'
+import { announce, endGame, extendTime, joinPlayer, pause, releaseResults, resume, startGame, submitAnswer } from '../src/game/index.js'
 import { fixtureQuiz, fixtureSettings } from '../src/game/fixtures.js'
 import {
   FINISHED_TTL_MS,
@@ -103,6 +103,66 @@ describe('GameManager', () => {
     vi.advanceTimersByTime(30_000)
     expect(manager.get(pin)!.state.phase).toBe('reveal')
     manager.close()
+  })
+
+  it('does not end a paused question; resume re-arms the deadline with the time left', async () => {
+    const { manager, pin } = await started()
+    vi.advanceTimersByTime(5_000)
+    manager.apply(pin, pause)
+    vi.advanceTimersByTime(60_000)
+    expect(manager.get(pin)!.state.phase).toBe('question')
+    manager.apply(pin, resume)
+    vi.advanceTimersByTime(15_000 - 1)
+    expect(manager.get(pin)!.state.phase).toBe('question')
+    vi.advanceTimersByTime(1)
+    expect(manager.get(pin)!.state.phase).toBe('reveal')
+    manager.close()
+  })
+
+  it('keeps a restored paused question paused', async () => {
+    const { manager, pin } = await started()
+    manager.apply(pin, pause)
+    const saved = structuredClone(manager.get(pin)!)
+    manager.close()
+
+    vi.advanceTimersByTime(60_000)
+    const store = memoryStore()
+    store.active = [saved]
+    const restored = new GameManager(store, quietLog)
+    await restored.restore()
+    vi.advanceTimersByTime(60_000)
+    expect(restored.get(pin)!.state).toMatchObject({ phase: 'question', pausedAt: expect.any(Number) })
+    restored.close()
+  })
+
+  it('clears a message with a duration on time, never a newer one, and after a restart too', async () => {
+    const { manager, pin } = await started()
+    manager.apply(pin, (s, now) => announce(s, { id: 'm1', text: 'Break', durationSec: 10 }, now))
+    vi.advanceTimersByTime(10_000 - 1)
+    expect(manager.get(pin)!.state.announcement?.id).toBe('m1')
+    vi.advanceTimersByTime(1)
+    expect(manager.get(pin)!.state.announcement).toBeNull()
+
+    // A message that stays replaces a timed one before it runs out.
+    manager.apply(pin, (s, now) => announce(s, { id: 'm2', text: 'Break', durationSec: 10 }, now))
+    vi.advanceTimersByTime(5_000)
+    manager.apply(pin, (s, now) => announce(s, { id: 'm3', text: 'Stays' }, now))
+    vi.advanceTimersByTime(60_000)
+    expect(manager.get(pin)!.state.announcement?.id).toBe('m3')
+
+    manager.apply(pin, (s, now) => announce(s, { id: 'm4', text: 'Back soon', durationSec: 30 }, now))
+    const saved = structuredClone(manager.get(pin)!)
+    manager.close()
+    vi.advanceTimersByTime(10_000)
+    const store = memoryStore()
+    store.active = [saved]
+    const restored = new GameManager(store, quietLog)
+    await restored.restore()
+    vi.advanceTimersByTime(20_000 - 1)
+    expect(restored.get(pin)!.state.announcement?.id).toBe('m4')
+    vi.advanceTimersByTime(1)
+    expect(restored.get(pin)!.state.announcement).toBeNull()
+    restored.close()
   })
 
   it('restores games disconnected and fires a passed deadline immediately', async () => {
@@ -446,6 +506,35 @@ describeDb('sockets (database)', () => {
     await cleared
     expect(await command(hostSocket, { type: 'announce', text: '' })).toEqual({ error: 'errors.invalidInput' })
     expect(await command(screen, { type: 'announce', text: 'Hi' })).toEqual({ error: 'errors.unauthorized' })
+  })
+
+  it('pause and resume: phones see the pause, answers wait for the resume; a question shown again reaches the phone', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const a = await player(pin, 'Anna')
+    expect(await command(hostSocket, { type: 'start' })).toEqual({ ok: true })
+
+    const paused = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.pausedAt !== null)
+    expect(await command(hostSocket, { type: 'pause' })).toEqual({ ok: true })
+    expect((await paused).pausedAt).toEqual(expect.any(Number))
+    const answer = { questionId: 'q-single', answer: { type: 'single', optionId: 'a' } }
+    expect(await a.socket.emitWithAck('player:answer', answer)).toEqual({ error: 'errors.gamePaused' })
+    expect(await command(hostSocket, { type: 'pause' })).toEqual({ error: 'errors.invalidTransition' })
+
+    expect(await command(hostSocket, { type: 'resume' })).toEqual({ ok: true })
+    const revealed = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'reveal')
+    expect(await a.socket.emitWithAck('player:answer', answer)).toEqual({ ok: true })
+    await revealed
+
+    expect(await command(hostSocket, { type: 'next' })).toEqual({ ok: true })
+    expect(await command(hostSocket, { type: 'endQuestion' })).toEqual({ ok: true })
+    const shown = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.reviewing)
+    expect(await command(hostSocket, { type: 'showQuestion', index: 0 })).toEqual({ ok: true })
+    expect(await shown).toMatchObject({ phase: 'reveal', questionIndex: 0, lastCorrect: true })
+    const back = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => !s.reviewing)
+    expect(await command(hostSocket, { type: 'closeQuestion' })).toEqual({ ok: true })
+    expect(await back).toMatchObject({ questionIndex: 1 })
+    expect(await command(hostSocket, { type: 'showQuestion', index: 5 })).toEqual({ error: 'errors.invalidTransition' })
   })
 
   it('host:ping acks the host only, and the host sees when a player went offline', async () => {
