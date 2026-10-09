@@ -62,7 +62,8 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
   const question = state.quiz.questions[state.questionIndex]
   return {
     ...(includeAnswers ? base : conceal(state, base)),
-    currentAnswers: includeAnswers ? currentAnswers(state) : null,
+    // The question on the screens: a question shown again lists its own answers.
+    currentAnswers: includeAnswers ? currentAnswers(state, base.questionIndex) : null,
     live: includeAnswers && state.phase === 'question' && question ? revealInfo(state, question) : null,
     playersWaiting: includeAnswers && resultsPendingFor(state, 'players'),
   }
@@ -73,7 +74,8 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
   const me = base.players.find((p) => p.id === playerId)
   const player = state.players[playerId]
   if (!me || !player) throw new EngineError('errors.playerNotFound')
-  const question = state.quiz.questions[state.questionIndex]
+  // The question on the screens (a question shown again: the player's own result on it).
+  const question = state.quiz.questions[base.questionIndex]
   const record = question ? player.answers[question.id] : undefined
   return {
     ...base,
@@ -137,12 +139,20 @@ export function isRevealed(state: GameState): boolean {
 }
 
 function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, seq: number): GameSnapshotBase {
-  const question = state.quiz.questions[state.questionIndex] ?? null
-  const inQuestion = state.phase === 'question' && question !== null
+  // A question shown again between questions is shown as its reveal.
+  const reviewing =
+    state.reviewIndex !== null &&
+    state.reviewIndex !== undefined &&
+    (state.phase === 'reveal' || state.phase === 'scoreboard')
+  const index = reviewing ? state.reviewIndex! : state.questionIndex
+  const phase = reviewing ? 'reveal' : state.phase
+  const question = state.quiz.questions[index] ?? null
+  const inQuestion = phase === 'question' && question !== null
   const revealed = question !== null && isRevealed(state)
   const players = Object.values(state.players)
 
-  const roundPoints = (p: Player) => (revealed && question ? (p.answers[question.id]?.points ?? 0) : 0)
+  // Nothing moves on a question shown again: no round points, so no rank arrows either.
+  const roundPoints = (p: Player) => (revealed && question && !reviewing ? (p.answers[question.id]?.points ?? 0) : 0)
   // Ranks before this question's points: what the scoreboard shows as "moved up" or "moved down".
   const previousPlayerRank = rankLookup(players.map((p) => ({ id: p.id, name: p.name, score: p.score - roundPoints(p) })))
   const previousTeamRank = rankLookup(
@@ -180,19 +190,21 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
   return {
     seq,
     pin: state.pin,
-    phase: state.phase,
+    phase,
     mode: state.settings.mode,
     quizTitle: state.quiz.title,
-    questionIndex: state.questionIndex,
+    questionIndex: index,
     questionCount: state.quiz.questions.length,
     question: inQuestion ? toPublicQuestion(question) : null,
     questionEndsAt: inQuestion ? state.questionEndsAt : null,
+    pausedAt: inQuestion ? (state.pausedAt ?? null) : null,
+    reviewing,
     serverNow: now,
     answeredCount: question ? players.filter((p) => p.answers[question.id]).length : 0,
     players: rankedPlayers,
     teams: rankedTeams,
     reveal: revealed ? revealInfo(state, question) : null,
-    awaitingGrading: state.awaitingGrading,
+    awaitingGrading: reviewing ? false : state.awaitingGrading,
     questionStats: questionStats(state, players),
     settings: state.settings,
     answersHidden: answersHidden(state, audience),
@@ -269,8 +281,8 @@ function questionStats(state: GameState, players: Player[]): QuestionStat[] {
   })
 }
 
-function currentAnswers(state: GameState): CurrentAnswer[] {
-  const question = state.quiz.questions[state.questionIndex]
+function currentAnswers(state: GameState, index: number): CurrentAnswer[] {
+  const question = state.quiz.questions[index]
   if (!question) return []
   return Object.values(state.players)
     .flatMap((player) => {

@@ -1,5 +1,6 @@
 import type { HostSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { PausedNote } from '../../components/paused-note'
 import { Timer } from '../../components/timer'
 import { stagger } from '../../lib/motion'
 import { QuestionInput } from '../questions/question-input'
@@ -18,8 +19,15 @@ export function ScreenQuestion({ host, clockOffset }: { host: HostSnapshot; cloc
         </span>
       </div>
       {host.questionEndsAt !== null && (
-        <Timer endsAt={host.questionEndsAt} totalMs={question.timeLimitSec * 1000} clockOffset={clockOffset} large />
+        <Timer
+          endsAt={host.questionEndsAt}
+          totalMs={question.timeLimitSec * 1000}
+          clockOffset={clockOffset}
+          pausedAt={host.pausedAt}
+          large
+        />
       )}
+      {host.pausedAt !== null && <PausedNote size="screen" />}
       <h1 className="animate-fade-up text-6xl leading-tight font-black wrap-break-word">{question.text}</h1>
       {question.imageId && (
         <img

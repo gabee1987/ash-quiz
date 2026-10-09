@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MAX_PLAYERS, announcementTextSchema, answerSchema, avatarSchema } from './game.js'
+import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
@@ -45,9 +45,19 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   /** Host grading of a text question without accepted answers: listed players are correct. */
   z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(MAX_PLAYERS) }),
   z.object({ type: z.literal('end') }),
-  /** A message on every phone and the projector until cleared (or the next question starts). */
-  z.object({ type: z.literal('announce'), text: announcementTextSchema }),
+  /**
+   * A message on every phone and the projector until cleared (or the next question starts);
+   * with `durationSec` it clears itself after that long.
+   */
+  z.object({ type: z.literal('announce'), text: announcementTextSchema, durationSec: announcementDurationSchema.optional() }),
   z.object({ type: z.literal('clearAnnouncement') }),
+  /** Stops the running question's clock; answers wait until `resume`. */
+  z.object({ type: z.literal('pause') }),
+  z.object({ type: z.literal('resume') }),
+  /** Between questions: puts a revealed question (by index) back on every screen, read only. */
+  z.object({ type: z.literal('showQuestion'), index: z.number().int().min(0) }),
+  /** Back from a question shown again to where the game was. */
+  z.object({ type: z.literal('closeQuestion') }),
 ])
 export type HostCommand = z.infer<typeof hostCommandSchema>
 

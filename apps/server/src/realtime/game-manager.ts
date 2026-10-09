@@ -1,5 +1,13 @@
 import { gameSettingsSchema, type GameSettings } from '@quizmoo/shared'
-import { EngineError, createGame, endQuestion, resultsPending, type GameQuiz, type GameState } from '../game/index.js'
+import {
+  EngineError,
+  createGame,
+  endQuestion,
+  expireAnnouncement,
+  resultsPending,
+  type GameQuiz,
+  type GameState,
+} from '../game/index.js'
 import { generatePin } from './pin.js'
 
 export interface ManagedGame {
@@ -23,6 +31,8 @@ type Listener = (game: ManagedGame, seq: number) => void
 interface Entry {
   game: ManagedGame
   timer: ReturnType<typeof setTimeout> | null
+  /** Clears a host message that has a duration. */
+  messageTimer: ReturnType<typeof setTimeout> | null
   saving: Promise<void>
   /**
    * Snapshot order. Seeded from the clock when the game is created or restored and raised by one
@@ -78,6 +88,7 @@ export class GameManager {
     const entry: Entry = {
       game: { state, hostId: input.hostId, quizId: input.quizId },
       timer: null,
+      messageTimer: null,
       saving: Promise.resolve(),
       seq: this.now(),
     }
@@ -130,6 +141,7 @@ export class GameManager {
       const entry: Entry = {
         game: { ...game, state: { ...game.state, settings, players } },
         timer: null,
+        messageTimer: null,
         saving: Promise.resolve(),
         seq: now,
       }
@@ -146,7 +158,7 @@ export class GameManager {
   async discard(gameId: string): Promise<void> {
     for (const [pin, entry] of this.games) {
       if (entry.game.state.id !== gameId) continue
-      if (entry.timer) clearTimeout(entry.timer)
+      this.clearTimers(entry)
       this.games.delete(pin)
       await entry.saving
     }
@@ -165,7 +177,7 @@ export class GameManager {
    */
   async stop(): Promise<void> {
     this.stopped = true
-    for (const entry of this.games.values()) if (entry.timer) clearTimeout(entry.timer)
+    for (const entry of this.games.values()) this.clearTimers(entry)
     await this.flush()
     this.games.clear()
   }
@@ -176,16 +188,28 @@ export class GameManager {
   }
 
   close() {
-    for (const entry of this.games.values()) if (entry.timer) clearTimeout(entry.timer)
+    for (const entry of this.games.values()) this.clearTimers(entry)
     this.games.clear()
   }
 
-  private schedule(pin: string, entry: Entry) {
+  private clearTimers(entry: Entry) {
     if (entry.timer) clearTimeout(entry.timer)
+    if (entry.messageTimer) clearTimeout(entry.messageTimer)
     entry.timer = null
+    entry.messageTimer = null
+  }
+
+  private schedule(pin: string, entry: Entry) {
+    this.clearTimers(entry)
     if (this.stopped) return
     const { state } = entry.game
-    if (state.phase === 'question' && state.questionEndsAt !== null) {
+    const message = state.announcement
+    if (message?.expiresAt) {
+      const id = message.id
+      entry.messageTimer = setTimeout(() => this.onMessageExpiry(pin, id), Math.max(0, message.expiresAt - this.now()))
+    }
+    // A paused question has no deadline until it resumes.
+    if (state.phase === 'question' && state.questionEndsAt !== null && !state.pausedAt) {
       entry.timer = setTimeout(() => this.onDeadline(pin), Math.max(0, state.questionEndsAt - this.now()))
     } else if (state.phase === 'finished' && state.finishedAt !== null) {
       // Kept longer while its results wait for the host, so a late release still reaches everyone.
@@ -200,13 +224,26 @@ export class GameManager {
     const entry = this.games.get(pin)
     if (!entry) return
     const { state } = entry.game
-    if (state.phase !== 'question' || state.questionEndsAt === null) return
+    if (state.phase !== 'question' || state.questionEndsAt === null || state.pausedAt) return
     // Timers can fire a millisecond early; the deadline is what counts.
     if (this.now() < state.questionEndsAt) return this.schedule(pin, entry)
     try {
       this.apply(pin, endQuestion)
     } catch (error) {
       this.log.error(error, 'ending question on timer failed')
+    }
+  }
+
+  private onMessageExpiry(pin: string, id: string) {
+    const entry = this.games.get(pin)
+    if (!entry) return
+    const expiresAt = entry.game.state.announcement?.expiresAt
+    // Timers can fire a millisecond early; re-arm until the message's time is really up.
+    if (entry.game.state.announcement?.id === id && expiresAt && this.now() < expiresAt) return this.schedule(pin, entry)
+    try {
+      this.apply(pin, (state, now) => expireAnnouncement(state, id, now))
+    } catch (error) {
+      this.log.error(error, 'clearing a host message on timer failed')
     }
   }
 

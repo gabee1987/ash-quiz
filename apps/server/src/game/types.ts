@@ -66,6 +66,10 @@ export interface GameState {
   announcement?: Announcement | null
   /** PIN of the next round after "Play again". */
   nextPin?: string | null
+  /** Unix ms when the host paused the running question; null while it runs. Missing in games saved before it existed. */
+  pausedAt?: number | null
+  /** Index of a revealed question the host put back on the screens; null otherwise. Missing in games saved before it existed. */
+  reviewIndex?: number | null
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

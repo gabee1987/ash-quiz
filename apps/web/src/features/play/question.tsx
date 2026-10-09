@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
+import { PausedNote } from '@/components/paused-note'
 import { Timer } from '../../components/timer'
 import { stagger } from '../../lib/motion'
 import { sendAnswer } from '../../lib/socket'
@@ -16,6 +17,7 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
   const [closed, setClosed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const question = snapshot.question
+  const paused = snapshot.pausedAt !== null
 
   if (!question) return null
   if (snapshot.myAnswer) return <Answered snapshot={snapshot} />
@@ -41,8 +43,14 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
         {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })}
       </p>
       {snapshot.questionEndsAt !== null && (
-        <Timer endsAt={snapshot.questionEndsAt} totalMs={question.timeLimitSec * 1000} clockOffset={clockOffset} />
+        <Timer
+          endsAt={snapshot.questionEndsAt}
+          totalMs={question.timeLimitSec * 1000}
+          clockOffset={clockOffset}
+          pausedAt={snapshot.pausedAt}
+        />
       )}
+      {paused && <PausedNote />}
       <h1 className="animate-fade-up text-2xl font-black wrap-break-word" style={stagger(1, 0, 60)}>
         {question.text}
       </h1>
@@ -58,7 +66,7 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
       <QuestionInput
         question={question}
         mode="answer"
-        disabled={pending || closed}
+        disabled={pending || closed || paused}
         pending={pending}
         colourful={snapshot.settings.answerStyle === 'colourful'}
         symbols={snapshot.settings.answerSymbols}

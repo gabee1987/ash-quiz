@@ -66,7 +66,15 @@
 - Join page: an OK button under the PIN closes the phone's keyboard. The avatar opens into 60 emoji in four groups (animals, food, fantasy, fun). "Surprise me" picks a whole silly name from a list admins edit on the new Names page (one list per language), never one already taken in the game.
 - Play again: after a game the host starts a new round of the same quiz with the same settings; phones get "Join the next round" (one tap, same name, avatar and team) and the projector switches to the new lobby by itself.
 
+### Host control
+- Pause and Resume during a question: the clock stops on the host control, the projector and every phone ("Paused"), and nobody can answer until the host resumes. The time left and the speed points stay as they were before the pause. Space on the projector resumes, and a server restart keeps the game paused.
+- Host messages can disappear by themselves after 10 s, 30 s or 60 s; the host's message box shows the time left. "Until cleared" stays the default.
+- Show again: between questions the host can put any question already played back on the projector and the phones (from "Questions so far" in the review panel) to talk it through. Each phone shows its own result on it; scores and ranks do not change. "Back to the game" returns to where the game was.
+- After the podium is shown, the host control says it is on the projector and has an "Open projector" button. Opening the projector again brings up the window that is already open instead of opening a second one.
+
 ### Fixes
+- The selected answer on phones (colourful buttons) is marked inside the option, in its text colour, instead of with a ring that reached into the neighbouring answers.
+- The quiz editor no longer shows two scrollbars when the quiz settings are open beside a short question.
 - Rate limiting applies to API requests only. Static files were counted too, so many phones sharing one public IP (venue wifi with a cloud deployment) could get errors and a blank page while loading the app.
 
 ## 1.0.0 – 2026-10-07

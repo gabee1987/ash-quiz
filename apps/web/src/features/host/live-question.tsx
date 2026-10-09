@@ -33,7 +33,7 @@ export function LiveQuestion({ host, clockOffset }: { host: HostSnapshot; clockO
       <h2 id="live-question" className="text-2xl font-extrabold wrap-break-word">
         {question.text}
       </h2>
-      <Timer endsAt={host.questionEndsAt} totalMs={question.timeLimitSec * 1000} clockOffset={clockOffset} />
+      <Timer endsAt={host.questionEndsAt} totalMs={question.timeLimitSec * 1000} clockOffset={clockOffset} pausedAt={host.pausedAt} />
 
       <div className="flex flex-col gap-1.5">
         <p className="font-bold tabular-nums" aria-live="polite">

@@ -1,12 +1,17 @@
 import type { HostSnapshot } from '@quizmoo/shared'
+import { MonitorUpIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 import { CheckIcon, CrossIcon } from '../../components/icons'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { formatAnswer } from '../questions/format-answer'
 
 /** Mid-game review: who is leading, how each question went, and the answers to the current one. */
-export function ReviewPanel({ host }: { host: HostSnapshot }) {
+export function ReviewPanel({ host, onShowQuestion }: { host: HostSnapshot; onShowQuestion: (index: number) => void }) {
   const { t, i18n } = useTranslation()
+  // Between questions (the engine's showQuestion rules): put a played question back on the screens.
+  const canShowAgain =
+    (host.phase === 'reveal' || host.phase === 'scoreboard') && !host.awaitingGrading && !host.answersHidden
   const teamName = (teamId: string | null) => host.teams.find((team) => team.id === teamId)?.name ?? ''
   const seconds = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 })
   const percent = new Intl.NumberFormat(i18n.language, { style: 'percent' })
@@ -76,6 +81,18 @@ export function ReviewPanel({ host }: { host: HostSnapshot }) {
                   {stat.averageTimeMs !== null &&
                     ` · ${t('host.review.averageTime', { seconds: seconds.format(stat.averageTimeMs / 1000) })}`}
                 </span>
+                {canShowAgain && !(host.reviewing && host.questionIndex === stat.index) && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="self-start"
+                    aria-label={t('host.review.showAgainLabel', { index: stat.index + 1 })}
+                    onClick={() => onShowQuestion(stat.index)}
+                  >
+                    <MonitorUpIcon aria-hidden="true" />
+                    {t('host.review.showAgain')}
+                  </Button>
+                )}
               </li>
             ))}
           </ol>

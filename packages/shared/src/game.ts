@@ -139,10 +139,14 @@ export interface Announcement {
   text: string
   /** Unix ms when it was sent. */
   at: number
+  /** Unix ms when it disappears by itself; null (or missing in games saved before it existed) while it stays. */
+  expiresAt?: number | null
 }
 
 /** Host messages: 1 to 200 characters. */
 export const announcementTextSchema = z.string().trim().min(1).max(200)
+/** How long a host message stays before it clears itself: 5 s to 10 min. */
+export const announcementDurationSchema = z.number().int().min(5).max(600)
 
 export interface GameSnapshotBase {
   /**
@@ -160,6 +164,16 @@ export interface GameSnapshotBase {
   question: PublicQuestion | null
   /** Unix ms when the current question closes. Present in the 'question' phase. */
   questionEndsAt: number | null
+  /**
+   * Server time when the host paused the running question; null while it runs. The clock then
+   * shows `questionEndsAt - pausedAt` frozen, and answers are refused until the host resumes.
+   */
+  pausedAt: number | null
+  /**
+   * The host put an earlier (or the current) question back on the screens: `phase` is 'reveal',
+   * `questionIndex` and `reveal` are that question's, read only, ranks do not move.
+   */
+  reviewing: boolean
   /** Server time at snapshot creation, lets clients compute their clock offset. */
   serverNow: number
   answeredCount: number

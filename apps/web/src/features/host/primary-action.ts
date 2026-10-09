@@ -19,11 +19,15 @@ const showScoreboard: PrimaryAction = { command: { type: 'scoreboard' }, label: 
 
 /** The one obvious next step for the host in each phase (button, and Space on the screen). */
 export function primaryAction(host: HostSnapshot): PrimaryAction | null {
+  // A question shown again: back to where the game was first.
+  if (host.reviewing) return { command: { type: 'closeQuestion' }, label: 'host.game.backToGame' }
   switch (host.phase) {
     case 'lobby':
       return host.players.length > 0 ? { command: { type: 'start' }, label: 'host.game.start' } : null
     case 'question':
-      return { command: { type: 'endQuestion' }, label: 'host.game.endQuestion' }
+      return host.pausedAt
+        ?{ command: { type: 'resume' }, label: 'host.game.resume' }
+        : { command: { type: 'endQuestion' }, label: 'host.game.endQuestion' }
     case 'reveal':
       if (host.awaitingGrading) return null
       return scoreboardAfterEachQuestion(host) ? showScoreboard : nextQuestion(host)
@@ -66,6 +70,7 @@ export function reconnectingCount(host: HostSnapshot): number | null {
  * After a game with held results: the phones' release while the podium is still held.
  */
 export function alternativeAction(host: HostSnapshot): PrimaryAction | null {
+  if (host.reviewing) return null
   if (host.phase === 'finished') return host.resultsPending && host.playersWaiting ? releaseToPlayers : null
   if (host.phase !== 'reveal' || host.awaitingGrading) return null
   if (scoreboardAfterEachQuestion(host)) return nextQuestion(host)

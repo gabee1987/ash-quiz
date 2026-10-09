@@ -20,6 +20,7 @@ import { ReviewPanel } from '../../features/host/review-panel'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { RankList } from '../../features/play/scoreboard'
 import { ApiError, apiFetch } from '../../lib/api'
+import { openProjector } from '../../lib/projector'
 import { toastError } from '../../lib/toast'
 import { closeSession, emitAck, startSession, useGameStore } from '../../lib/socket'
 
@@ -74,7 +75,7 @@ function HostGamePage() {
       <div className="flex min-w-0 flex-col gap-5">
         <Header host={host} connected={status === 'connected'} />
         <Controls host={host} onCommand={(c) => void send(c)} />
-        <MessageBox announcement={host.announcement} onCommand={send} />
+        <MessageBox announcement={host.announcement} clockOffset={clockOffset} onCommand={send} />
         <PhaseDetail
           host={host}
           clockOffset={clockOffset}
@@ -87,7 +88,7 @@ function HostGamePage() {
       </div>
       <div className="flex min-w-0 flex-col gap-6">
         <PlayerPanel host={host} clockOffset={clockOffset} onKick={(playerId) => void send({ type: 'kick', playerId })} />
-        <ReviewPanel host={host} />
+        <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
       </div>
     </div>
   )
@@ -130,7 +131,16 @@ function Header({ host, connected }: { host: HostSnapshot; connected: boolean })
         </div>
       </div>
       <Button asChild variant="secondary">
-        <a href={`/screen/${host.pin}`} target="_blank" rel="noreferrer">
+        {/* A second click brings the same projector window up instead of opening another one. */}
+        <a
+          href={`/screen/${host.pin}`}
+          target="_blank"
+          rel="noreferrer"
+          onClick={(e) => {
+            e.preventDefault()
+            openProjector(host.pin)
+          }}
+        >
           <MonitorIcon aria-hidden="true" />
           {t('host.game.openScreen')}
         </a>
@@ -173,6 +183,18 @@ function PhaseDetail({
       return (
         <section className="flex flex-col gap-2">
           <h2 className="text-xl font-extrabold">{t('play.podium')}</h2>
+          {/* Once released, say where the podium went and offer the way to that window. */}
+          {!host.resultsPending && (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl bg-secondary px-4 py-2 text-secondary-foreground">
+              <p role="status" className="flex-1 font-semibold">
+                {t('host.game.podiumOnProjector')}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => openProjector(host.pin)}>
+                <MonitorIcon aria-hidden="true" />
+                {t('host.game.openProjector')}
+              </Button>
+            </div>
+          )}
           {host.mode === 'team' ? (
             <ol className="flex flex-col gap-2">
               {host.teams

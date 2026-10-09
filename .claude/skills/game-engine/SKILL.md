@@ -47,7 +47,10 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | `joinPlayer({ id, name, teamId, token, avatar })` | lobby only (reconnect allowed any time via token) | adds player; name unique case-insensitively and allowed by `isNameAllowed` (`names.ts`, else `errors.nameNotAllowed`), max 60 players (`MAX_PLAYERS` in `packages/shared`); team mode requires a known `teamId`; `avatar` from `avatars`, else `fallbackAvatar(id)`; a token rejoin keeps the stored name and avatar |
 | `setNextGame(pin)` | finished | "Play again": `nextPin` points phones and the projector to the next round |
 | `reconnectPlayer(token)` / `disconnectPlayer(playerId, now)` | any | flips `connected`; disconnect stamps `disconnectedAt`, reconnect clears it |
-| `announce({ id, text }, now)` / `clearAnnouncement()` | any | sets or clears `announcement: { id, text, at }` (1 to 200 characters, trimmed); `startGame` and `next` clear it too |
+| `announce({ id, text, durationSec? }, now)` / `clearAnnouncement()` | any | sets or clears `announcement: { id, text, at, expiresAt }` (1 to 200 characters, trimmed; `durationSec` 5 to 600 sets `expiresAt`, otherwise null); `startGame` and `next` clear it too |
+| `expireAnnouncement(id, now)` | any | clears the message only if it is still `id` and `expiresAt` has passed (the realtime layer's message timer calls it) |
+| `pause(now)` / `resume(now)` | question (pause: running and before the deadline; resume: paused) | `pausedAt` set / cleared; `submitAnswer` throws `errors.gamePaused` while paused; resume moves `questionStartedAt` and `questionEndsAt` by the pause; `endQuestion`, `skipQuestion`, `endGame` and opening a question clear it |
+| `showQuestion(index)` / `closeQuestion()` | reveal or scoreboard, not `awaitingGrading`, not `answersHidden(state, 'screen')`, `0 <= index <= questionIndex` | `reviewIndex` set / cleared; snapshots then show that question as phase `reveal` with `reviewing: true`, own results, no round points (ranks do not move); `next`, `showScoreboard` and `endGame` clear it |
 | `kickPlayer(playerId)` | any except finished | removes player, recomputes nothing (their past points stay out of team totals from then on) |
 | `startGame()` | lobby, at least 1 player, at least 1 question | goes to question 0 |
 | `submitAnswer(playerId, questionId, answer)` | question, before `questionEndsAt`, once per player per question | records answer, answer type must match question type |
@@ -62,7 +65,7 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 
 ## Scoring
 
-Let `P` = question points, `T` = time limit in ms, `t` = answer time minus `questionStartedAt` (clamped to `[0, T]`).
+Let `P` = question points, `T` = time limit in ms, `t` = the answer's stored `timeMs` (answer time minus `questionStartedAt` when it was given, so a later resume does not change it; clamped to `[0, T]`).
 
 - Correct answer, speed bonus on: `round(P * (1 - t / T / 2))`, so between `P` and `P/2`.
 - Correct answer, speed bonus off: `P`.
