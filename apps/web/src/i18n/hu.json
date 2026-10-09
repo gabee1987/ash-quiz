@@ -2,6 +2,7 @@
   "app": {
     "name": "Quizmoo",
     "language": "Nyelv",
+    "settings": "Beállítások",
     "mode": "Megjelenés",
     "modes": {
       "light": "Világos",
@@ -151,6 +152,20 @@
         }
       }
     },
+    "shown": {
+      "onScreen": {
+        "reveal": "A kijelzőkön: a válaszok",
+        "scoreboard": "A kijelzőkön: eredménytábla e kérdés után",
+        "shownAgain": "A kijelzőkön: újra kivetítve"
+      },
+      "answered": "Válaszolt",
+      "right": "Helyes",
+      "averageTime": "Átlagos idő",
+      "fastest": "Leggyorsabb helyes",
+      "seconds": "{{seconds}} mp",
+      "noAnswer_one": "{{count}} játékos nem válaszolt:",
+      "noAnswer_other": "{{count}} játékos nem válaszolt:"
+    },
     "review": {
       "title": "Áttekintés",
       "standings": "Állás",
@@ -197,7 +212,12 @@
       "streakBonusHelp": "Az egymás utáni helyes válaszok extra pontot érnek: a másodiktól +100, legfeljebb +500.",
       "shuffle": "Válaszlehetőségek keverése",
       "submit": "Játék létrehozása",
-      "changeForGame": "Beállítások módosítása erre a játékra",
+      "groupsHelp": "A játék a kvíz beállításaival indul. Bármelyik csoportot módosíthatja csak erre a játékra.",
+      "change": "Módosítás",
+      "done": "Kész",
+      "reset": "Visszaállítás",
+      "changedForGame": "Erre a játékra módosítva",
+      "noBonuses": "Nincs bónusz, kötött sorrend",
       "revealAnswers": "Helyes válaszok",
       "revealAnswersOptions": {
         "afterQuestion": "Minden kérdés után",
@@ -356,6 +376,7 @@
     "answerKept": "Válasz rögzítve",
     "resultsAtEnd": "A helyes válaszok a játék végén derülnek ki.",
     "backToHome": "Vissza a kezdőlapra",
+    "voted": "Szavaztál",
     "yourAnswers": "Válaszaid",
     "yourAnswer": "A te válaszod",
     "resultsComing": "Hamarosan jönnek az eredmények.",
@@ -628,6 +649,17 @@
     "noQuestions": "Még egy kérdés sem zárult le.",
     "questionNumber": "{{index}}. kérdés",
     "correctPercent": "{{percent}}% helyes",
+    "correctPercentText": "A játékosok {{share}}-a talált",
+    "summary": {
+      "title": "Összegzés",
+      "players": "Játékosok",
+      "questions": "Kérdések",
+      "averageCorrect": "Átlagos találati arány",
+      "averageTime": "Átlagos válaszidő",
+      "seconds": "{{seconds}} mp",
+      "easiest": "Legkönnyebb kérdés",
+      "hardest": "Legnehezebb kérdés"
+    },
     "answered_one": "{{count}} játékosból {{answered}} válaszolt",
     "answered_other": "{{count}} játékosból {{answered}} válaszolt",
     "averageTime": "Átlagos idő: {{seconds}} mp",

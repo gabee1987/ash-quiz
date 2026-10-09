@@ -65,8 +65,11 @@ function PlayPage() {
         <Spinner />
       ) : (
         <>
-          <AnnouncementBanner announcement={player.announcement} clockOffset={clockOffset} />
-          <NextRound snapshot={player} pin={pin} />
+          {/* Clear of the floating settings button in the top right corner. */}
+          <div className="mr-12">
+            <AnnouncementBanner announcement={player.announcement} clockOffset={clockOffset} />
+            <NextRound snapshot={player} pin={pin} />
+          </div>
           <PhaseView snapshot={player} clockOffset={clockOffset} />
         </>
       )}

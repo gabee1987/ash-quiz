@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button'
 import { toastError } from '@/lib/toast'
 import { Spinner } from '../../components/spinner'
 import { PlayerTable, TeamTable } from '../../features/results/player-table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { QuestionStats } from '../../features/results/question-stats'
-import { ResultsPodium } from '../../features/results/results-podium'
+import { ResultsSummary } from '../../features/results/results-summary'
 import { apiFetch, errorCode } from '../../lib/api'
 
 export const Route = createFileRoute('/host/results/$gameId')({
@@ -114,25 +115,34 @@ function ResultsPage() {
         </div>
       </header>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <div className="flex min-w-0 flex-col gap-6">
-          {data.podium.length > 0 && <ResultsPodium places={data.podium} />}
+      {/* What matters first; the details below in tabs. */}
+      <ResultsSummary results={data} />
+
+      <Tabs defaultValue="players" className="gap-4">
+        <TabsList>
+          <TabsTrigger value="players">
+            {t('results.players')} ({data.players.length})
+          </TabsTrigger>
+          <TabsTrigger value="questions">
+            {t('results.questions')} ({data.questions.length})
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="players" className="flex flex-col gap-6">
           {data.mode === 'team' && <TeamTable teams={data.teams} />}
           <PlayerTable players={data.players} teams={data.mode === 'team' ? data.teams : []} />
-        </div>
-        <section className="flex min-w-0 flex-col gap-2">
-          <h2 className="text-xl font-extrabold">{t('results.questions')}</h2>
+        </TabsContent>
+        <TabsContent value="questions">
           {data.questions.length === 0 ? (
             <p className="text-muted-foreground">{t('results.noQuestions')}</p>
           ) : (
-            <ol className="flex flex-col gap-3">
+            <ol className="grid gap-3 xl:grid-cols-2">
               {data.questions.map((question) => (
                 <QuestionStats key={question.question.id} question={question} playerCount={data.players.length} />
               ))}
             </ol>
           )}
-        </section>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

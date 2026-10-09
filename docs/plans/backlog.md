@@ -7,7 +7,6 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Feature | Why | Effort | Notes |
 |---|---|---|---|
 | Partial-credit multiple choice ("some of these") | Several correct options where picking some is enough | M | New question type in the shared schema (keeps `multiple` as "all must be picked"); scoring option per question: same points for any correct pick, or points per correct option; wrong picks subtract or void, to decide; phone UI as multiple choice |
-| Phone end-of-game answer review redesign | The current list on the podium screen is cramped: question, own answer, correct answer and points all in one small card | S | One card per question with the result colour as a stripe, the own answer and the correct answer on separate lines, collapsible per question; requested after phase 9 |
 | Slider or range question | Estimation questions with a visual answer | M | Like number with min/max/step and a slider input; distribution as a histogram |
 | Player reactions | Audience energy between questions | M | Emoji burst on the projector; rate limited; not persisted |
 | Sounds and music | Atmosphere | M | Needs licensed audio assets; opt-in on the projector only; phones silent by default |
@@ -51,6 +50,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Host messages fly in and out with an elastic animation, and the content below follows (phase 12 follow-up).
 - Streak bonus, ordering question, avatars, nickname generator and filter, play again (phase 13).
 - Pause and resume, host messages that leave by themselves, showing an answered question again, "Show podium" telling the host where it went, the selected-answer marker, the double scrollbar (phase 14).
+- Phone game screens without the header, question images that fit, review cards, results summary, new game dialog in groups (phase 15).
 
 ### Open
 
@@ -60,8 +60,5 @@ Collected while testing phases 9 to 12. Effort as above.
 | Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
 | Host lobby restructure | Design | M | The lobby screen of the host control (QR code, PIN, players, message box) as one composition around the QR code instead of stacked panels. |
 | Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
-| Phone question layout with an image | Design | M | Image and all answers visible without scrolling. Language and light/dark switches move from the header into a settings menu behind a small floating button on game screens. |
 | Change answers until a deadline | Feature | M | A game mode where players can change their answer until the time is up (or an earlier deadline); the last answer counts, and the speed bonus uses its time or is turned off. |
-| Results page redesign | Design | M | The after-game report as one coherent page with clear UX: summary first, then questions and players. |
-| New game dialog redesign | Design | M | The game settings dialog shown when starting a game, restructured for clarity (groups, summary, sensible defaults). |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |

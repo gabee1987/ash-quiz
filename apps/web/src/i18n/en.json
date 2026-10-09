@@ -2,6 +2,7 @@
   "app": {
     "name": "Quizmoo",
     "language": "Language",
+    "settings": "Settings",
     "mode": "Appearance",
     "modes": {
       "light": "Light",
@@ -151,6 +152,20 @@
         }
       }
     },
+    "shown": {
+      "onScreen": {
+        "reveal": "On the screens: answers revealed",
+        "scoreboard": "On the screens: scoreboard after this question",
+        "shownAgain": "On the screens: shown again"
+      },
+      "answered": "Answered",
+      "right": "Right",
+      "averageTime": "Average time",
+      "fastest": "Fastest right",
+      "seconds": "{{seconds}} s",
+      "noAnswer_one": "{{count}} player did not answer:",
+      "noAnswer_other": "{{count}} players did not answer:"
+    },
     "review": {
       "title": "Review",
       "standings": "Standings",
@@ -197,7 +212,12 @@
       "streakBonusHelp": "Correct answers in a row earn extra points: +100 from the second, up to +500.",
       "shuffle": "Shuffle answer options",
       "submit": "Create game",
-      "changeForGame": "Change settings for this game",
+      "groupsHelp": "The game starts with the quiz's settings. Change any group for this game only.",
+      "change": "Change",
+      "done": "Done",
+      "reset": "Reset",
+      "changedForGame": "Changed for this game",
+      "noBonuses": "No bonuses, fixed order",
       "revealAnswers": "Correct answers",
       "revealAnswersOptions": {
         "afterQuestion": "After each question",
@@ -357,6 +377,7 @@
     "resultsAtEnd": "Correct answers are revealed at the end of the game.",
     "backToHome": "Back to home",
     "yourAnswers": "Your answers",
+    "voted": "Voted",
     "yourAnswer": "Your answer",
     "resultsComing": "The results will be shown soon.",
     "movedUp_one": "Up {{count}} place",
@@ -628,6 +649,17 @@
     "noQuestions": "No question has been revealed yet.",
     "questionNumber": "Question {{index}}",
     "correctPercent": "{{percent}}% correct",
+    "correctPercentText": "{{share}} of the players got it right",
+    "summary": {
+      "title": "Summary",
+      "players": "Players",
+      "questions": "Questions",
+      "averageCorrect": "Right on average",
+      "averageTime": "Average answer time",
+      "seconds": "{{seconds}} s",
+      "easiest": "Easiest question",
+      "hardest": "Hardest question"
+    },
     "answered_one": "{{answered}} of {{count}} answered",
     "answered_other": "{{answered}} of {{count}} answered",
     "averageTime": "Average time: {{seconds}} s",

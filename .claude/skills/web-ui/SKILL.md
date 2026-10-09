@@ -46,6 +46,8 @@ Answer options are identified by index. Their colours come from the game's answe
 ## Mobile first
 
 - Phone layout is the default; the screen view is the exception. Touch targets at least 48 px high. Answer buttons fill the width and the lower half of the viewport.
+- `/play/*` has no `AppHeader`: the root layout shows `GameMenu` instead (a fixed round button top right with the language and colour mode). Keep the top right corner of phone game screens free, or give the element `pr-12` / `mr-12`.
+- A question image on the phone sits in a `flex-3` box (absolutely positioned `img`, `max-h-full`, `object-contain`, `min-h-28`) next to the answers' `flex-2` box, so image and answers fit the screen together.
 - Use `100dvh` based layouts, `viewport-fit=cover` safe-area padding, no horizontal scroll, no hover-only affordances.
 - Forms: `inputMode="numeric"` for the PIN, `autoComplete="off"`, `enterKeyHint`.
 - A persistent thin status bar shows connection state when it is not `connected`, using `errors.connectionLost`.
