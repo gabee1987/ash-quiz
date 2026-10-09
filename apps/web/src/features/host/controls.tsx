@@ -1,4 +1,4 @@
-import type { HostCommand, HostSnapshot } from '@ash-quiz/shared'
+import type { HostCommand, HostSnapshot } from '@quizmoo/shared'
 import { WifiOffIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'

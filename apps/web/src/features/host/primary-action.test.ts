@@ -1,4 +1,4 @@
-import type { GameSettings, HostSnapshot } from '@ash-quiz/shared'
+import type { GameSettings, HostSnapshot } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { alternativeAction, primaryAction, reconnectingCount } from './primary-action'
 

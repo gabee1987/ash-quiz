@@ -6,7 +6,7 @@ import {
   type AnswerPalette,
   type AnswerSymbols,
   type GameSettings,
-} from '@ash-quiz/shared'
+} from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
 import { XIcon } from 'lucide-react'
 import { useId, useState, type ReactNode } from 'react'

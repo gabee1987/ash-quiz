@@ -8,5 +8,5 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   // Workspace packages are plain TypeScript sources, so bundle them in.
-  noExternal: ['@ash-quiz/shared'],
+  noExternal: ['@quizmoo/shared'],
 })

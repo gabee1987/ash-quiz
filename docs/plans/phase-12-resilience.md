@@ -73,7 +73,7 @@ apps/server/scripts/load-test.ts                   asserts seq monotonic per pla
 ## Verification command
 
 ```powershell
-pnpm verify; $env:TEST_DATABASE_URL="postgres://ashquiz:ashquiz@localhost:5432/ashquiz"; pnpm --filter @ash-quiz/server test
+pnpm verify; $env:TEST_DATABASE_URL="postgres://quizmoo:quizmoo@localhost:5432/quizmoo"; pnpm --filter @quizmoo/server test
 docker compose up -d --build --wait
 $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 $env:LOAD_TEST_USERNAME="admin"; $env:LOAD_TEST_PASSWORD="..."; pnpm load-test --players 60 --flap 0.3

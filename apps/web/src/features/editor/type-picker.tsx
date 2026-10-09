@@ -1,4 +1,4 @@
-import { questionTypes, type QuestionType } from '@ash-quiz/shared'
+import { questionTypes, type QuestionType } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowDownWideNarrowIcon,

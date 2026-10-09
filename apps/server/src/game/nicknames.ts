@@ -1,4 +1,4 @@
-import type { NicknameLanguage } from '@ash-quiz/shared'
+import type { NicknameLanguage } from '@quizmoo/shared'
 
 /** "Surprise me" names used until an admin saves a list for the language. Each passes the name filter. */
 export const defaultNicknames: Record<NicknameLanguage, string[]> = {

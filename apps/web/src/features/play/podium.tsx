@@ -1,4 +1,4 @@
-import type { PlayerQuestionResult, PlayerSnapshot } from '@ash-quiz/shared'
+import type { PlayerQuestionResult, PlayerSnapshot } from '@quizmoo/shared'
 import { Link } from '@tanstack/react-router'
 import { TrophyIcon } from 'lucide-react'
 import { useEffect } from 'react'

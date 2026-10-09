@@ -1,16 +1,19 @@
+# Fixed project name, so the containers and the database volume keep their names whatever the folder is called.
+name: quizmoo
+
 services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: ashquiz
-      POSTGRES_PASSWORD: ashquiz
-      POSTGRES_DB: ashquiz
+      POSTGRES_USER: quizmoo
+      POSTGRES_PASSWORD: quizmoo
+      POSTGRES_DB: quizmoo
     ports:
       - "5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ashquiz"]
+      test: ["CMD-SHELL", "pg_isready -U quizmoo"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -23,7 +26,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://ashquiz:ashquiz@db:5432/ashquiz
+      DATABASE_URL: postgres://quizmoo:quizmoo@db:5432/quizmoo
       SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env}
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
       RESULTS_RETENTION_DAYS: ${RESULTS_RETENTION_DAYS:-90}

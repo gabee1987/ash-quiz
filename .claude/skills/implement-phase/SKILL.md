@@ -1,12 +1,12 @@
 ---
 name: implement-phase
-description: Entry point for implementing one ASH Quiz phase from docs/plans. Use when asked to implement, continue or finish a phase (e.g. "/implement-phase 3"). Loads the plan, the relevant domain skills, drives the work to a verified state and produces the delivery report.
+description: Entry point for implementing one Quizmoo phase from docs/plans. Use when asked to implement, continue or finish a phase (e.g. "/implement-phase 3"). Loads the plan, the relevant domain skills, drives the work to a verified state and produces the delivery report.
 argument-hint: <phase number>
 ---
 
 # Implement a phase
 
-You are implementing one phase of ASH Quiz. The phase number is `$ARGUMENTS`.
+You are implementing one phase of Quizmoo. The phase number is `$ARGUMENTS`.
 
 ## Before writing code
 

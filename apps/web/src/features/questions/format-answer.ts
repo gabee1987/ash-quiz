@@ -1,4 +1,4 @@
-import type { Answer, PublicQuestion, Question } from '@ash-quiz/shared'
+import type { Answer, PublicQuestion, Question } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
 
 /** A player's answer as readable text: option texts, true/false, the typed text or the number. */

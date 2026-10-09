@@ -1,4 +1,4 @@
-import type { Announcement } from '@ash-quiz/shared'
+import type { Announcement } from '@quizmoo/shared'
 import { MegaphoneIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'

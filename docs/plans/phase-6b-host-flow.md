@@ -36,7 +36,7 @@ Out: results history and projector summary (phase 7).
 ## Verification command
 
 ```powershell
-pnpm verify; $env:TEST_DATABASE_URL="postgres://ashquiz:ashquiz@localhost:5432/ashquiz"; pnpm --filter @ash-quiz/server test
+pnpm verify; $env:TEST_DATABASE_URL="postgres://quizmoo:quizmoo@localhost:5432/quizmoo"; pnpm --filter @quizmoo/server test
 ```
 
 ## Deviations

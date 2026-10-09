@@ -4,7 +4,7 @@ import type {
   PlayerAnswer,
   PlayerSnapshot,
   ServerToClientEvents,
-} from '@ash-quiz/shared'
+} from '@quizmoo/shared'
 import { useSyncExternalStore } from 'react'
 import { io, type Socket } from 'socket.io-client'
 

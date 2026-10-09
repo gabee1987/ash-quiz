@@ -1,4 +1,4 @@
-import type { GameHostInfo, HostCommand, HostSnapshot } from '@ash-quiz/shared'
+import type { GameHostInfo, HostCommand, HostSnapshot } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { MonitorIcon, TrophyIcon } from 'lucide-react'

@@ -1,4 +1,4 @@
-import type { GameSettings } from '@ash-quiz/shared'
+import type { GameSettings } from '@quizmoo/shared'
 import type { GameQuiz } from './types.js'
 
 /** One question of each type with deterministic ids, 20 s and 1000 points each. */

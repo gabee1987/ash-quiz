@@ -1,4 +1,4 @@
-import type { Question, QuestionType } from '@ash-quiz/shared'
+import type { Question, QuestionType } from '@quizmoo/shared'
 
 /**
  * Short random id for new questions and options. getRandomValues works on plain

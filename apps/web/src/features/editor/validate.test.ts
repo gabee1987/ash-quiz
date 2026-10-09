@@ -1,4 +1,4 @@
-import { gameSettingsSchema, type QuizInput } from '@ash-quiz/shared'
+import { gameSettingsSchema, type QuizInput } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { copyQuestion, move, newQuestion } from './draft'
 import { errorsUnder, locateProblem, validateQuiz } from './validate'

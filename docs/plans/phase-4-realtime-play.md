@@ -71,7 +71,7 @@ apps/web/src/components/*.tsx                  Button, OptionButton, Timer, Spin
 ## Verification command
 
 ```
-pnpm verify && TEST_DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashquiz pnpm --filter @ash-quiz/server exec vitest run test/realtime.test.ts test/games.test.ts
+pnpm verify && TEST_DATABASE_URL=postgres://quizmoo:quizmoo@localhost:5432/quizmoo pnpm --filter @quizmoo/server exec vitest run test/realtime.test.ts test/games.test.ts
 ```
 
 ## Manual test list (draft)

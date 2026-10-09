@@ -1,6 +1,6 @@
-import type { Announcement, Answer, Avatar, GamePhase, GameSettings, Quiz } from '@ash-quiz/shared'
+import type { Announcement, Answer, Avatar, GamePhase, GameSettings, Quiz } from '@quizmoo/shared'
 
-export { MAX_PLAYERS } from '@ash-quiz/shared'
+export { MAX_PLAYERS } from '@quizmoo/shared'
 
 export interface PlayerAnswerRecord {
   answer: Answer

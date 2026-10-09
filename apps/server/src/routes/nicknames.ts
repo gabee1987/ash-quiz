@@ -1,4 +1,4 @@
-import { nicknameLanguages, nicknameListSchema, pinSchema, type NicknameLanguage } from '@ash-quiz/shared'
+import { nicknameLanguages, nicknameListSchema, pinSchema, type NicknameLanguage } from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'

@@ -1,4 +1,4 @@
-import type { PlayerSnapshot } from '@ash-quiz/shared'
+import type { PlayerSnapshot } from '@quizmoo/shared'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

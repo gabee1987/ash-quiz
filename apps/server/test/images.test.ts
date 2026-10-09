@@ -7,7 +7,7 @@ import { describeDb, withTestDb } from './helpers/test-db.js'
 
 /** A multipart/form-data body with one file field, as a browser would send it. */
 function multipart(filename: string, mime: string, data: Buffer) {
-  const boundary = '----ashquiz-test-boundary'
+  const boundary = '----quizmoo-test-boundary'
   const head = Buffer.from(
     `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: ${mime}\r\n\r\n`,
   )

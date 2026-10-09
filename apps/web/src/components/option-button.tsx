@@ -1,4 +1,4 @@
-import type { AnswerSymbols } from '@ash-quiz/shared'
+import type { AnswerSymbols } from '@quizmoo/shared'
 import { Loader2Icon } from 'lucide-react'
 import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/lib/cn'

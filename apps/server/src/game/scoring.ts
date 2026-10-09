@@ -1,4 +1,4 @@
-import type { Answer, Question } from '@ash-quiz/shared'
+import type { Answer, Question } from '@quizmoo/shared'
 import { normalise } from './normalise.js'
 
 /**

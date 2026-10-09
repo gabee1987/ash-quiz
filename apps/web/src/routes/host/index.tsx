@@ -1,4 +1,4 @@
-import type { GameSettings, Quiz } from '@ash-quiz/shared'
+import type { GameSettings, Quiz } from '@quizmoo/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'

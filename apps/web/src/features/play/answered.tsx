@@ -1,4 +1,4 @@
-import type { PlayerSnapshot } from '@ash-quiz/shared'
+import type { PlayerSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon } from '../../components/icons'
 import { WaitingDots } from '../../components/waiting-dots'

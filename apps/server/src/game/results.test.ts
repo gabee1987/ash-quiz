@@ -1,4 +1,4 @@
-import type { Answer, GameSettings } from '@ash-quiz/shared'
+import type { Answer, GameSettings } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { createGame, endGame, endQuestion, joinPlayer, next, startGame, submitAnswer } from './engine.js'
 import { fixtureQuiz, fixtureSettings } from './fixtures.js'

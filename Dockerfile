@@ -14,7 +14,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 # Production dependencies of the server only (the shared package is bundled into dist).
-RUN pnpm --filter @ash-quiz/server deploy --prod --legacy /out
+RUN pnpm --filter @quizmoo/server deploy --prod --legacy /out
 
 FROM node:22-alpine
 ENV NODE_ENV=production

@@ -1,5 +1,5 @@
 {
-  "name": "ash-quiz",
+  "name": "quizmoo",
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@12.9.1",
@@ -12,8 +12,8 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "verify": "pnpm typecheck && pnpm test && pnpm build",
-    "e2e": "pnpm --filter @ash-quiz/web e2e",
-    "load-test": "pnpm --filter @ash-quiz/server exec tsx scripts/load-test.ts",
+    "e2e": "pnpm --filter @quizmoo/web e2e",
+    "load-test": "pnpm --filter @quizmoo/server exec tsx scripts/load-test.ts",
     "db:up": "docker compose up -d db"
   }
 }

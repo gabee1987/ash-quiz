@@ -1,6 +1,6 @@
 # Deployment
 
-ASH Quiz runs as one Node process (API, Socket.IO and the web app on the same origin) plus one PostgreSQL database. The `Dockerfile` in the repository root builds that process; database migrations run automatically when the container starts.
+Quizmoo runs as one Node process (API, Socket.IO and the web app on the same origin) plus one PostgreSQL database. The `Dockerfile` in the repository root builds that process; database migrations run automatically when the container starts.
 
 > **Compliance note.** Railway and Render are third-party cloud services. Before using either for a government or client project, the hosting provider, its data location (EU region) and its sub-processors require a compliance review (GDPR, NIS2, ISO 27001 controls). The laptop/LAN option keeps all data on hardware under your control.
 
@@ -19,7 +19,7 @@ ASH Quiz runs as one Node process (API, Socket.IO and the web app on the same or
 
 The seed script is idempotent: it creates the admin if missing and a sample quiz if the admin has none.
 
-- Local development: `SEED_ADMIN_USERNAME=admin SEED_ADMIN_PASSWORD=<password> pnpm --filter @ash-quiz/server seed`
+- Local development: `SEED_ADMIN_USERNAME=admin SEED_ADMIN_PASSWORD=<password> pnpm --filter @quizmoo/server seed`
 - Inside the Docker image (any host): `node apps/server/dist/seed.js` with both variables set.
 
 ## Railway

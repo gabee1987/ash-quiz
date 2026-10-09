@@ -4,7 +4,7 @@
 ;(function () {
   var mode = 'system'
   try {
-    mode = localStorage.getItem('ash-quiz.mode') || 'system'
+    mode = localStorage.getItem('quizmoo.mode') || 'system'
   } catch (e) {}
   var dark = mode === 'dark' || (mode !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
   document.documentElement.dataset.mode = dark ? 'dark' : 'light'

@@ -1,4 +1,4 @@
-import { fallbackAvatar, streakBonusFor, type Answer, type Avatar, type GameSettings, type Question } from '@ash-quiz/shared'
+import { fallbackAvatar, streakBonusFor, type Answer, type Avatar, type GameSettings, type Question } from '@quizmoo/shared'
 import { isNameAllowed } from './names.js'
 import { isCorrect, pointsFor } from './scoring.js'
 import {

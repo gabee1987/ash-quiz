@@ -1,4 +1,4 @@
-import type { GameResults, ResultQuestion } from '@ash-quiz/shared'
+import type { GameResults, ResultQuestion } from '@quizmoo/shared'
 import { ChevronLeftIcon, ChevronRightIcon, PauseIcon, PlayIcon } from 'lucide-react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -27,7 +27,7 @@ type InjectResponse = { cookies: { name: string; value: string }[] }
 
 /** `cookie` header value carrying the session cookie from a login response. */
 export function sessionCookie(res: InjectResponse): string {
-  const cookie = res.cookies.find((c) => c.name === 'ash_session')
+  const cookie = res.cookies.find((c) => c.name === 'quizmoo_session')
   if (!cookie) throw new Error('no session cookie in response')
-  return `ash_session=${cookie.value}`
+  return `quizmoo_session=${cookie.value}`
 }

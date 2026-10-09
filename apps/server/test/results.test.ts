@@ -121,7 +121,7 @@ describeDb('results routes and retention (database)', () => {
     expect(res.statusCode).toBe(200)
     expect(res.headers['content-type']).toBe('text/csv; charset=utf-8')
     expect(res.headers['content-disposition']).toMatch(
-      new RegExp(`^attachment; filename="ash-quiz-${pin}-\\d{4}-\\d{2}-\\d{2}\\.csv"$`),
+      new RegExp(`^attachment; filename="quizmoo-${pin}-\\d{4}-\\d{2}-\\d{2}\\.csv"$`),
     )
     expect(res.rawPayload.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]))
     expect(res.body.split('\r\n')[0]).toBe('﻿Rank;Name;Team;Total;1. Capital of Hungary?')

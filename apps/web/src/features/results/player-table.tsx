@@ -1,4 +1,4 @@
-import type { ResultPlayer, TeamPublic } from '@ash-quiz/shared'
+import type { ResultPlayer, TeamPublic } from '@quizmoo/shared'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlayerAvatar } from '../../components/player-avatar'

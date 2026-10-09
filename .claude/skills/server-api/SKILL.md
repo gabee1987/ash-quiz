@@ -24,7 +24,7 @@ apps/server/src
 
 ## Routes
 
-All under `/api`. JSON in, JSON out. Bodies and params are parsed with Zod schemas from `@ash-quiz/shared` where one exists, otherwise a local schema in the route file. A parse failure returns `400 { error: 'errors.invalidInput', issues }`.
+All under `/api`. JSON in, JSON out. Bodies and params are parsed with Zod schemas from `@quizmoo/shared` where one exists, otherwise a local schema in the route file. A parse failure returns `400 { error: 'errors.invalidInput', issues }`.
 
 Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid input, 401 not logged in, 403 not owner, 404 not found, 409 conflict (e.g. username taken), 429 rate limited.
 
@@ -57,7 +57,7 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 ## Auth and sessions
 
 - Passwords hashed with `@node-rs/argon2` (defaults). Minimum length 10, no other complexity rules.
-- Session token: 32 random bytes, base64url, in an `httpOnly`, `sameSite=lax`, `secure` (production) cookie named `ash_session`, 30 days. The DB stores the SHA-256 of the token.
+- Session token: 32 random bytes, base64url, in an `httpOnly`, `sameSite=lax`, `secure` (production) cookie named `quizmoo_session`, 30 days. The DB stores the SHA-256 of the token.
 - `requireSession` preHandler loads the user onto `request.user`. Expired sessions are deleted on sight.
 - Login is rate limited to 10 attempts per minute per IP. Failed login returns `401 { error: 'errors.invalidCredentials' }` regardless of whether the user exists.
 - Users are created by the seed script or by an admin via `POST /api/users` (admin only, phase 6). No self-registration.
@@ -65,7 +65,7 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 
 ## Database
 
-- Drizzle with the `postgres` driver. Schema in `db/schema.ts`, migrations generated with `pnpm --filter @ash-quiz/server db:generate` into `apps/server/drizzle/`, applied with `db:migrate`. Never edit a generated migration that has been applied; add a new one.
+- Drizzle with the `postgres` driver. Schema in `db/schema.ts`, migrations generated with `pnpm --filter @quizmoo/server db:generate` into `apps/server/drizzle/`, applied with `db:migrate`. Never edit a generated migration that has been applied; add a new one.
 - Migrations run automatically at server start in production (`migrate()` from `drizzle-orm/postgres-js/migrator`) so Railway/Render deploys need no extra step.
 - Queries live in the route or manager that uses them. No repository layer.
 - JSON columns are typed with `$type<>()` from shared types and validated with Zod on write.

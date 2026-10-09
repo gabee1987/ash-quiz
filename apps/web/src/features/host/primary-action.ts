@@ -1,4 +1,4 @@
-import type { HostCommand, HostSnapshot } from '@ash-quiz/shared'
+import type { HostCommand, HostSnapshot } from '@quizmoo/shared'
 
 export interface PrimaryAction {
   command: HostCommand

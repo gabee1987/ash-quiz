@@ -1,4 +1,4 @@
-import type { Answer, GameSettings, Question } from '@ash-quiz/shared'
+import type { Answer, GameSettings, Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import {
   announce,

@@ -56,7 +56,7 @@ test('admin edits the Surprise me names and a phone gets one of them', async ({ 
 
     await test.step('Surprise me on a phone picks from the list, and waits for the PIN', async () => {
       const phone = await (await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, locale: 'en-US' })).newPage()
-      await phone.addInitScript(() => localStorage.setItem('ash-quiz.lang', 'en'))
+      await phone.addInitScript(() => localStorage.setItem('quizmoo.lang', 'en'))
       await phone.goto('/')
       await expect(phone.getByRole('button', { name: 'Surprise me' })).toBeDisabled()
       await phone.getByRole('button', { name: 'OK', exact: true }).click()

@@ -1,4 +1,4 @@
-import type { Avatar, GamePublicInfo } from '@ash-quiz/shared'
+import type { Avatar, GamePublicInfo } from '@quizmoo/shared'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { CameraIcon, CheckIcon, DicesIcon, Loader2Icon, PlayIcon } from 'lucide-react'

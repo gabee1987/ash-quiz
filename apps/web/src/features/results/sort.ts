@@ -1,4 +1,4 @@
-import type { ResultPlayer } from '@ash-quiz/shared'
+import type { ResultPlayer } from '@quizmoo/shared'
 
 export type SortKey = 'score' | 'name'
 export type SortDirection = 'asc' | 'desc'

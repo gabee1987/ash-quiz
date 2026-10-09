@@ -1,4 +1,4 @@
-import { nicknameListSchema } from '@ash-quiz/shared'
+import { nicknameListSchema } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { isNameAllowed } from './names.js'
 import { defaultNicknames, pickNickname } from './nicknames.js'

@@ -1,4 +1,4 @@
-import type { Question } from '@ash-quiz/shared'
+import type { Question } from '@quizmoo/shared'
 import { DndContext, DragOverlay, closestCenter, type UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'

@@ -1,4 +1,4 @@
-import type { AnswerSymbols, Question } from '@ash-quiz/shared'
+import type { AnswerSymbols, Question } from '@quizmoo/shared'
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Label } from '@/components/ui/label'

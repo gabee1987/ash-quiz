@@ -1,4 +1,4 @@
-import type { ResultPlayer } from '@ash-quiz/shared'
+import type { ResultPlayer } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { sortPlayers, toggleSort } from './sort'
 

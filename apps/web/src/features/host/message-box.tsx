@@ -1,4 +1,4 @@
-import type { Announcement, HostCommand } from '@ash-quiz/shared'
+import type { Announcement, HostCommand } from '@quizmoo/shared'
 import { MegaphoneIcon, SendIcon, XIcon } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'

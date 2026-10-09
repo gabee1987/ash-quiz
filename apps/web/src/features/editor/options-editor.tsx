@@ -1,4 +1,4 @@
-import type { AnswerSymbols, Option } from '@ash-quiz/shared'
+import type { AnswerSymbols, Option } from '@quizmoo/shared'
 import { DndContext, closestCenter, type UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'

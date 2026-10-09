@@ -1,4 +1,4 @@
-import type { GameSettings } from '@ash-quiz/shared'
+import type { GameSettings } from '@quizmoo/shared'
 import { ChevronDownIcon, PlayIcon } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'

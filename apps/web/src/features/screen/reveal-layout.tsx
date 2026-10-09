@@ -1,4 +1,4 @@
-import type { AnswerSymbols, Question, RevealInfo } from '@ash-quiz/shared'
+import type { AnswerSymbols, Question, RevealInfo } from '@quizmoo/shared'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DistributionBars } from '../../components/distribution-bars'

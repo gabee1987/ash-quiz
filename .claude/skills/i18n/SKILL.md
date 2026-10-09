@@ -1,6 +1,6 @@
 ---
 name: i18n
-description: Hungarian and English localisation rules for ASH Quiz: key naming, where strings live, server error keys, pluralisation and dates. Load whenever adding or changing any user-visible text on the web or any error code on the server.
+description: Hungarian and English localisation rules for Quizmoo: key naming, where strings live, server error keys, pluralisation and dates. Load whenever adding or changing any user-visible text on the web or any error code on the server.
 ---
 
 # i18n
@@ -30,7 +30,7 @@ t('play.answeredCount', { count: snapshot.answeredCount })
 - Never build sentences from fragments; use interpolation `{{name}}` and `count` pluralisation (`key_one`, `key_other` in both languages).
 - `aria-label` and `title` attributes are translated too.
 - Numbers and dates: `Intl.NumberFormat` / `Intl.DateTimeFormat` with `i18n.language`, never hand-formatted.
-- Language choice persists in `localStorage` (`ash-quiz.lang`) and is set on `<html lang>`.
+- Language choice persists in `localStorage` (`quizmoo.lang`) and is set on `<html lang>`.
 
 ## Tone
 

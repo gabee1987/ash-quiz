@@ -1,4 +1,4 @@
-import { gameSettingsSchema, pinSchema, type GameHostInfo, type GamePublicInfo } from '@ash-quiz/shared'
+import { gameSettingsSchema, pinSchema, type GameHostInfo, type GamePublicInfo } from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'

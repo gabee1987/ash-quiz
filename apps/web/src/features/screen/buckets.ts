@@ -1,4 +1,4 @@
-import type { Question } from '@ash-quiz/shared'
+import type { Question } from '@quizmoo/shared'
 
 export interface Bucket {
   key: string

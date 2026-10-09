@@ -1,4 +1,4 @@
-import { fallbackAvatar, type GameResults, type PodiumPlace, type ResultPlayer, type ResultQuestion } from '@ash-quiz/shared'
+import { fallbackAvatar, type GameResults, type PodiumPlace, type ResultPlayer, type ResultQuestion } from '@quizmoo/shared'
 import { resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
 import { isRevealed, revealInfo } from './snapshots.js'

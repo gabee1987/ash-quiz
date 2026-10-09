@@ -7,7 +7,7 @@ import { quizzes, users } from '../db/schema.js'
 import { fixtureQuiz } from '../game/fixtures.js'
 
 // Idempotent: creates the admin if missing, and a sample quiz if the admin has none.
-// Runs as `pnpm --filter @ash-quiz/server seed` or `node apps/server/dist/seed.js` in the Docker image.
+// Runs as `pnpm --filter @quizmoo/server seed` or `node apps/server/dist/seed.js` in the Docker image.
 
 const config = loadConfig()
 const username = config.SEED_ADMIN_USERNAME

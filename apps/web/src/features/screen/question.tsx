@@ -1,4 +1,4 @@
-import type { HostSnapshot } from '@ash-quiz/shared'
+import type { HostSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { Timer } from '../../components/timer'
 import { stagger } from '../../lib/motion'

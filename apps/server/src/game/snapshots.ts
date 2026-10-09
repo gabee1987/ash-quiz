@@ -12,7 +12,7 @@ import {
   type QuestionStat,
   type RevealInfo,
   type TeamPublic,
-} from '@ash-quiz/shared'
+} from '@quizmoo/shared'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
 import { answersHidden, resultsPendingFor } from './engine.js'

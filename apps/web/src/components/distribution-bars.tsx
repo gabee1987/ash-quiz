@@ -1,4 +1,4 @@
-import type { AnswerSymbols, RevealInfo } from '@ash-quiz/shared'
+import type { AnswerSymbols, RevealInfo } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { toBuckets } from '../features/screen/buckets'

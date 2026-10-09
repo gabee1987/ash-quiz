@@ -1,5 +1,5 @@
 import { pgTable, text, timestamp, jsonb, integer, boolean, customType } from 'drizzle-orm/pg-core'
-import type { GameSettings, Question } from '@ash-quiz/shared'
+import type { GameSettings, Question } from '@quizmoo/shared'
 import type { GameState } from '../game/types.js'
 
 const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' })

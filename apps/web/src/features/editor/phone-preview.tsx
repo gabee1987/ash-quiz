@@ -1,4 +1,4 @@
-import type { GameSettings, Question } from '@ash-quiz/shared'
+import type { GameSettings, Question } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { QuestionInput } from '../questions/question-input'

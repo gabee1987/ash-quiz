@@ -1,4 +1,4 @@
-import { nicknameLanguages, type NicknameLanguage } from '@ash-quiz/shared'
+import { nicknameLanguages, type NicknameLanguage } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { RotateCcwIcon, SaveIcon } from 'lucide-react'

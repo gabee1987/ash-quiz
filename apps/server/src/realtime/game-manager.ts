@@ -1,4 +1,4 @@
-import { gameSettingsSchema, type GameSettings } from '@ash-quiz/shared'
+import { gameSettingsSchema, type GameSettings } from '@quizmoo/shared'
 import { EngineError, createGame, endQuestion, resultsPending, type GameQuiz, type GameState } from '../game/index.js'
 import { generatePin } from './pin.js'
 

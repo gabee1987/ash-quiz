@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New name
+- The app is now called Quizmoo, with a cow as its logo (in the header and as the browser tab icon).
+- Hosts are logged out once after the update, and phones forget their saved language, colour mode and game once.
+
 ### Design
 - New design system: shadcn/ui components on Radix, design tokens for colours, radii and shadows, the Nunito font (served by the app itself), icons.
 - Light, dark and system colour mode on every screen, chosen per device and remembered, applied before the page is drawn (no flash).

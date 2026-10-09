@@ -1,4 +1,4 @@
-import type { GameResults } from '@ash-quiz/shared'
+import type { GameResults } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'

@@ -1,4 +1,4 @@
-import type { ResultQuestion } from '@ash-quiz/shared'
+import type { ResultQuestion } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { DistributionBars } from '../../components/distribution-bars'
 import { CorrectAnswer } from '../questions/correct-answer'

@@ -1,4 +1,4 @@
-import type { PlayerSnapshot } from '@ash-quiz/shared'
+import type { PlayerSnapshot } from '@quizmoo/shared'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2Icon, RotateCcwIcon } from 'lucide-react'
 import { useState } from 'react'

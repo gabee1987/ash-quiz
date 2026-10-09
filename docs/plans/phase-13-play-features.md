@@ -92,7 +92,7 @@ apps/server/scripts/load-test.ts                  unchanged (single choice only)
 ## Verification command
 
 ```powershell
-pnpm verify; $env:TEST_DATABASE_URL="postgres://ashquiz:ashquiz@localhost:5432/ashquiz"; pnpm --filter @ash-quiz/server test
+pnpm verify; $env:TEST_DATABASE_URL="postgres://quizmoo:quizmoo@localhost:5432/quizmoo"; pnpm --filter @quizmoo/server test
 $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 ```
 

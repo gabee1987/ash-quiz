@@ -1,4 +1,4 @@
-import type { PodiumPlace } from '@ash-quiz/shared'
+import type { PodiumPlace } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { PlayerAvatar } from '../../components/player-avatar'
 

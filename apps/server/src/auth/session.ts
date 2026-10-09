@@ -4,7 +4,7 @@ import type { FastifyReply } from 'fastify'
 import type { Db } from '../db/index.js'
 import { sessions, users } from '../db/schema.js'
 
-export const SESSION_COOKIE = 'ash_session'
+export const SESSION_COOKIE = 'quizmoo_session'
 export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
 export interface SessionUser {

@@ -1,5 +1,5 @@
 {
-  "name": "@ash-quiz/server",
+  "name": "@quizmoo/server",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
     "seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts"
   },
   "dependencies": {
-    "@ash-quiz/shared": "workspace:*",
+    "@quizmoo/shared": "workspace:*",
     "@fastify/cookie": "11.1.2",
     "@fastify/helmet": "13.1.1",
     "@fastify/multipart": "10.1.2",

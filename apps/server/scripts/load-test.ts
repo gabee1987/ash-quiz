@@ -2,7 +2,7 @@
  * Load test: one host and N simulated players play a full game over Socket.IO.
  *
  *   $env:LOAD_TEST_USERNAME="admin"; $env:LOAD_TEST_PASSWORD="..."
- *   pnpm --filter @ash-quiz/server exec tsx scripts/load-test.ts --players 60
+ *   pnpm --filter @quizmoo/server exec tsx scripts/load-test.ts --players 60
  *
  * Options: --url (default http://localhost:3000), --players 60, --questions 5, --seconds 12,
  * --flap 0.2 (share of players that drop and reconnect during each question), --keep (keep the
@@ -20,7 +20,7 @@
  * player shows the second. Exits 1 on failure.
  */
 import { parseArgs } from 'node:util'
-import type { ClientToServerEvents, HostCommand, HostSnapshot, PlayerSnapshot, ServerToClientEvents } from '@ash-quiz/shared'
+import type { ClientToServerEvents, HostCommand, HostSnapshot, PlayerSnapshot, ServerToClientEvents } from '@quizmoo/shared'
 import { io, type Socket } from 'socket.io-client'
 
 type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>

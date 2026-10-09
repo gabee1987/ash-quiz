@@ -1,4 +1,4 @@
-import type { HostSnapshot } from '@ash-quiz/shared'
+import type { HostSnapshot } from '@quizmoo/shared'
 import { CrownIcon } from 'lucide-react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -1,4 +1,4 @@
-import { gameSettingsSchema, quizInputSchema, type Question, type QuizInput } from '@ash-quiz/shared'
+import { gameSettingsSchema, quizInputSchema, type Question, type QuizInput } from '@quizmoo/shared'
 import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'

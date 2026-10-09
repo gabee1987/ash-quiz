@@ -1,4 +1,4 @@
-import type { CurrentAnswer, HostSnapshot } from '@ash-quiz/shared'
+import type { CurrentAnswer, HostSnapshot } from '@quizmoo/shared'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'

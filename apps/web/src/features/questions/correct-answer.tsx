@@ -1,4 +1,4 @@
-import type { AnswerSymbols, Question } from '@ash-quiz/shared'
+import type { AnswerSymbols, Question } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { OptionSymbol } from '../../components/icons'

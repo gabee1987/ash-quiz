@@ -42,7 +42,7 @@ const webPort = await freePort(Number(process.env.WEB_PORT ?? 5173))
 const origin = `http://${ip}:${webPort}`
 
 console.log(`
-  ASH Quiz on your local network
+  Quizmoo on your local network
   Players (phones):  ${origin}
   Host login:        ${origin}/login
   Phones must be on the same wifi. If they cannot connect, allow Node.js
@@ -54,8 +54,8 @@ const env = { ...process.env, APP_ORIGIN: origin }
 // Fixed command strings (the port is a number we chose), so running them through the shell is safe.
 const run = (command) => spawn(command, { stdio: 'inherit', shell: true, env })
 const children = [
-  run('pnpm --filter @ash-quiz/server dev'),
-  run(`pnpm --filter @ash-quiz/web exec vite --host 0.0.0.0 --port ${webPort} --strictPort`),
+  run('pnpm --filter @quizmoo/server dev'),
+  run(`pnpm --filter @quizmoo/web exec vite --host 0.0.0.0 --port ${webPort} --strictPort`),
 ]
 for (const child of children) {
   child.on('exit', (code) => {

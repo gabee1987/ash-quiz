@@ -51,7 +51,7 @@ README.md, CHANGELOG.md, docs/event-checklist.md
 ## Verification command
 
 ```
-pnpm verify && pnpm e2e && pnpm --filter @ash-quiz/server exec tsx scripts/load-test.ts --players 60
+pnpm verify && pnpm e2e && pnpm --filter @quizmoo/server exec tsx scripts/load-test.ts --players 60
 ```
 
 ## Manual test list (draft)

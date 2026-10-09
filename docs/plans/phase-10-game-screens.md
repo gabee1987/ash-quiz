@@ -66,7 +66,7 @@ docs/security-notes.md, CHANGELOG.md, .claude/skills/web-ui/SKILL.md (motion rul
 ## Steps
 
 1. **Schema and engine.** Themes, palettes, symbols in the shared schema with defaults; `previousRank` in `snapshots.ts` with tests: lobby (equal to rank), after a question where positions swap, ties, concealed results. Check: `vitest run src/game/snapshots.test.ts` and the server test suite.
-2. **Tokens and keyframes.** Themes computed in `[data-theme]` wrappers, `--chroma`, the four palettes, the keyframes, the button hover lift, the backdrop. Check: `pnpm --filter @ash-quiz/web build`; the editor preview changes colour with the theme.
+2. **Tokens and keyframes.** Themes computed in `[data-theme]` wrappers, `--chroma`, the four palettes, the keyframes, the button hover lift, the backdrop. Check: `pnpm --filter @quizmoo/web build`; the editor preview changes colour with the theme.
 3. **Join screen.** PIN input with tests (typing, backspace moves back, paste of six digits, non-digits ignored), the scanner. Check: `vitest run src/components/pin-input.test.tsx`; manual on a phone over HTTPS.
 4. **Player screens.** Check: manual with two phones; the pending state ends when the ack arrives; the ring and the bar agree.
 5. **Projector screens and the summary.** Check: manual on a 1080p display; 60 names fit the lobby grid (load test); the image shows on the reveal and the summary.
@@ -85,7 +85,7 @@ docs/security-notes.md, CHANGELOG.md, .claude/skills/web-ui/SKILL.md (motion rul
 ## Verification command
 
 ```powershell
-pnpm verify; $env:TEST_DATABASE_URL="postgres://ashquiz:ashquiz@localhost:5432/ashquiz"; pnpm --filter @ash-quiz/server test
+pnpm verify; $env:TEST_DATABASE_URL="postgres://quizmoo:quizmoo@localhost:5432/quizmoo"; pnpm --filter @quizmoo/server test
 docker compose up -d --build --wait
 $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 $env:LOAD_TEST_USERNAME="admin"; $env:LOAD_TEST_PASSWORD="..."; pnpm load-test --players 60

@@ -1,4 +1,4 @@
-import type { Question } from '@ash-quiz/shared'
+import type { Question } from '@quizmoo/shared'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {

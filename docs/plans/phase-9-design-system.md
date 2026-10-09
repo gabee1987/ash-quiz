@@ -22,7 +22,7 @@ Direction: a rounded display font, saturated accents on neutral surfaces, 16 to 
 In:
 - **shadcn/ui base.** `components.json`, `src/components/ui/*` (code copied into the repo, not a runtime dependency), `cn()` helper (`clsx` + `tailwind-merge`), `class-variance-authority`, the needed Radix primitives, `lucide-react` icons. A `@/` path alias for `apps/web` (shadcn requires it). Primitives installed: Button, Card, Input, Label, Textarea, Select, Switch, Checkbox, RadioGroup, Dialog, Sheet, Tabs, Badge, Tooltip, DropdownMenu, Skeleton, Separator, Progress, Sonner (toasts).
 - **Tokens.** All colours, radii, shadows and font families as CSS variables in `styles.css`, exposed to Tailwind through `@theme inline`. Semantic names only (`--background`, `--foreground`, `--card`, `--primary`, `--accent`, `--muted`, `--destructive`, `--success`, `--warning`, `--ring`, `--radius`), plus the six fixed answer-option colours with their on-colours.
-- **Colour mode.** `light`, `dark`, `system`, persisted in localStorage `ash-quiz.mode`, applied as `data-mode` on `<html>` by an inline script in `index.html` before first paint (no flash). A toggle in the header on every screen, including play and screen. The `theme-color` meta follows the mode.
+- **Colour mode.** `light`, `dark`, `system`, persisted in localStorage `quizmoo.mode`, applied as `data-mode` on `<html>` by an inline script in `index.html` before first paint (no flash). A toggle in the header on every screen, including play and screen. The `theme-color` meta follows the mode.
 - **Game themes.** A new quiz setting `theme: 'classic' | 'arcade' | 'sunset' | 'mint'` (shared schema, default `classic`, overridable per game like the other settings). Applied as `data-theme` on the play, screen and host-control routes from the snapshot's settings. Each theme defines its token set for both modes. `classic` reproduces today's indigo look.
 - **Typography.** Nunito (variable, Latin Extended for Hungarian accents) self-hosted via `@fontsource-variable/nunito`. No font CDN: players' phones must not call a third party (data minimisation, GDPR).
 - **Shell.** New root layout: compact header with logo mark, language switch and mode toggle; host area gets a left sidebar on laptop and a bottom tab bar on phone (Quizzes, Games, Users, Account). Login page restyled.
@@ -65,12 +65,12 @@ docs/security-notes.md, CHANGELOG.md
 
 ## Steps
 
-1. **Baseline.** Run `pnpm --filter @ash-quiz/web build` and record the gzip sizes of the entry chunk and the `play.$pin` route chunk in this plan under a "Results" heading. Budget for the phase: at most +60 KB gzip on the player route. Check: numbers recorded.
+1. **Baseline.** Run `pnpm --filter @quizmoo/web build` and record the gzip sizes of the entry chunk and the `play.$pin` route chunk in this plan under a "Results" heading. Budget for the phase: at most +60 KB gzip on the player route. Check: numbers recorded.
 2. **Alias and shadcn init.** Add `@/` to `tsconfig.json` and `vite.config.ts`; `pnpm dlx shadcn@latest init` with Tailwind v4, CSS variables on, neutral base colour; add the primitives listed in scope. Check: `pnpm typecheck` passes.
 3. **Tokens, modes, fonts.** Replace the `@theme` block: semantic tokens with light and dark values under `:root` and `[data-mode="dark"]`, Nunito as `--font-sans`, radii and shadows. Inline no-flash script in `index.html`. `lib/mode.ts` store with `useMode()`; tests for storage, system fallback and the `matchMedia` listener. Check: `vitest run src/lib/mode.test.ts`; toggling in the browser changes every surface with no flash on reload.
 4. **Game themes.** Add `theme` to `gameSettingsSchema` (default `classic`), the four theme token blocks under `[data-theme="..."]` (each overriding only hues so both modes keep working), swatch previews in `lib/themes.ts`, the picker in `game-settings-form.tsx` with `settings.theme.*` i18n keys. Apply `data-theme` on `/play/$pin`, `/screen/$pin` and `/host/games/$pin` from `snapshot.settings.theme`. Check: shared and server settings tests pass; a quiz saved before this phase loads as `classic`.
 5. **Shell.** `app-header.tsx`, `host-nav.tsx` (sidebar at `lg:` and up, bottom tab bar below), root and host layouts. Check: manual at 375 px and 1280 px widths; keyboard navigation reaches every link.
-6. **Restyle host pages.** Login, quiz list (cards with title, question count, mode badge, actions in a dropdown), history (table on laptop, cards on phone), results, users, password. Replace `button.tsx`, `text-field.tsx`, `dialog.tsx` with thin wrappers over `ui/*` or delete them and update the imports. Check: `pnpm --filter @ash-quiz/web test`; manual pass of every host page in both modes.
+6. **Restyle host pages.** Login, quiz list (cards with title, question count, mode badge, actions in a dropdown), history (table on laptop, cards on phone), results, users, password. Replace `button.tsx`, `text-field.tsx`, `dialog.tsx` with thin wrappers over `ui/*` or delete them and update the imports. Check: `pnpm --filter @quizmoo/web test`; manual pass of every host page in both modes.
 7. **Restyle join, host control and the editor forms with primitives,** keeping their structure. Game-phase screens get only tokens and font. Check: play a two-phone game end to end in both modes.
 8. **Toasts.** Mount `<Toaster>` in the root; `useMutation` error handlers show `t(error.code)`. Check: a failed login shows a toast; a failed quiz save shows a toast and keeps the draft.
 9. **Accessibility pass.** `a11y.e2e.ts` runs axe on login, quiz list, join, play lobby and projector lobby in both modes and fails on serious or critical violations. Check: `pnpm e2e` passes.
@@ -89,7 +89,7 @@ docs/security-notes.md, CHANGELOG.md
 ## Verification command
 
 ```powershell
-pnpm verify; $env:TEST_DATABASE_URL="postgres://ashquiz:ashquiz@localhost:5432/ashquiz"; pnpm --filter @ash-quiz/server test
+pnpm verify; $env:TEST_DATABASE_URL="postgres://quizmoo:quizmoo@localhost:5432/quizmoo"; pnpm --filter @quizmoo/server test
 docker compose up -d --build --wait
 $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 $env:LOAD_TEST_USERNAME="admin"; $env:LOAD_TEST_PASSWORD="..."; pnpm load-test --players 60

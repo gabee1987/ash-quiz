@@ -1,4 +1,4 @@
-import type { AnswerSymbols } from '@ash-quiz/shared'
+import type { AnswerSymbols } from '@quizmoo/shared'
 import { CloudIcon, HeartIcon, MoonIcon, StarIcon, SunIcon, ZapIcon } from 'lucide-react'
 
 // Answer shapes by option index, so colour is never the only signal.

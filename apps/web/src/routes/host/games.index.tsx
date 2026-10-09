@@ -1,4 +1,4 @@
-import type { GameHistoryItem } from '@ash-quiz/shared'
+import type { GameHistoryItem } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { BarChart3Icon, GamepadIcon, HistoryIcon, Trash2Icon } from 'lucide-react'

@@ -1,4 +1,4 @@
-import { answerPalettes, answerSymbols, gameThemes, type GameSettings, type GameTheme } from '@ash-quiz/shared'
+import { answerPalettes, answerSymbols, gameThemes, type GameSettings, type GameTheme } from '@quizmoo/shared'
 import { useEffect } from 'react'
 
 export { answerPalettes, answerSymbols, gameThemes }

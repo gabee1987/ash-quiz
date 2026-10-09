@@ -1,4 +1,4 @@
-import type { PlayerPublic, PlayerSnapshot, TeamPublic } from '@ash-quiz/shared'
+import type { PlayerPublic, PlayerSnapshot, TeamPublic } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { CountUp } from '../../components/count-up'

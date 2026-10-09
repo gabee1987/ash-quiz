@@ -84,7 +84,7 @@ describe('app', () => {
   })
 
   it('rate limits the API but not page loads (phones behind one venue IP fetch many assets)', async () => {
-    const webDist = mkdtempSync(path.join(tmpdir(), 'ash-quiz-web-'))
+    const webDist = mkdtempSync(path.join(tmpdir(), 'quizmoo-web-'))
     mkdirSync(path.join(webDist, 'assets'))
     writeFileSync(path.join(webDist, 'index.html'), '<!doctype html><title>test</title>')
     writeFileSync(path.join(webDist, 'assets', 'index.js'), 'export {}')

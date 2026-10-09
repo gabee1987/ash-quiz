@@ -1,4 +1,4 @@
-import type { HostSnapshot, PlayerPublic } from '@ash-quiz/shared'
+import type { HostSnapshot, PlayerPublic } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { useNow } from '../../lib/clock'

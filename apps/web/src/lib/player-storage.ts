@@ -1,4 +1,4 @@
-import { avatars, type Avatar } from '@ash-quiz/shared'
+import { avatars, type Avatar } from '@quizmoo/shared'
 
 // The player's token per game PIN, so a reload or a reopened browser rejoins as the same player.
 
@@ -9,7 +9,7 @@ export interface StoredPlayer {
   avatar?: Avatar
 }
 
-const key = (pin: string) => `ash-quiz.player.${pin}`
+const key = (pin: string) => `quizmoo.player.${pin}`
 
 export function getStoredPlayer(pin: string): StoredPlayer | null {
   try {

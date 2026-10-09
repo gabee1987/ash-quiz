@@ -31,7 +31,7 @@ apps/server/src/auth/session.ts              create, verify, destroy, cookie hel
 apps/server/src/auth/require-session.ts      preHandler
 apps/server/src/routes/auth.ts
 apps/server/src/routes/quizzes.ts
-apps/server/src/scripts/seed.ts              pnpm --filter @ash-quiz/server seed
+apps/server/src/scripts/seed.ts              pnpm --filter @quizmoo/server seed
 apps/server/src/migrate.ts                   runMigrations(db)
 apps/server/test/helpers/test-db.ts          creates a schema per test file, drops after
 apps/server/test/auth.test.ts
@@ -46,14 +46,14 @@ Dockerfile, .dockerignore, docs/deploy.md
 ## Steps
 
 1. **Config.** Add `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` (optional), `RESULTS_RETENTION_DAYS` (default 90) to `config.ts` and `.env.example`. Check: typecheck.
-2. **Migrations.** Run `db:generate`, review the SQL, add `runMigrations` and call it from `index.ts` when `NODE_ENV=production`. Check: `pnpm db:up && pnpm --filter @ash-quiz/server db:migrate` creates the tables (`psql` or Drizzle Studio not required; a quick `SELECT` via a one-off `tsx` script is fine).
+2. **Migrations.** Run `db:generate`, review the SQL, add `runMigrations` and call it from `index.ts` when `NODE_ENV=production`. Check: `pnpm db:up && pnpm --filter @quizmoo/server db:migrate` creates the tables (`psql` or Drizzle Studio not required; a quick `SELECT` via a one-off `tsx` script is fine).
 3. **Test DB helper.** `withTestDb()` creates schema `test_<random>`, runs migrations into it using `search_path`, returns `db` and a `cleanup`. Skips the suite with a visible message when `TEST_DATABASE_URL` is unset. Check: a trivial test inserts and reads a user.
 4. **Dependency injection.** `buildApp(config, { db })`. Update `app.test.ts` to pass a stub `db` object (it does not query). Check: existing tests pass.
 5. **Password and session.** Per the `server-api` skill. Tests: hash verifies, wrong password fails, session round trip, expired session rejected and deleted. Check: `vitest run test/auth.test.ts`.
 6. **Auth routes.** Login, logout, me. Login rate limit 10/min per IP via `@fastify/rate-limit` route config. Tests: wrong password 401 with `errors.invalidCredentials`, correct login sets cookie and `me` returns the user, logout clears, 11th attempt in a minute is 429. Check: tests.
 7. **Quiz routes.** CRUD with `quizInputSchema`, ids assigned with `nanoid(8)` where missing, owner-only access. Tests: create returns id, list shows only own quizzes (two users), get/put/delete by non-owner is 403, invalid body is 400 with `issues`. Check: `vitest run test/quizzes.test.ts`.
 8. **Seed script.** Idempotent: creates admin if missing, creates the fixture quiz if the admin has no quizzes. Refuses to run without both env vars. Check: run twice, second run reports "nothing to do".
-9. **Web login and host list.** `apiFetch`, `/login` form with translated validation and error display, `/host` layout guard using a `me` query and `redirect` to `/login`, `/host` list page with logout. i18n keys under `auth.*`, `host.*`, `common.*` in both languages. Check: `pnpm --filter @ash-quiz/web typecheck`, manual test.
+9. **Web login and host list.** `apiFetch`, `/login` form with translated validation and error display, `/host` layout guard using a `me` query and `redirect` to `/login`, `/host` list page with logout. i18n keys under `auth.*`, `host.*`, `common.*` in both languages. Check: `pnpm --filter @quizmoo/web typecheck`, manual test.
 10. **Docker.** Multi-stage Dockerfile: install with pnpm, build web and server, final image `node:22-alpine` with `apps/server/dist`, `apps/web/dist`, production `node_modules` only (`pnpm deploy --prod` or `--filter` install). `CMD node apps/server/dist/index.js`. Compose `app` service depends on `db`. Check: `docker compose up --build` serves the login page on `http://localhost:3000` and login works.
 11. **Deploy doc.** `docs/deploy.md`: Railway (service from Dockerfile + Postgres plugin, env vars, `APP_ORIGIN`), Render (web service + Postgres, note the free-tier spin-down), laptop LAN (`docker compose up`, find the laptop IP, phones use `http://<ip>:3000`, note that the QR must use that origin). Check: read-through only.
 12. **CI.** Confirm `.github/workflows/ci.yml` runs the DB tests with `TEST_DATABASE_URL` (already set there). Check: `pnpm verify` locally with the env var set.
@@ -68,12 +68,12 @@ Dockerfile, .dockerignore, docs/deploy.md
 ## Verification command
 
 ```
-pnpm verify && TEST_DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashquiz pnpm --filter @ash-quiz/server test
+pnpm verify && TEST_DATABASE_URL=postgres://quizmoo:quizmoo@localhost:5432/quizmoo pnpm --filter @quizmoo/server test
 ```
 
 ## Manual test list (draft)
 
-1. `pnpm db:up`, `pnpm --filter @ash-quiz/server db:migrate`, then seed with `SEED_ADMIN_USERNAME=admin SEED_ADMIN_PASSWORD=<10+ chars>`. Expect "created admin" and "created sample quiz".
+1. `pnpm db:up`, `pnpm --filter @quizmoo/server db:migrate`, then seed with `SEED_ADMIN_USERNAME=admin SEED_ADMIN_PASSWORD=<10+ chars>`. Expect "created admin" and "created sample quiz".
 2. `pnpm dev`, open `http://localhost:5173/host` on the laptop. Expect redirect to `/login`.
 3. Log in with a wrong password. Expect a translated error, no redirect.
 4. Log in correctly. Expect the quiz list with the sample quiz and its question count.

@@ -5,7 +5,7 @@ export const modes = ['light', 'dark', 'system'] as const
 export type Mode = (typeof modes)[number]
 export type ResolvedMode = 'light' | 'dark'
 
-export const MODE_STORAGE_KEY = 'ash-quiz.mode'
+export const MODE_STORAGE_KEY = 'quizmoo.mode'
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 /** Browser chrome colour per mode; the page background at the top of the screen. */
 const THEME_COLOURS: Record<ResolvedMode, string> = { light: '#f3f1fb', dark: '#1d1442' }

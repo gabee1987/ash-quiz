@@ -1,4 +1,4 @@
-import type { Answer, AnswerSymbols, PublicQuestion } from '@ash-quiz/shared'
+import type { Answer, AnswerSymbols, PublicQuestion } from '@quizmoo/shared'
 import { MultipleChoice } from './multiple-choice'
 import { NumberAnswer } from './number-answer'
 import { OrderAnswer } from './order-answer'

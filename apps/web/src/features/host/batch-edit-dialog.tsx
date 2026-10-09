@@ -1,4 +1,4 @@
-import type { GameSettings } from '@ash-quiz/shared'
+import type { GameSettings } from '@quizmoo/shared'
 import { CheckIcon } from 'lucide-react'
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'

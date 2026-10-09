@@ -24,9 +24,9 @@ export function LogoMark() {
   return (
     <span
       aria-hidden="true"
-      className="grid size-9 -rotate-6 place-items-center rounded-xl bg-primary text-xl font-black text-primary-foreground shadow-[0_3px_0_0_var(--primary-edge)]"
+      className="grid size-9 -rotate-6 place-items-center rounded-xl bg-primary shadow-[0_3px_0_0_var(--primary-edge)]"
     >
-      ?
+      <img src="/logo.svg" alt="" className="size-8" />
     </span>
   )
 }

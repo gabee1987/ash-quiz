@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: ASH Quiz branching model, commit message format and the end-of-phase delivery report. Use whenever work is finished or the user asks which branch, commit message or manual tests apply. The user runs every git command themselves; the agent only proposes.
+description: Quizmoo branching model, commit message format and the end-of-phase delivery report. Use whenever work is finished or the user asks which branch, commit message or manual tests apply. The user runs every git command themselves; the agent only proposes.
 ---
 
 # Git workflow

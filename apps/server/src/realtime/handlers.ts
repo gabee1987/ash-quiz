@@ -8,7 +8,7 @@ import {
   type ErrorPayload,
   type HostCommand,
   type ServerToClientEvents,
-} from '@ash-quiz/shared'
+} from '@quizmoo/shared'
 import { nanoid } from 'nanoid'
 import type { DefaultEventsMap, Server, Socket } from 'socket.io'
 import { SESSION_COOKIE, verifySession } from '../auth/session.js'

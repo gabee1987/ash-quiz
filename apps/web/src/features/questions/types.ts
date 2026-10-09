@@ -1,4 +1,4 @@
-import type { Answer, AnswerSymbols, PublicQuestion } from '@ash-quiz/shared'
+import type { Answer, AnswerSymbols, PublicQuestion } from '@quizmoo/shared'
 
 export type QuestionMode = 'answer' | 'display'
 

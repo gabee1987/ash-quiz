@@ -1,4 +1,4 @@
-import { gameSettingsSchema } from '@ash-quiz/shared'
+import { gameSettingsSchema } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 
 describe('gameSettingsSchema', () => {

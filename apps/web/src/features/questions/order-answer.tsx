@@ -1,7 +1,7 @@
 import { DndContext, closestCenter, type UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { Option } from '@ash-quiz/shared'
+import type { Option } from '@quizmoo/shared'
 import { ChevronDownIcon, ChevronUpIcon, GripVerticalIcon, Loader2Icon } from 'lucide-react'
 import { useCallback, useState, type KeyboardEventHandler } from 'react'
 import { useTranslation } from 'react-i18next'

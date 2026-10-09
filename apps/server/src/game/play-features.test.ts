@@ -1,4 +1,4 @@
-import { avatars, type Answer, type GameSettings, type Question } from '@ash-quiz/shared'
+import { avatars, type Answer, type GameSettings, type Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { createGame, endGame, endQuestion, gradeText, joinPlayer, next, setNextGame, skipQuestion, startGame, submitAnswer } from './engine.js'
 import { isNameAllowed } from './names.js'

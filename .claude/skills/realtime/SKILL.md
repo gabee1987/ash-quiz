@@ -1,6 +1,6 @@
 ---
 name: realtime
-description: Socket.IO conventions for ASH Quiz in apps/server/src/realtime and the web socket client: rooms, join and reconnect by token, snapshot broadcasting, server-side timers, persistence and restore. Load when touching sockets, the game manager, timers or reconnection.
+description: Socket.IO conventions for Quizmoo in apps/server/src/realtime and the web socket client: rooms, join and reconnect by token, snapshot broadcasting, server-side timers, persistence and restore. Load when touching sockets, the game manager, timers or reconnection.
 ---
 
 # Realtime layer
@@ -60,5 +60,5 @@ Rate limit: a player socket may send at most 10 events per second; beyond that, 
 - Snapshots with a lower `seq` than the held one are ignored.
 - `lib/socket-toasts.ts` turns transitions into toasts: "Reconnected" after a drop, nothing on the first connect.
 - `clockOffset = snapshot.serverNow - Date.now()` is updated on every snapshot; countdowns use `questionEndsAt - (Date.now() + clockOffset)`.
-- Player tokens are kept in `localStorage` under `ash-quiz.player.<pin>` as `{ token, name }`. Storage access is wrapped in try/catch.
+- Player tokens are kept in `localStorage` under `quizmoo.player.<pin>` as `{ token, name }`. Storage access is wrapped in try/catch.
 - Answers go through `sendAnswer`: the option stays pending until `{ ok: true }` or a definitive error. A lost ack (or `errors.playerNotFound` from a socket that has not rejoined yet) is retried once while the question is still open; `errors.alreadyAnswered` on the retry counts as sent. When both fail the player gets `errors.answerNotSent` ("tap again") as a toast; never a silent loss.

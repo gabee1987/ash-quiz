@@ -1,4 +1,4 @@
-import type { Question } from '@ash-quiz/shared'
+import type { Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { OTHER_KEY, toBuckets } from './buckets'
 

@@ -1,12 +1,22 @@
-# ASH Quiz
+<p align="center"><img src="apps/web/public/logo.svg" alt="" width="120"></p>
 
-A live quiz for company events, in the style of Kahoot. The host shows the questions on a projector; up to 60 players answer on their phones after scanning a QR code or typing a 6-digit PIN and a nickname. No player accounts and no personal data beyond the nickname. The interface is in Hungarian and English.
+# Quizmoo
 
-- **Hosts** log in, build quizzes in an editor (single and multiple choice, true/false, free text, number, poll, images), run games from a laptop or phone, and review the results afterwards (podium, per-question statistics, CSV export).
-- **Players** need only a browser. A dropped connection or a reloaded page rejoins the game with the same score.
-- **Options per quiz**: individual or team mode, correct answers after each question or only at the end, scoreboard after each question or on demand, final results released by the host, plain or colourful answer buttons on phones.
+A playful live quiz for team building, Christmas parties and any get-together, in the spirit of Kahoot. The questions go up on a projector, and everyone answers on their own phone: scan the QR code or type the 6-digit PIN, pick a name and an emoji, and you're in. No app to install, no accounts for players, nothing stored about them beyond the nickname. The interface is in Hungarian and English.
 
-One Node.js process serves the API, the realtime connection (Socket.IO) and the web app from the same address; PostgreSQL stores everything, including running games, so a restart resumes them.
+**For players**
+- Join from any phone browser with a PIN or a QR code; "Surprise me" picks a silly name if you can't think of one.
+- Answer with big colourful buttons, sort "Put in order" items by dragging, watch the points count up, climb the scoreboard and land on the podium (with confetti).
+- Streak bonus for correct answers in a row; team mode if you'd rather play together.
+- A dropped connection or a reloaded page brings you back into the game with your score.
+
+**For hosts**
+- An editor with drag and drop and a live phone preview. Question types: single and multiple choice, true/false, free text, number, poll and "Put in order", all with optional images.
+- Themes, light and dark mode, answer colour sets and symbols, set per quiz and overridable per game.
+- Run the game from a laptop or a phone: see each question live with the answers coming in, send a message to every screen, grade free-text answers, then "Play again" for a second round with the same people.
+- Results afterwards: podium, statistics per question, player and team tables, CSV export.
+
+One Node.js process serves the API, the realtime connection (Socket.IO) and the web app from the same address; PostgreSQL stores everything, including running games, so a server restart resumes them. Built for about 50 players per game, 60 allowed.
 
 ## Documentation
 
@@ -38,8 +48,8 @@ Requires Node.js 22 or later, pnpm 12 and Docker (for PostgreSQL).
 pnpm install
 pnpm db:up                                   # PostgreSQL in Docker
 Copy-Item .env.example .env                  # set SESSION_SECRET
-pnpm --filter @ash-quiz/server db:migrate
-$env:SEED_ADMIN_USERNAME="admin"; $env:SEED_ADMIN_PASSWORD="<at least 10 characters>"; pnpm --filter @ash-quiz/server seed
+pnpm --filter @quizmoo/server db:migrate
+$env:SEED_ADMIN_USERNAME="admin"; $env:SEED_ADMIN_PASSWORD="<at least 10 characters>"; pnpm --filter @quizmoo/server seed
 pnpm dev                                     # API on :3000, web app on http://localhost:5173
 ```
 
@@ -48,7 +58,7 @@ pnpm dev                                     # API on :3000, web app on http://l
 | Command | What it does |
 |---|---|
 | `pnpm verify` | Typecheck, unit and API tests, build. Must pass before every merge. |
-| `$env:TEST_DATABASE_URL="postgres://ashquiz:ashquiz@localhost:5432/ashquiz"; pnpm --filter @ash-quiz/server test` | Server tests including the database suites (they create and drop their own databases) |
+| `$env:TEST_DATABASE_URL="postgres://quizmoo:quizmoo@localhost:5432/quizmoo"; pnpm --filter @quizmoo/server test` | Server tests including the database suites (they create and drop their own databases) |
 | `$env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e` | Browser end-to-end test against a running app (default `http://localhost:3000`; set `E2E_BASE_URL` for another address). Uses the installed Chrome. |
 | `$env:LOAD_TEST_USERNAME="admin"; $env:LOAD_TEST_PASSWORD="..."; pnpm load-test --players 60` | 60 simulated phones play a full game, 20% of them dropping and reconnecting; fails if a player is lost or broadcasts exceed 200 ms. `--url` for another server. |
 
@@ -65,4 +75,4 @@ Working agreements for contributors (and coding agents) are in [AGENTS.md](AGENT
 
 ## Data protection
 
-Players enter a nickname only; no e-mail, device identifier or IP address is stored. Hosts have a username and password, nothing else. Finished games, with the nicknames and answers in them, are deleted automatically after `RESULTS_RETENTION_DAYS` (default 90). No third-party services are used beyond the hosting provider and PostgreSQL; a cloud host requires a compliance review before use in client or government projects (see [docs/deploy.md](docs/deploy.md)).
+Players enter a nickname only; no e-mail, device identifier or IP address is stored. Hosts have a username and password, nothing else. Finished games, with the nicknames and answers in them, are deleted automatically after `RESULTS_RETENTION_DAYS` (default 90). No third-party services are used beyond the hosting provider and PostgreSQL (see [docs/deploy.md](docs/deploy.md)).

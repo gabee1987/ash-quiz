@@ -1,4 +1,4 @@
-import type { PlayerSnapshot } from '@ash-quiz/shared'
+import type { PlayerSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { CheckIcon, CrossIcon } from '../../components/icons'

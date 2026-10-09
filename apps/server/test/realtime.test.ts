@@ -1,4 +1,4 @@
-import type { HostSnapshot, PlayerSnapshot } from '@ash-quiz/shared'
+import type { HostSnapshot, PlayerSnapshot } from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import { io as ioClient, type Socket } from 'socket.io-client'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'

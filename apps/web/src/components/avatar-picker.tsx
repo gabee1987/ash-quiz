@@ -1,4 +1,4 @@
-import { avatarGroups, type Avatar, type AvatarGroup } from '@ash-quiz/shared'
+import { avatarGroups, type Avatar, type AvatarGroup } from '@quizmoo/shared'
 import { ChevronDownIcon } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'

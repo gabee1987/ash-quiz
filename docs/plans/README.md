@@ -1,4 +1,4 @@
-# ASH Quiz implementation plans
+# Quizmoo implementation plans
 
 One file per phase. Each phase is one `feature/*` branch off `develop`, implemented with the `implement-phase` skill (`/implement-phase <N>`), verified with `pnpm verify` plus the phase's own command, and handed over with a delivery report (see the `git-workflow` skill). The user runs all git commands.
 
@@ -37,7 +37,7 @@ Phases 1 to 8 are release 1.0.0. Phases 9 to 12 are the design and resilience ov
 Local branches `main`, `develop` and `feature/game-engine` already exist. Remaining steps:
 
 ```
-gh repo create ash-quiz --private --source . --push
+gh repo create quizmoo --private --source . --push
 git push -u origin main develop feature/game-engine
 ```
 

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import type { PlayerSnapshot } from '@ash-quiz/shared'
+import type { PlayerSnapshot } from '@quizmoo/shared'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // A fake Socket.IO client: tests fire its events and script the acks of emitWithAck.

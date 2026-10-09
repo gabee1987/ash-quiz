@@ -1,6 +1,6 @@
 ---
 name: game-engine
-description: Rules for the pure ASH Quiz game engine in apps/server/src/game: state shape, phase transitions, scoring formulas for every question type, team scoring, error codes. Load when touching the engine, scoring, snapshots or anything that interprets answers.
+description: Rules for the pure Quizmoo game engine in apps/server/src/game: state shape, phase transitions, scoring formulas for every question type, team scoring, error codes. Load when touching the engine, scoring, snapshots or anything that interprets answers.
 ---
 
 # Game engine

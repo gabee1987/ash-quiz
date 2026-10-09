@@ -1,4 +1,4 @@
-import { quizInputSchema, type QuizInput } from '@ash-quiz/shared'
+import { quizInputSchema, type QuizInput } from '@quizmoo/shared'
 import type { z } from 'zod'
 
 /** Field path (e.g. "questions.2.options.1.text") to i18n key of the first problem there. */

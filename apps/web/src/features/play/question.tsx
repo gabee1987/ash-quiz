@@ -1,4 +1,4 @@
-import type { Answer, PlayerSnapshot } from '@ash-quiz/shared'
+import type { Answer, PlayerSnapshot } from '@quizmoo/shared'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'

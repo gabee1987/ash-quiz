@@ -1,6 +1,6 @@
 ---
 name: verification
-description: How ASH Quiz work is verified: the commands, what passing output looks like, how to run a single test, how to smoke-test the production bundle, and what "done" means. Load before claiming any task or phase is finished.
+description: How Quizmoo work is verified: the commands, what passing output looks like, how to run a single test, how to smoke-test the production bundle, and what "done" means. Load before claiming any task or phase is finished.
 ---
 
 # Verification
@@ -23,12 +23,12 @@ runs, in order, `pnpm typecheck`, `pnpm test`, `pnpm build`. All three must exit
 |---|---|
 | Typecheck all packages | `pnpm typecheck` |
 | All tests | `pnpm test` |
-| One server test file | `pnpm --filter @ash-quiz/server exec vitest run src/game/engine.test.ts` |
-| One web test file | `pnpm --filter @ash-quiz/web exec vitest run src/lib/clock.test.ts` |
-| Watch mode while iterating | `pnpm --filter @ash-quiz/server exec vitest` |
+| One server test file | `pnpm --filter @quizmoo/server exec vitest run src/game/engine.test.ts` |
+| One web test file | `pnpm --filter @quizmoo/web exec vitest run src/lib/clock.test.ts` |
+| Watch mode while iterating | `pnpm --filter @quizmoo/server exec vitest` |
 | Build web + server bundles | `pnpm build` |
 | Start Postgres (Docker) | `pnpm db:up` |
-| Apply migrations | `pnpm --filter @ash-quiz/server db:migrate` |
+| Apply migrations | `pnpm --filter @quizmoo/server db:migrate` |
 | Dev servers (API :3000, Vite :5173) | `pnpm dev` |
 
 Use single-file runs while iterating. The full `pnpm verify` is for the final pass.
@@ -38,7 +38,7 @@ Use single-file runs while iterating. The full `pnpm verify` is for the final pa
 After `pnpm build`, from `apps/server`:
 
 ```
-NODE_ENV=production PORT=3999 DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashquiz SESSION_SECRET=<32+ chars> node dist/index.js
+NODE_ENV=production PORT=3999 DATABASE_URL=postgres://quizmoo:quizmoo@localhost:5432/quizmoo SESSION_SECRET=<32+ chars> node dist/index.js
 ```
 
 Then check:
@@ -51,7 +51,7 @@ Stop the process afterwards. On Windows: `Get-NetTCPConnection -LocalPort 3999 -
 
 ## Tests that need a database
 
-Server tests that touch Postgres read `TEST_DATABASE_URL`. If it is unset they are skipped with a visible `skipped` line, not silently passed. Locally: `pnpm db:up` and set `TEST_DATABASE_URL=postgres://ashquiz:ashquiz@localhost:5432/ashquiz`. Tests create and drop their own schema; they never touch the dev data.
+Server tests that touch Postgres read `TEST_DATABASE_URL`. If it is unset they are skipped with a visible `skipped` line, not silently passed. Locally: `pnpm db:up` and set `TEST_DATABASE_URL=postgres://quizmoo:quizmoo@localhost:5432/quizmoo`. Tests create and drop their own schema; they never touch the dev data.
 
 ## What counts as done
 

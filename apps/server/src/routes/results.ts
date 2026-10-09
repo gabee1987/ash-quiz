@@ -1,4 +1,4 @@
-import type { GameHistoryItem } from '@ash-quiz/shared'
+import type { GameHistoryItem } from '@quizmoo/shared'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
@@ -105,7 +105,7 @@ export async function resultRoutes(app: FastifyInstance, { db, manager }: Result
     const date = new Date(state.createdAt).toISOString().slice(0, 10)
     return reply
       .header('content-type', 'text/csv; charset=utf-8')
-      .header('content-disposition', `attachment; filename="ash-quiz-${state.pin}-${date}.csv"`)
+      .header('content-disposition', `attachment; filename="quizmoo-${state.pin}-${date}.csv"`)
       .header('cache-control', 'no-store')
       .send(toCsv(toResults(state), query.lang))
   })

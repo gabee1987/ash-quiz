@@ -43,7 +43,7 @@ Shared package changes: add `errors.*` codes nowhere (they are plain strings), b
 
 ## Steps
 
-1. **Types and error.** Write `types.ts` per the skill. `EngineError extends Error` with `code: string`. Check: `pnpm --filter @ash-quiz/server typecheck`.
+1. **Types and error.** Write `types.ts` per the skill. `EngineError extends Error` with `code: string`. Check: `pnpm --filter @quizmoo/server typecheck`.
 2. **Normaliser.** `normalise('  Győr  ')` is `'gyor'`, `'A   b'` is `'a b'`. Table-driven test with 8 cases including empty string, mixed case, ß, and multiple spaces. Check: `vitest run src/game/normalise.test.ts`.
 3. **Scoring.** `isCorrect` for each type (returns `boolean | null`, null for poll and ungraded text), `pointsFor(question, correct, t, T, speedBonus)`, `denseRank(items)`. Tests: every row of the skill's correctness table, boundary `t = 0`, `t = T`, `t > T` clamps, tolerance inclusive, speed bonus off gives `P`. Check: `vitest run src/game/scoring.test.ts`.
 4. **createGame and lobby commands.** `createGame`, `joinPlayer`, `reconnectPlayer`, `disconnectPlayer`, `kickPlayer`. Tests: name uniqueness is case-insensitive and trimmed, 51st player rejected with `errors.gameFull`, team mode requires a known team, classic mode ignores `teamId`, join after start rejected unless token matches. Check: run the test file.
@@ -64,7 +64,7 @@ Shared package changes: add `errors.*` codes nowhere (they are plain strings), b
 ## Verification command
 
 ```
-pnpm verify && pnpm --filter @ash-quiz/server exec vitest run src/game
+pnpm verify && pnpm --filter @quizmoo/server exec vitest run src/game
 ```
 
 ## Manual test list (draft)

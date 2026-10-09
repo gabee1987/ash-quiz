@@ -1,4 +1,4 @@
-import type { GamePublicInfo, HostSnapshot } from '@ash-quiz/shared'
+import type { GamePublicInfo, HostSnapshot } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'

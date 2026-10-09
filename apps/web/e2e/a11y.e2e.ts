@@ -19,7 +19,7 @@ test.afterEach(async () => {
 async function newPage(browser: Browser, mode: (typeof modes)[number], viewport: { width: number; height: number }) {
   const context = await browser.newContext({ viewport, locale: 'en-US', colorScheme: mode })
   contexts.push(context)
-  await context.addInitScript((m) => localStorage.setItem('ash-quiz.mode', m), mode)
+  await context.addInitScript((m) => localStorage.setItem('quizmoo.mode', m), mode)
   return context.newPage()
 }
 

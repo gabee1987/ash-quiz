@@ -1,4 +1,4 @@
-import type { Answer, Question } from '@ash-quiz/shared'
+import type { Answer, Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { fixtureQuiz } from './fixtures.js'
 import { denseRank, isCorrect, pointsFor } from './scoring.js'
