@@ -463,6 +463,17 @@ describeDb('sockets (database)', () => {
     expect(back.snapshot.me.disconnectedAt).toBeNull()
   })
 
+  it('join keeps the picked avatar, rejects an unknown one and a blocked name', async () => {
+    const pin = await newGame()
+    const socket = await connect()
+    const snapshot = nextSnapshot<PlayerSnapshot>(socket, 'game:player')
+    expect(await socket.emitWithAck('player:join', { pin, name: 'Anna', avatar: '🦊' })).toHaveProperty('token')
+    expect((await snapshot).me.avatar).toBe('🦊')
+    const other = await connect()
+    expect(await other.emitWithAck('player:join', { pin, name: 'Bea', avatar: 'X' })).toEqual({ error: 'errors.invalidInput' })
+    expect(await other.emitWithAck('player:join', { pin, name: 'Fasz Feri' })).toEqual({ error: 'errors.nameNotAllowed' })
+  })
+
   it('kick sends game:closed to the player', async () => {
     const pin = await newGame()
     const hostSocket = await host(pin)
@@ -514,6 +525,8 @@ describeDb('sockets (database)', () => {
     await hostSaw
     expect(screenSnaps.length).toBeGreaterThan(0)
     expect(screenSnaps.every((s) => s.currentAnswers === null)).toBe(true)
+    expect(screenSnaps.every((s) => s.live === null)).toBe(true)
+    expect((await hostSaw).live!.distribution.b).toBe(1)
   })
 
   it('results at the end: phones and the public screen see no correctness until the game is over', async () => {

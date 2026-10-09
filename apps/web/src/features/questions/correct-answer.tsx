@@ -42,6 +42,34 @@ export function CorrectAnswer({
       break
     case 'poll':
       break
+    case 'order':
+      return (
+        <div className={cn('flex flex-col items-center gap-2 text-center', large && 'items-start text-left')}>
+          <p className={cn('font-semibold text-muted-foreground', large ? 'text-2xl' : 'text-sm')}>{t('play.correctOrder')}</p>
+          <ol className={cn('flex flex-col gap-1.5', large && 'gap-3')}>
+            {question.options.map((option, index) => (
+              <li
+                key={option.id}
+                style={{ animationDelay: `${index * 80}ms` }}
+                className={cn(
+                  'flex animate-pop items-center gap-2 rounded-xl border-2 bg-card font-bold wrap-break-word',
+                  large ? 'px-5 py-2.5 text-3xl' : 'px-3 py-1.5 text-base',
+                )}
+              >
+                <span
+                  className={cn(
+                    'grid shrink-0 place-items-center rounded-lg bg-success font-black text-success-foreground tabular-nums',
+                    large ? 'size-12' : 'size-7 text-sm',
+                  )}
+                >
+                  {index + 1}
+                </span>
+                <span>{option.text}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )
   }
   if (!chips?.length && text === null) return null
   return (

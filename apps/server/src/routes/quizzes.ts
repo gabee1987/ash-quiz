@@ -1,5 +1,5 @@
 import { gameSettingsSchema, quizInputSchema, type Question, type QuizInput } from '@ash-quiz/shared'
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
@@ -27,6 +27,18 @@ export function assignIds(body: unknown): unknown {
 /** The client sends the translated title ("… (copy)"); the server never writes human text itself. */
 const duplicateSchema = z.object({ title: z.string().trim().min(1).max(120).optional() })
 
+const batchIds = z.array(z.string().min(1)).min(1).max(100)
+const batchDeleteSchema = z.object({ ids: batchIds })
+/**
+ * Values set on every selected quiz; keys left out keep each quiz's own value. Each merged quiz is
+ * validated in full, which also checks the ranges and that team mode comes with team names.
+ */
+const batchUpdateSchema = z.object({
+  ids: batchIds,
+  settings: z.record(z.string(), z.unknown()).default({}),
+  questions: z.object({ timeLimitSec: z.number().optional(), points: z.number().optional() }).default({}),
+})
+
 /** New ids for a question and its options, keeping the correct-answer references intact. */
 export function withFreshIds(question: Question): Question {
   if (!('options' in question)) return { ...question, id: nanoid(8) }
@@ -38,6 +50,7 @@ export function withFreshIds(question: Question): Question {
     case 'multiple':
       return { ...question, id: nanoid(8), options, correctOptionIds: question.correctOptionIds.map((id) => map.get(id) ?? id) }
     case 'poll':
+    case 'order':
       return { ...question, id: nanoid(8), options }
   }
 }
@@ -73,6 +86,18 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     return row
   }
 
+  /** The user's quizzes with these ids, or answers 404 and returns null when any is missing or someone else's. */
+  async function ownQuizzes(ids: string[], userId: string, reply: FastifyReply): Promise<QuizRow[] | null> {
+    const unique = [...new Set(ids)]
+    const rows = await db
+      .select()
+      .from(quizzes)
+      .where(and(inArray(quizzes.id, unique), eq(quizzes.ownerId, userId)))
+    if (rows.length === unique.length) return rows
+    void reply.code(404).send({ error: 'errors.notFound' })
+    return null
+  }
+
   function parseQuiz(body: unknown, reply: FastifyReply): QuizInput | null {
     return parseOr400(quizInputSchema, assignIds(body), reply)
   }
@@ -101,6 +126,49 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
       .values({ id: nanoid(12), ownerId: request.user!.id, ...input })
       .returning()
     return reply.code(201).send({ quiz: toQuiz(row!) })
+  })
+
+  // All or nothing: one quiz that is missing or not the user's, and none is deleted.
+  app.post('/api/quizzes/batch-delete', auth, async (request, reply) => {
+    const body = parseOr400(batchDeleteSchema, request.body, reply)
+    if (!body) return reply
+    const rows = await ownQuizzes(body.ids, request.user!.id, reply)
+    if (!rows) return reply
+    const ids = rows.map((row) => row.id)
+    await db.delete(quizzes).where(and(inArray(quizzes.id, ids), eq(quizzes.ownerId, request.user!.id)))
+    return { deleted: rows.length }
+  })
+
+  // All or nothing as well: if any merged quiz is invalid, none is changed.
+  app.patch('/api/quizzes/batch', auth, async (request, reply) => {
+    const body = parseOr400(batchUpdateSchema, request.body, reply)
+    if (!body) return reply
+    const rows = await ownQuizzes(body.ids, request.user!.id, reply)
+    if (!rows) return reply
+    const updates: { id: string; input: QuizInput }[] = []
+    for (const row of rows) {
+      const input = parseQuiz(
+        {
+          title: row.title,
+          description: row.description,
+          questions: row.questions.map((question) => ({ ...question, ...body.questions })),
+          settings: { ...row.settings, ...body.settings },
+        },
+        reply,
+      )
+      if (!input) return reply
+      updates.push({ id: row.id, input })
+    }
+    const now = new Date()
+    await db.transaction(async (tx) => {
+      for (const { id, input } of updates) {
+        await tx
+          .update(quizzes)
+          .set({ questions: input.questions, settings: input.settings, updatedAt: now })
+          .where(eq(quizzes.id, id))
+      }
+    })
+    return { updated: updates.length }
   })
 
   app.get<{ Params: { id: string } }>('/api/quizzes/:id', auth, async (request, reply) => {

@@ -1,6 +1,7 @@
 import type { HostSnapshot } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, CrossIcon } from '../../components/icons'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { formatAnswer } from '../questions/format-answer'
 
 /** Mid-game review: who is leading, how each question went, and the answers to the current one. */
@@ -32,7 +33,17 @@ export function ReviewPanel({ host }: { host: HostSnapshot }) {
               {host.players.map((p) => (
                 <tr key={p.id} className="border-t">
                   <td className="py-1 pr-2 tabular-nums">{p.rank}.</td>
-                  <td className="max-w-40 truncate py-1 pr-2">{p.name}</td>
+                  <td className="max-w-40 py-1 pr-2">
+                    <span className="flex items-center gap-1.5">
+                      <PlayerAvatar avatar={p.avatar} />
+                      <span className="truncate">{p.name}</span>
+                      {host.settings.streakBonus && p.streak >= 2 && (
+                        <span className="shrink-0 text-xs font-bold text-muted-foreground" title={t('play.streak', { count: p.streak })}>
+                          🔥{p.streak}
+                        </span>
+                      )}
+                    </span>
+                  </td>
                   {host.mode === 'team' && <td className="py-1 pr-2">{teamName(p.teamId)}</td>}
                   <td className="py-1 pr-2 text-right tabular-nums">{p.correctCount}</td>
                   <td className="py-1 text-right tabular-nums">{p.score}</td>

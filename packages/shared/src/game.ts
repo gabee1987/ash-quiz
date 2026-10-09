@@ -16,8 +16,43 @@ export const answerSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('text'), value: z.string().trim().min(1).max(100) }),
   z.object({ type: z.literal('number'), value: z.number().finite() }),
   z.object({ type: z.literal('poll'), optionId: z.string().min(1) }),
+  /** Option ids in the order the player put them (a permutation of the question's options). */
+  z.object({ type: z.literal('order'), optionIds: z.array(z.string().min(1)).min(2).max(6) }),
 ])
 export type Answer = z.infer<typeof answerSchema>
+
+// ---- Players ----------------------------------------------------------------
+
+/** Avatars a player picks from when joining: emoji only, no uploads. */
+/** The avatars by group, as the join page's picker shows them. Single-codepoint emoji only, so every phone draws them. */
+export const avatarGroups = {
+  animals: [
+    '🐶', '🐱', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵',
+    '🐔', '🐧', '🦉', '🦄', '🐝', '🐢', '🐙', '🦀', '🐬', '🦒', '🦔', '🦥',
+  ],
+  food: ['🍕', '🍔', '🌮', '🍩', '🍦', '🍉', '🍓', '🥑', '🍌', '🥨', '🧁', '🍿'],
+  fantasy: ['👽', '🤖', '👻', '🎃', '🧙', '🧛', '🦸', '🧜', '🐉', '🧞', '🤡', '😎'],
+  fun: ['🚀', '⚽', '🏀', '🎸', '🎮', '🎲', '🌈', '⭐', '🎯', '💎', '🎩', '🪐'],
+} as const
+export type AvatarGroup = keyof typeof avatarGroups
+export const avatars = Object.values(avatarGroups).flat() as [
+  (typeof avatarGroups)[AvatarGroup][number],
+  ...(typeof avatarGroups)[AvatarGroup][number][],
+]
+export type Avatar = (typeof avatars)[number]
+export const avatarSchema = z.enum(avatars)
+
+/** Avatar for a player saved before avatars existed: stable per player id. */
+export function fallbackAvatar(playerId: string): Avatar {
+  let hash = 0
+  for (const char of playerId) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  return avatars[hash % avatars.length]!
+}
+
+/** Streak bonus for a correct answer that makes a streak of `streak`: +100 from the second, up to +500. */
+export function streakBonusFor(streak: number): number {
+  return Math.min(Math.max(streak - 1, 0), 5) * 100
+}
 
 // ---- Snapshots sent to clients -------------------------------------------
 // The server broadcasts full snapshots on every state change. Clients render
@@ -27,6 +62,9 @@ export interface PlayerPublic {
   id: string
   name: string
   teamId: string | null
+  avatar: Avatar
+  /** Correct answers in a row so far (0 while results are held back). */
+  streak: number
   connected: boolean
   /** Unix ms when the player's last connection dropped; null while connected. */
   disconnectedAt: number | null
@@ -148,12 +186,19 @@ export interface GameSnapshotBase {
   resultsPending: boolean
   /** The host's current message, shown as a banner until cleared. */
   announcement: Announcement | null
+  /** PIN of the next round once the host pressed "Play again" after this game; otherwise null. */
+  nextPin: string | null
 }
 
 /** What the host control and projector screens receive. */
 export interface HostSnapshot extends GameSnapshotBase {
   /** Answers to the current question. Host room only; null on the public screen. */
   currentAnswers: CurrentAnswer[] | null
+  /**
+   * While a question runs: the full question (correct answer included) and the answers so far,
+   * counted like the reveal. Host room only; null on the public screen and in other phases.
+   */
+  live: RevealInfo | null
   /** The players' phones still wait for the final results. Host room only; false on the public screen. */
   playersWaiting: boolean
 }
@@ -163,8 +208,10 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   me: PlayerPublic
   /** Answer the player submitted for the current question, if any. */
   myAnswer: Answer | null
-  /** Points earned on the last revealed question. */
+  /** Points earned on the last revealed question (streak bonus included). */
   lastPoints: number | null
+  /** The streak bonus within `lastPoints`; null outside a reveal. */
+  lastBonus: number | null
   /** Whether that answer was correct; null for polls, ungraded text, or no answer. */
   lastCorrect: boolean | null
   /** Every question with this player's answer, once the game is finished; otherwise null. */
@@ -217,6 +264,7 @@ export interface ResultQuestion extends RevealInfo {
 export interface ResultPlayer {
   id: string
   name: string
+  avatar: Avatar
   teamId: string | null
   score: number
   rank: number
@@ -229,6 +277,8 @@ export interface ResultPlayer {
 export interface PodiumPlace {
   id: string
   name: string
+  /** Null for a team. */
+  avatar: Avatar | null
   score: number
   rank: number
 }

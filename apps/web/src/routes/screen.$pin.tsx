@@ -1,6 +1,6 @@
 import type { GamePublicInfo, HostSnapshot } from '@ash-quiz/shared'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,7 @@ export const Route = createFileRoute('/screen/$pin')({
 function ScreenPage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
+  const navigate = useNavigate()
   const { status, since, host, clockOffset, closed } = useGameStore()
   useGameTheme(host?.settings)
   const me = useQuery({ ...meQueryOptions, throwOnError: false })
@@ -52,6 +53,12 @@ function ScreenPage() {
       if ('error' in res && res.error !== 'errors.connectionLost') closeSession(res.error)
     })
   }, [pin, me.isPending, loggedIn])
+
+  // "Play again": the projector moves to the next round's lobby by itself.
+  const nextPin = host?.pin === pin ? host.nextPin : null
+  useEffect(() => {
+    if (nextPin) void navigate({ to: '/screen/$pin', params: { pin: nextPin }, replace: true })
+  }, [nextPin, navigate])
 
   useEffect(() => {
     if (!isHost || !host) return

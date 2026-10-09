@@ -1,6 +1,7 @@
 import type { Answer, AnswerSymbols, PublicQuestion } from '@ash-quiz/shared'
 import { MultipleChoice } from './multiple-choice'
 import { NumberAnswer } from './number-answer'
+import { OrderAnswer } from './order-answer'
 import { Poll } from './poll'
 import { SingleChoice } from './single-choice'
 import { TextAnswer } from './text-answer'
@@ -32,5 +33,7 @@ export function QuestionInput(props: {
       return <NumberAnswer question={question} {...rest} />
     case 'poll':
       return <Poll question={question} {...rest} />
+    case 'order':
+      return <OrderAnswer question={question} {...rest} />
   }
 }

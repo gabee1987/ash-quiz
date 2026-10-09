@@ -52,7 +52,8 @@ export function DistributionBars({
             <span
               style={{ width: `${Math.max(2, (bucket.count / max) * 100)}%`, ...(bucket.index !== null ? optionVars(bucket.index) : {}), ...stagger(i, 110, 150) }}
               className={cn(
-                'origin-left animate-grow-x rounded-lg',
+                // The width glides when counts change (the host's live view).
+                'origin-left animate-grow-x rounded-lg transition-[width] duration-500',
                 large ? 'h-12' : 'h-6',
                 bucket.index !== null ? 'bg-(--option)' : 'bg-muted-foreground',
                 bucket.correct && 'shadow-[0_0_0_4px_var(--success),0_0_28px_var(--success)]',

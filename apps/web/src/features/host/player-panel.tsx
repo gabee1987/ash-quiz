@@ -1,5 +1,6 @@
 import type { HostSnapshot, PlayerPublic } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { useNow } from '../../lib/clock'
 
 export function PlayerPanel({
@@ -41,6 +42,7 @@ export function PlayerPanel({
                 aria-label={player.connected ? t('host.game.online') : t('host.game.offline')}
                 className={`size-3 shrink-0 rounded-full ${player.connected ? 'bg-success' : 'bg-muted-foreground/40'}`}
               />
+              <PlayerAvatar avatar={player.avatar} size="md" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold">{player.name}</span>
                 {player.teamId && <span className="block truncate text-xs text-muted-foreground">{teamName(player.teamId)}</span>}

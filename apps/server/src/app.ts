@@ -16,6 +16,7 @@ import { authRoutes } from './routes/auth.js'
 import { gameRoutes } from './routes/games.js'
 import { imageRoutes } from './routes/images.js'
 import { quizRoutes } from './routes/quizzes.js'
+import { nicknameRoutes } from './routes/nicknames.js'
 import { resultRoutes } from './routes/results.js'
 import { userRoutes } from './routes/users.js'
 
@@ -101,6 +102,7 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(userRoutes, { db })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
   await app.register(resultRoutes, { db, manager })
+  await app.register(nicknameRoutes, { db, manager })
 
   const webDist =
     webDistOverride ??

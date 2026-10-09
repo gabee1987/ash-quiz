@@ -1,6 +1,7 @@
 import { questionTypes, type QuestionType } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
 import {
+  ArrowDownWideNarrowIcon,
   ChartColumnIcon,
   CircleDotIcon,
   HashIcon,
@@ -18,6 +19,7 @@ export const typeIcons: Record<QuestionType, LucideIcon> = {
   text: TextCursorInputIcon,
   number: HashIcon,
   poll: ChartColumnIcon,
+  order: ArrowDownWideNarrowIcon,
 }
 
 /** One card per question type: icon, name and a one-line explanation. */

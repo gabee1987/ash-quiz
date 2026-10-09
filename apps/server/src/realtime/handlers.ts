@@ -132,7 +132,7 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
       respond(ack, async () => {
         const parsed = playerJoinSchema.safeParse(data)
         if (!parsed.success) return invalidInput
-        const { pin, name, teamId, token } = parsed.data
+        const { pin, name, teamId, token, avatar } = parsed.data
         const game = manager.get(pin)
         if (!game) return { error: 'errors.gameNotFound' }
 
@@ -140,7 +140,7 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         const existing = token ? Object.values(game.state.players).find((p) => p.token === token) : undefined
         const playerId = existing?.id ?? nanoid(10)
         const playerToken = existing?.token ?? randomBytes(24).toString('base64url')
-        manager.apply(pin, (s) => joinPlayer(s, { id: playerId, name, teamId, token: playerToken }))
+        manager.apply(pin, (s) => joinPlayer(s, { id: playerId, name, teamId, token: playerToken, avatar }))
 
         leaveGameRooms(socket)
         socket.data = { pin, playerId, role: 'player' }

@@ -42,6 +42,41 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Password reset | Host forgot the password | M | Needs e-mail delivery, which is a third-party service (compliance review) or an admin-side reset link instead |
 | Two-factor login for hosts | Security for public deployments | M | TOTP, no SMS |
 
+## From the test notes (October 2026)
+
+Collected while testing phases 9 to 12. Effort as above.
+
+### Already done
+
+- Bubble-gum press animations and playful details (phase 11 follow-up).
+- Drag and drop for questions with a drag preview and a pop on landing (phase 11).
+- Structured game settings: readable summary when collapsed, real collapse and expand controls, tabs instead of one long list (phase 11).
+- Subdued themes and answer colours for company events (phase 11 follow-up).
+- Custom drop-down lists (phase 11 follow-up).
+- Pause on the projector's results summary (phase 11 follow-up).
+- The quiz settings push the content aside instead of covering the phone preview (phase 11 follow-up).
+- Sticky top bar in the quiz editor (phase 11 follow-up).
+- Host messages fly in and out with an elastic animation, and the content below follows (phase 12 follow-up).
+
+### Open
+
+| Task | Kind | Effort | Notes |
+|---|---|---|---|
+| Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
+| Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
+| Double scrollbar when the quiz settings are open | Bug | S | The settings panel scrolls inside itself (`max-h` + `overflow-y-auto`) while the page scrolls too. Not yet confirmed on screen. |
+| Host lobby restructure | Design | M | The lobby screen of the host control (QR code, PIN, players, message box) as one composition around the QR code instead of stacked panels. |
+| Host messages that leave by themselves | Feature | S | Optional duration on a message (for example 10 s, 30 s, 1 min); the server clears it (timer in the realtime layer, `expiresAt` in the state so a restart keeps it). |
+| Pause the game | Feature | M | The timer stops until the host resumes (backlog item "Pause game"); the engine shifts `questionEndsAt`; phones and the projector show "Paused". |
+| Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
+| Phone question layout with an image | Design | M | Image and all answers visible without scrolling. Language and light/dark switches move from the header into a settings menu behind a small floating button on game screens. |
+| Selected answer on phones | Bug | S | The selected option has a 4 px ring in the text colour (black in light mode) with an offset, reaching into the neighbouring answers. Use a theme-coloured marker that stays inside the option's space. |
+| Change answers until a deadline | Feature | M | A game mode where players can change their answer until the time is up (or an earlier deadline); the last answer counts, and the speed bonus uses its time or is turned off. |
+| Results page redesign | Design | M | The after-game report as one coherent page with clear UX: summary first, then questions and players. |
+| New game dialog redesign | Design | M | The game settings dialog shown when starting a game, restructured for clarity (groups, summary, sensible defaults). |
+| "Show podium" on the host | UX | S | Today it only releases the results to the projector and stays on the host control. Decide: also open or focus the projector window, or show the podium on the host screen. |
+| Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |
+
 ## Suggested first group (one phase, "Play features")
 
 Streak bonus, ordering question, avatars, nickname generator and filter, play again. All are self-contained, mostly engine and schema work, and make the game noticeably richer for players.

@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
+import { setNextGame } from '../game/index.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
 
@@ -43,6 +44,29 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       hostId: request.user!.id,
       quizId: quiz.id,
     })
+    return reply.code(201).send({ pin: game.state.pin })
+  })
+
+  /**
+   * "Play again": a new lobby from a finished game's quiz and settings. The old game points its
+   * phones and projector to it (`nextPin`). Pressing it twice returns the same next round.
+   */
+  app.post<{ Params: { gameId: string } }>('/api/games/:gameId/again', auth, async (request, reply) => {
+    const old = manager.byId(request.params.gameId)
+    if (!old) return reply.code(404).send({ error: 'errors.gameNotFound' })
+    if (old.hostId !== request.user!.id) return reply.code(403).send({ error: 'errors.forbidden' })
+    if (old.state.phase !== 'finished') return reply.code(409).send({ error: 'errors.gameNotFinished' })
+    const existing = old.state.nextPin ? manager.get(old.state.nextPin) : undefined
+    if (existing) return reply.code(200).send({ pin: existing.state.pin })
+
+    const game = await manager.create({
+      id: nanoid(12),
+      quiz: old.state.quiz,
+      settings: old.state.settings,
+      hostId: old.hostId,
+      quizId: old.quizId,
+    })
+    manager.apply(old.state.pin, (state) => setNextGame(state, game.state.pin))
     return reply.code(201).send({ pin: game.state.pin })
   })
 

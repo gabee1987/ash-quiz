@@ -19,6 +19,8 @@
     "pinPlaceholder": "6 digits",
     "name": "Your name",
     "namePlaceholder": "What should we call you?",
+    "surprise": "Surprise me",
+    "avatar": "Your avatar",
     "team": "Team",
     "submit": "Join",
     "hostLogin": "Host login",
@@ -28,7 +30,17 @@
     "scanHint": "Point the camera at the QR code on the screen.",
     "cameraDenied": "Camera access was refused. Type the PIN instead.",
     "cameraUnavailable": "The camera is not available. Type the PIN instead.",
-    "pinDigit": "Digit {{n}}"
+    "pinDigit": "Digit {{n}}",
+    "pinOk": "OK",
+    "surpriseNeedsPin": "Enter the PIN first",
+    "avatarChange": "Change",
+    "avatarDone": "Done",
+    "avatarGroups": {
+      "animals": "Animals",
+      "food": "Food",
+      "fantasy": "Fantasy",
+      "fun": "Fun and games"
+    }
   },
   "common": {
     "loading": "Loading…",
@@ -77,6 +89,8 @@
       },
       "answered_one": "{{answered}} of {{count}} answered",
       "answered_other": "{{answered}} of {{count}} answered",
+      "notAnswered_one": "{{count}} player has not answered yet:",
+      "notAnswered_other": "{{count}} players have not answered yet:",
       "start": "Start",
       "endQuestion": "End question",
       "extend": "+30 s",
@@ -102,6 +116,7 @@
       "releaseToPlayers": "Show results on phones",
       "podiumPendingHint": "The projector does not show the results yet.",
       "playersWaitingHint": "The players do not see their results yet.",
+      "playAgain": "Play again",
       "connectedOfTotal": "{{connected}} / {{count}} connected",
       "offlineForSeconds": "Offline for {{count}} s",
       "offlineForMinutes": "Offline for {{count}} min",
@@ -163,6 +178,8 @@
       "duplicateTeams": "Team names must be different.",
       "speedBonus": "Speed bonus",
       "speedBonusHelp": "Faster correct answers earn more points.",
+      "streakBonus": "Streak bonus",
+      "streakBonusHelp": "Correct answers in a row earn extra points: +100 from the second, up to +500.",
       "shuffle": "Shuffle answer options",
       "submit": "Create game",
       "changeForGame": "Change settings for this game",
@@ -230,6 +247,38 @@
     "deleteTitle": "Delete this quiz?",
     "deleteBody": "“{{title}}” will be deleted permanently. Results of games already played are kept.",
     "moreActions": "More actions for {{title}}",
+    "select": "Select",
+    "batch": {
+      "selected_one": "{{count}} selected",
+      "selected_other": "{{count}} selected",
+      "selectAll": "Select all",
+      "clearSelection": "Deselect all",
+      "exit": "Stop selecting",
+      "selectQuiz": "Select {{title}}",
+      "edit": "Edit settings",
+      "editTitle_one": "Edit {{count}} quiz",
+      "editTitle_other": "Edit {{count}} quizzes",
+      "editHelp": "Tick what to change. Everything else keeps each quiz's own setting.",
+      "apply_one": "Apply to {{count}} quiz",
+      "apply_other": "Apply to {{count}} quizzes",
+      "groups": {
+        "look": "Look",
+        "lookHelp": "Theme, answer colours, symbols and style",
+        "scoring": "Scoring",
+        "scoringHelp": "Speed bonus, streak bonus, shuffled options",
+        "flow": "Game flow",
+        "flowHelp": "Mode and teams, when answers and the scoreboard show, final results",
+        "questions": "Every question",
+        "questionsHelp": "Time limit and points of all questions"
+      },
+      "deleteTitle_one": "Delete {{count}} quiz?",
+      "deleteTitle_other": "Delete {{count}} quizzes?",
+      "deleteBody": "These quizzes will be deleted permanently. Results of games already played are kept.",
+      "deleted_one": "{{count}} quiz deleted",
+      "deleted_other": "{{count}} quizzes deleted",
+      "updated_one": "{{count}} quiz updated",
+      "updated_other": "{{count}} quizzes updated"
+    },
     "search": "Search quizzes",
     "sort": "Sort",
     "sortOptions": {
@@ -266,6 +315,15 @@
     "points_one": "+{{count}} point",
     "points_other": "+{{count}} points",
     "correctAnswer": "Correct answer",
+    "correctOrder": "Correct order",
+    "orderHint": "Drag the items into the right order",
+    "dragItem": "Move {{item}}",
+    "moveUp": "Move {{item}} up",
+    "moveDown": "Move {{item}} down",
+    "streak_one": "{{count}} in a row",
+    "streak_other": "{{count}} in a row",
+    "nextRoundReady": "The host started another round!",
+    "joinNextRound": "Join the next round",
     "totalScore": "Score: {{score}}",
     "rank": "Rank: {{rank}}.",
     "yourRank": "Your rank",
@@ -324,7 +382,9 @@
     "number": "Number",
     "numberHelp": "Players type a number, with optional tolerance.",
     "poll": "Poll",
-    "pollHelp": "Opinion vote, no points."
+    "pollHelp": "Opinion vote, no points.",
+    "order": "Put in order",
+    "orderHelp": "Players sort the items into the right order."
   },
   "editor": {
     "title": "Quiz title",
@@ -345,6 +405,8 @@
     "options": "Options",
     "optionsMarkOne": "Options: mark the correct one",
     "optionsMarkAll": "Options: mark every correct one",
+    "optionsInOrder": "Items in the correct order",
+    "orderHint": "Players see them shuffled and put them back in this order. Drag to reorder.",
     "optionText": "Option {{n}}",
     "optionImage": "Image for option {{n}}",
     "removeOption": "Remove option {{n}}",
@@ -421,6 +483,8 @@
     "questionDuplicated": "Question duplicated",
     "questionDeleted": "Question {{n}} deleted",
     "undo": "Undo",
+    "deleteQuiz": "Delete quiz",
+    "deleteQuizHelp": "Deletes the quiz permanently. Results of games already played are kept.",
     "leaveTitle": "Leave the editor?",
     "leave": "Leave",
     "leaveBody": {
@@ -445,6 +509,28 @@
       "cancelled": "Reordering cancelled, {{item}} is back in place."
     }
   },
+  "nicknames": {
+    "nav": "Names",
+    "title": "Surprise me names",
+    "help": "Players get one of these at random when they press “Surprise me” on the join page, from the list of their page's language, never one already taken in the game.",
+    "languages": {
+      "hu": "Hungarian",
+      "en": "English"
+    },
+    "label": "Names, one per line",
+    "hint": "At most 24 characters each. Duplicates are dropped; offensive names are refused, like on the join page.",
+    "count_one": "{{count}} name",
+    "count_other": "{{count}} names",
+    "builtIn": "Built-in list",
+    "custom": "Edited",
+    "save": "Save",
+    "saved": "Names saved",
+    "tooLong": "longer than 24 characters",
+    "restore": "Restore built-in list",
+    "restoreTitle": "Restore the built-in list?",
+    "restoreBody": "The edited names of this language are replaced by the built-in ones.",
+    "restored": "Built-in list restored"
+  },
   "users": {
     "title": "Users",
     "add": "Add user",
@@ -464,6 +550,7 @@
     "gameFull": "The game is full.",
     "gameAlreadyStarted": "The game has already started.",
     "nameTaken": "That name is already taken.",
+    "nameNotAllowed": "Please choose another name.",
     "invalidInput": "Invalid input.",
     "notFound": "Not found.",
     "connectionLost": "Connection lost, reconnecting…",
@@ -485,7 +572,7 @@
     "usernameTaken": "This username is already taken.",
     "wrongCurrentPassword": "The current password is wrong.",
     "samePassword": "The new password must differ from the current one.",
-    "gameNotFinished": "End the game before deleting it.",
+    "gameNotFinished": "End the game first.",
     "answerNotSent": "Your answer was not sent. Tap again."
   },
   "nav": {

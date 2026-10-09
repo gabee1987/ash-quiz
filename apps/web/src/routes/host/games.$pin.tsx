@@ -10,10 +10,11 @@ import { ConnectionBar } from '../../components/connection-bar'
 import { DistributionBars } from '../../components/distribution-bars'
 import { QrCode } from '../../components/qr-code'
 import { Spinner } from '../../components/spinner'
-import { Timer } from '../../components/timer'
 import { Controls } from '../../features/host/controls'
 import { GradingPanel } from '../../features/host/grading-panel'
+import { LiveQuestion } from '../../features/host/live-question'
 import { MessageBox } from '../../features/host/message-box'
+import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
@@ -98,6 +99,7 @@ function Header({ host, connected }: { host: HostSnapshot; connected: boolean })
   const settings = [
     t(`host.create.modes.${host.settings.mode}`),
     host.settings.speedBonus ? t('host.create.speedBonus') : null,
+    host.settings.streakBonus ? t('host.create.streakBonus') : null,
     host.settings.shuffleOptions ? t('host.create.shuffle') : null,
     host.settings.revealAnswers === 'atEnd' ? t('host.create.revealAnswersOptions.atEnd') : null,
     host.settings.revealAnswers === 'afterQuestion' && host.settings.scoreboard === 'onDemand'
@@ -158,15 +160,7 @@ function PhaseDetail({
         </div>
       ) : null
     case 'question':
-      return host.question && host.questionEndsAt !== null ? (
-        <div className="flex flex-col gap-2">
-          <p className="text-xl font-extrabold wrap-break-word">{host.question.text}</p>
-          <Timer endsAt={host.questionEndsAt} totalMs={host.question.timeLimitSec * 1000} clockOffset={clockOffset} />
-          <p className="font-semibold text-muted-foreground">
-            {t('host.game.answered', { answered: host.answeredCount, count: host.players.length })}
-          </p>
-        </div>
-      ) : null
+      return <LiveQuestion host={host} clockOffset={clockOffset} />
     case 'reveal':
     case 'scoreboard':
       return host.reveal ? (
@@ -202,6 +196,7 @@ function PhaseDetail({
               </Link>
             </Button>
           )}
+          {gameId && <PlayAgainButton gameId={gameId} />}
           <Button asChild variant="ghost">
             <Link to="/host">{t('host.game.backToQuizzes')}</Link>
           </Button>

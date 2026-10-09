@@ -28,6 +28,13 @@ export function isCorrect(question: Question, answer: Answer): boolean | null {
       return answer.type === 'number' && Math.abs(answer.value - question.correct) <= question.tolerance
     case 'poll':
       return null
+    case 'order':
+      // All or nothing: every item in its place.
+      return (
+        answer.type === 'order' &&
+        answer.optionIds.length === question.options.length &&
+        question.options.every((option, i) => answer.optionIds[i] === option.id)
+      )
   }
 }
 

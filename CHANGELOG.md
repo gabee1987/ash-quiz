@@ -32,6 +32,8 @@
 - Quiz list: search by title, sort by last edited or title; a duplicated quiz opens straight in the editor.
 - The top bar stays in view while scrolling (tablets and laptops). On a laptop the quiz settings open beside the question and the phone preview instead of over them, so theme and colour choices are previewed as they are made.
 - Drop-down lists (time limit, points, sorting) have the app's own look instead of the browser's.
+- A quiz can be deleted from the editor too (at the bottom of the quiz settings).
+- Quiz list: "Select" turns the cards into a selection. The selected quizzes can be deleted together, or given the same look, scoring, game flow, or time limit and points for every question; groups that are not ticked keep each quiz's own settings.
 
 ### Look and feel
 - Opening the quiz settings on a laptop is animated: the question list slides out to the left, the question narrows and the settings slide in from the right with a soft spring; closing plays it backwards.
@@ -49,6 +51,16 @@
 - Phones can no longer show an older state over a newer one after a reconnect: every update is numbered and an older one is ignored.
 - Host control: each player shows how long they have been offline, the header shows "connected / total" and the round-trip time to the server (green, amber, red), and a hint appears next to Start or Next question when more than a fifth of the players are reconnecting.
 - Host messages: "Get ready!", "Short break", "Last question!" or any text up to 200 characters, shown as a banner on every phone and the projector until the host clears it or the next question starts. Reloaded phones and a restarted server keep it.
+
+### Play features
+- Streak bonus (a game setting, off by default): correct answers in a row earn +100 from the second, up to +500. Phones show "3 in a row +200" on the reveal; the host's standings show the streak.
+- New question type "Put in order": the editor's order is the correct one, phones get the items shuffled and sort them by dragging or with arrow buttons; scored all or nothing; the reveal shows the correct order and how many players put each item in its place.
+- Avatars: players pick an animal when joining (a random one is preselected); it shows next to their name in the lobby, on the scoreboard, the podium, the host control and the results.
+- Offensive names are refused on the join page with a polite message.
+- Host control: while a question runs, the host sees it as the players do (image, text, timer) with the correct answer, the answers so far as live bars, and who has not answered yet.
+- Ordering questions on phones: an item is dragged from anywhere on it, at once (no press and hold), and the list no longer replays its entrance animation after a drop.
+- Join page: an OK button under the PIN closes the phone's keyboard. The avatar opens into 60 emoji in four groups (animals, food, fantasy, fun). "Surprise me" picks a whole silly name from a list admins edit on the new Names page (one list per language), never one already taken in the game.
+- Play again: after a game the host starts a new round of the same quiz with the same settings; phones get "Join the next round" (one tap, same name, avatar and team) and the projector switches to the new lobby by itself.
 
 ### Fixes
 - Rate limiting applies to API requests only. Static files were counted too, so many phones sharing one public IP (venue wifi with a cloud deployment) could get errors and a blank page while loading the app.

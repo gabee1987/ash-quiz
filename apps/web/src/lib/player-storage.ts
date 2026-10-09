@@ -1,8 +1,12 @@
+import { avatars, type Avatar } from '@ash-quiz/shared'
+
 // The player's token per game PIN, so a reload or a reopened browser rejoins as the same player.
 
 export interface StoredPlayer {
   token: string
   name: string
+  /** Missing for players stored before avatars existed. */
+  avatar?: Avatar
 }
 
 const key = (pin: string) => `ash-quiz.player.${pin}`
@@ -13,8 +17,11 @@ export function getStoredPlayer(pin: string): StoredPlayer | null {
     if (!raw) return null
     const value: unknown = JSON.parse(raw)
     if (typeof value === 'object' && value !== null && 'token' in value && 'name' in value) {
-      const { token, name } = value as Record<string, unknown>
-      if (typeof token === 'string' && typeof name === 'string') return { token, name }
+      const { token, name, avatar } = value as Record<string, unknown>
+      if (typeof token === 'string' && typeof name === 'string') {
+        const known = avatars.find((a) => a === avatar)
+        return known ? { token, name, avatar: known } : { token, name }
+      }
     }
   } catch {
     // Storage unavailable (private mode) or corrupted: treat as no stored player.

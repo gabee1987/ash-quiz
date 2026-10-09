@@ -39,6 +39,19 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
         )}
         <h1 className="text-3xl font-black">{title}</h1>
         {!isPoll && snapshot.lastPoints !== null && <p className="text-2xl font-black tabular-nums">{t('play.points', { count: points })}</p>}
+        {/* Streak bonus: from the second correct answer in a row. */}
+        {correct === true && snapshot.settings.streakBonus && snapshot.me.streak >= 2 && (
+          <p
+            className="flex animate-pop items-center gap-2 rounded-full bg-success-foreground/20 px-4 py-1.5 text-lg font-black"
+            style={stagger(1, 0, 600)}
+          >
+            <span aria-hidden="true" className="inline-block animate-wiggle">
+              🔥
+            </span>
+            {t('play.streak', { count: snapshot.me.streak })}
+            {(snapshot.lastBonus ?? 0) > 0 && <span className="tabular-nums">+{snapshot.lastBonus}</span>}
+          </p>
+        )}
       </div>
       {question && (
         <div className="animate-fade-up" style={stagger(1, 0, 300)}>

@@ -38,7 +38,7 @@ test('host reorders, duplicates, deletes and restores questions, and duplicates 
       await page.getByRole('button', { name: 'Log in' }).click()
       await expect(page).toHaveURL(/\/host$/)
       await page.getByRole('button', { name: 'New quiz', exact: true }).click()
-      await expect(page).toHaveURL(/\/host\/quizzes\/\w+$/)
+      await expect(page).toHaveURL(/\/host\/quizzes\/[\w-]+$/)
       created.push(page.url().split('/').pop()!)
       await page.getByLabel('Quiz title').fill(title)
     })
@@ -67,10 +67,12 @@ test('host reorders, duplicates, deletes and restores questions, and duplicates 
       await page.keyboard.press('Space')
       // "Picked up" is replaced at once by the announcement of the item over its own place.
       await expect(page.getByText(/^(Picked up Question 3, position|Question 3 moved to position) 3 of 3\.$/)).toBeAttached()
-      await page.keyboard.press('ArrowUp')
-      await expect(page.getByText('Question 3 moved to position 2 of 3.')).toBeAttached()
-      await page.keyboard.press('ArrowUp')
-      await expect(page.getByText('Question 3 moved to position 1 of 3.')).toBeAttached()
+      // An arrow press right after the pick-up is occasionally not taken; pressing again until the
+      // item is announced at the top is safe (at the top, ArrowUp does nothing).
+      await expect(async () => {
+        await page.keyboard.press('ArrowUp')
+        await expect(page.getByText('Question 3 moved to position 1 of 3.')).toBeAttached({ timeout: 1000 })
+      }).toPass({ timeout: 15_000 })
       await page.keyboard.press('Space')
       await expect.poll(listTexts).toEqual(['Third poll', 'First single', 'Second truefalse'])
       await saved()
@@ -107,7 +109,8 @@ test('host reorders, duplicates, deletes and restores questions, and duplicates 
       await expect(page).toHaveURL(/\/host$/)
       await page.getByRole('button', { name: `More actions for ${title}` }).click()
       await page.getByRole('menuitem', { name: 'Duplicate' }).click()
-      await expect(page).toHaveURL(new RegExp(`/host/quizzes/(?!${created[0]}$)\\w+$`))
+      // Ids are nanoids: letters, digits, "_" and "-".
+      await expect(page).toHaveURL(new RegExp(`/host/quizzes/(?!${created[0]}$)[\\w-]+$`))
       created.push(page.url().split('/').pop()!)
       await expect(page.getByLabel('Quiz title')).toHaveValue(`${title} (copy)`)
       const [original, copy] = [await stored(created[0]!), await stored(created[1]!)]

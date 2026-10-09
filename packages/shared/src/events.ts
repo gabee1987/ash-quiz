@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MAX_PLAYERS, announcementTextSchema, answerSchema } from './game.js'
+import { MAX_PLAYERS, announcementTextSchema, answerSchema, avatarSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
@@ -7,10 +7,18 @@ import type { HostSnapshot, PlayerSnapshot } from './game.js'
 export const pinSchema = z.string().regex(/^[0-9]{6}$/)
 export const playerNameSchema = z.string().trim().min(1).max(24)
 
+/** Languages with their own "Surprise me" name list. */
+export const nicknameLanguages = ['hu', 'en'] as const
+export type NicknameLanguage = (typeof nicknameLanguages)[number]
+/** An admin's "Surprise me" list: whole names, each one a valid player name. */
+export const nicknameListSchema = z.object({ names: z.array(playerNameSchema).min(1).max(500) })
+
 export const playerJoinSchema = z.object({
   pin: pinSchema,
   name: playerNameSchema,
   teamId: z.string().min(1).optional(),
+  /** Chosen on the join page; a rejoin with a token keeps the stored one. */
+  avatar: avatarSchema.optional(),
   /** Token from a previous join, used to reclaim the same player after a reconnect. */
   token: z.string().min(1).optional(),
 })

@@ -245,6 +245,17 @@ describe('review and grading data', () => {
     expect(toHostSnapshot(state, T0).settings).toEqual(fixtureSettings())
   })
 
+  it('gives the host room a live count with the full question while a question runs, and nobody else', () => {
+    const state = answerSingle(answerSingle(atQuestion(0), 'p1', 'b', T0 + 3_000), 'p2', 'b', T0 + 4_000)
+    const live = toHostSnapshot(state, T0, { includeAnswers: true }).live!
+    expect(live.question).toEqual(state.quiz.questions[0])
+    expect(live.correctKeys).toEqual(['a'])
+    expect(live.answeredCount).toBe(2)
+    expect(live.distribution).toMatchObject({ a: 0, b: 2 })
+    expect(toHostSnapshot(state, T0).live).toBeNull()
+    expect(toHostSnapshot(endQuestion(state), T0, { includeAnswers: true }).live).toBeNull()
+  })
+
   it('reports correct keys per question type', () => {
     expect(toHostSnapshot(endQuestion(atQuestion(0)), T0).reveal!.correctKeys).toEqual(['a'])
     expect(toHostSnapshot(endQuestion(atQuestion(2)), T0).reveal!.correctKeys).toEqual(['true'])

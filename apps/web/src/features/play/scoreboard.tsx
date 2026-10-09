@@ -2,12 +2,15 @@ import type { PlayerPublic, PlayerSnapshot, TeamPublic } from '@ash-quiz/shared'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { CountUp } from '../../components/count-up'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { RankArrow } from '../../components/rank-arrow'
 import { stagger } from '../../lib/motion'
 
 interface Row {
   id: string
   name: string
+  /** Players only; teams have none. */
+  avatar?: string
   score: number
   rank: number
   previousRank: number
@@ -30,6 +33,7 @@ function Rows({ rows, mineId }: { rows: Row[]; mineId?: string | null | undefine
             style={stagger(i, 60)}
           >
             <span className="w-8 text-lg font-black tabular-nums">{row.rank}.</span>
+            <PlayerAvatar avatar={row.avatar} />
             <span className="flex-1 truncate font-semibold">{row.name}</span>
             <RankArrow previous={row.previousRank} rank={row.rank} className={cn('text-sm', mine && 'text-primary-foreground')} />
             {row.roundPoints !== undefined && row.roundPoints > 0 && (

@@ -1,4 +1,5 @@
-import type { Answer, GameSettings, Question } from '@ash-quiz/shared'
+import { fallbackAvatar, streakBonusFor, type Answer, type Avatar, type GameSettings, type Question } from '@ash-quiz/shared'
+import { isNameAllowed } from './names.js'
 import { isCorrect, pointsFor } from './scoring.js'
 import {
   EngineError,
@@ -48,6 +49,7 @@ export function createGame(
     finishedAt: null,
     released: { screen: false, players: false },
     announcement: null,
+    nextPin: null,
   }
 }
 
@@ -56,6 +58,8 @@ export interface JoinInput {
   name: string
   teamId?: string | null | undefined
   token: string
+  /** Picked on the join page; without one the player gets a stable one from their id. */
+  avatar?: Avatar | undefined
 }
 
 /** Adds a player in the lobby. A known token reclaims that player in any phase instead. */
@@ -65,6 +69,7 @@ export function joinPlayer(state: GameState, input: JoinInput): GameState {
 
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
   const name = input.name.trim()
+  if (!isNameAllowed(name)) throw new EngineError('errors.nameNotAllowed')
   const key = nameKey(name)
   if (Object.values(state.players).some((p) => nameKey(p.name) === key)) throw new EngineError('errors.nameTaken')
   if (Object.keys(state.players).length >= MAX_PLAYERS) throw new EngineError('errors.gameFull')
@@ -78,6 +83,8 @@ export function joinPlayer(state: GameState, input: JoinInput): GameState {
     id: input.id,
     name,
     teamId,
+    avatar: input.avatar ?? fallbackAvatar(input.id),
+    streak: 0,
     token: input.token,
     connected: true,
     disconnectedAt: null,
@@ -220,6 +227,12 @@ export function releaseResults(state: GameState, audience: ResultsAudience): Gam
   return { ...state, released: { ...released, [audience]: true } }
 }
 
+/** Points a finished game's phones and projector to the next round ("Play again"). */
+export function setNextGame(state: GameState, pin: string): GameState {
+  if (state.phase !== 'finished') throw new EngineError('errors.gameNotFinished')
+  return { ...state, nextPin: pin }
+}
+
 /** Shows a message on every phone and the projector, replacing the current one. Allowed in any phase. */
 export function announce(state: GameState, input: { id: string; text: string }, now: number): GameState {
   const text = input.text.trim()
@@ -321,12 +334,24 @@ function answerFits(question: Question, answer: Answer): boolean {
       return (
         new Set(answer.optionIds).size === answer.optionIds.length && answer.optionIds.every((id) => optionIds.has(id))
       )
+    case 'order':
+      // A permutation of all the options.
+      return (
+        answer.optionIds.length === optionIds.size &&
+        new Set(answer.optionIds).size === optionIds.size &&
+        answer.optionIds.every((id) => optionIds.has(id))
+      )
     default:
       return true
   }
 }
 
-/** Sets correctness and points on every answer to `question` and adds the points to player scores. */
+/**
+ * Sets correctness and points on every answer to `question`, adds the points to player scores
+ * and moves streaks: a correct answer extends one, a wrong or missing answer resets it, and
+ * polls and ungraded answers leave it as it is. With `streakBonus` a correct answer's points
+ * include the bonus for the streak it makes.
+ */
 function scorePlayers(
   state: GameState,
   question: Question,
@@ -336,21 +361,25 @@ function scorePlayers(
   for (const player of Object.values(state.players)) {
     const record = player.answers[question.id]
     if (!record) {
-      players[player.id] = player
+      players[player.id] = question.type === 'poll' ? player : { ...player, streak: 0 }
       continue
     }
     const correct = question.type === 'poll' ? null : decide(record.answer, player.id)
-    const points = pointsFor(
-      question.points,
-      correct,
-      record.at - (state.questionStartedAt ?? record.at),
-      question.timeLimitSec * 1000,
-      state.settings.speedBonus,
-    )
+    const streak = correct === true ? (player.streak ?? 0) + 1 : correct === false ? 0 : (player.streak ?? 0)
+    const bonus = correct === true && state.settings.streakBonus ? streakBonusFor(streak) : 0
+    const points =
+      pointsFor(
+        question.points,
+        correct,
+        record.at - (state.questionStartedAt ?? record.at),
+        question.timeLimitSec * 1000,
+        state.settings.speedBonus,
+      ) + bonus
     players[player.id] = {
       ...player,
+      streak,
       score: player.score + points,
-      answers: { ...player.answers, [question.id]: { ...record, correct, points } },
+      answers: { ...player.answers, [question.id]: { ...record, correct, points, bonus } },
     }
   }
   return players

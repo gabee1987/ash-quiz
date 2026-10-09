@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { HistoryIcon, KeyRoundIcon, LayoutGridIcon, LogOutIcon, UserRoundIcon, UsersIcon } from 'lucide-react'
+import { DicesIcon, HistoryIcon, KeyRoundIcon, LayoutGridIcon, LogOutIcon, UserRoundIcon, UsersIcon } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -15,7 +15,7 @@ import { apiFetch } from '@/lib/api'
 import type { User } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 
-type To = '/host' | '/host/games' | '/host/users'
+type To = '/host' | '/host/games' | '/host/users' | '/host/nicknames'
 
 interface Item {
   to: To
@@ -24,7 +24,7 @@ interface Item {
   exact: boolean
 }
 
-/** Host navigation: a sidebar from `lg` up, a bottom tab bar below (Quizzes, Games, Users, Account). */
+/** Host navigation: a sidebar from `lg` up, a bottom tab bar below (Quizzes, Games, Users, Names, Account). */
 export function HostNav({ user }: { user: User }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -39,7 +39,12 @@ export function HostNav({ user }: { user: User }) {
   const items: Item[] = [
     { to: '/host', label: t('nav.quizzes'), icon: LayoutGridIcon, exact: true },
     { to: '/host/games', label: t('nav.games'), icon: HistoryIcon, exact: true },
-    ...(user.role === 'admin' ? [{ to: '/host/users' as const, label: t('users.title'), icon: UsersIcon, exact: false }] : []),
+    ...(user.role === 'admin'
+      ? [
+          { to: '/host/users' as const, label: t('users.title'), icon: UsersIcon, exact: false },
+          { to: '/host/nicknames' as const, label: t('nicknames.nav'), icon: DicesIcon, exact: false },
+        ]
+      : []),
   ]
 
   return (

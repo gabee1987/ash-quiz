@@ -35,6 +35,16 @@ export function toBuckets(
         correct: correct.has(option.id),
         index,
       }))
+    case 'order':
+      // In the correct order; each bar counts the players who put that item in its place.
+      // Neutral bars: ordering items have no answer colour or symbol.
+      return question.options.map((option, index) => ({
+        key: option.id,
+        label: `${index + 1}. ${option.text}`,
+        count: distribution[option.id] ?? 0,
+        correct: true,
+        index: null,
+      }))
     case 'truefalse':
       return (['true', 'false'] as const).map((key, index) => ({
         key,

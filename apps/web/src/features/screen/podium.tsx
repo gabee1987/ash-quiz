@@ -4,12 +4,15 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { CountUp } from '../../components/count-up'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { celebrate } from '../../lib/confetti'
 import { stagger } from '../../lib/motion'
 
 interface Place {
   id: string
   name: string
+  /** Players only; teams have none. */
+  avatar?: string | null
   score: number
   rank: number
 }
@@ -46,8 +49,11 @@ export function ScreenPodium({ host }: { host: HostSnapshot }) {
         <div className="flex animate-fade-up flex-wrap items-center justify-center gap-3" style={{ animationDelay: `${STEP_MS * 3 + 300}ms` }}>
           <span className="text-2xl font-bold text-muted-foreground">{t('screen.runnersUp')}</span>
           {runnersUp.map((place) => (
-            <span key={place.id} className="rounded-full border bg-card px-4 py-1 text-2xl font-semibold shadow-soft">
-              {place.rank}. {place.name}
+            <span
+              key={place.id}
+              className="flex items-center gap-2 rounded-full border bg-card py-1 pr-4 pl-2 text-2xl font-semibold shadow-soft"
+            >
+              {place.rank}. <PlayerAvatar avatar={'avatar' in place ? place.avatar : null} size="md" /> {place.name}
             </span>
           ))}
         </div>
@@ -91,6 +97,7 @@ export function PodiumStage({
               {position === 0 && (
                 <CrownIcon className={cn('animate-float text-warning', compact ? 'size-7' : 'size-14')} aria-label={t('play.champion')} />
               )}
+              <PlayerAvatar avatar={place.avatar} size={compact ? 'md' : 'xl'} />
               <p className={cn('text-center font-black wrap-break-word', compact ? 'text-base' : 'text-4xl')}>{place.name}</p>
               <CountUp
                 value={place.score}
