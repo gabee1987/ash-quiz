@@ -21,6 +21,7 @@ One file per phase. Each phase is one `feature/*` branch off `develop`, implemen
 | 14 | [Host control: pause, timed messages, show a question again](phase-14-host-control.md) | `feature/host-control` | done |
 | 15 | [Phone and results screens: game menu, question image, review cards, results summary, new game dialog](phase-15-screens.md) | `feature/screens-v2` | done |
 | 16 | [Join and login home screen](phase-16-home-screen.md) | `feature/home-screen` | done |
+| 17 | [Host lobby around the QR code](phase-17-host-lobby.md) | `feature/host-lobby` | done |
 
 Order matters: each phase builds on the previous one. Phase 1 and this planning material are the first two commits on `main` and `develop`.
 

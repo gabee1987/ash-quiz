@@ -118,6 +118,8 @@
       "confirmEnd": "End the game for everyone?",
       "kick": "Remove",
       "confirmKick": "Remove {{name}} from the game?",
+      "kickPlayer": "Remove {{name}}",
+      "teamEmpty": "Nobody yet",
       "online": "Connected",
       "offline": "Disconnected",
       "waitingForPlayers": "No players yet. Share the PIN or the QR code.",

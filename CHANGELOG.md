@@ -81,6 +81,11 @@
 - Host control between questions: a panel about the question on the screens says what they show (answers revealed, the scoreboard after it, or shown again) and gives the question's type, time and points, its image, the correct answer, how many answered and were right, the average time, the fastest right answer, the answer bars and who did not answer.
 - The new game dialog shows the settings in three groups (game flow, look, scoring) with short summaries. "Change" opens one group; a group changed for this game is marked and can be reset to the quiz's settings.
 
+### Host lobby
+- While players join, the host control is one layout around the QR code: the QR code, the PIN in big digits, the join link and "Open projector" in one card, with Start and the players next to it.
+- Players appear as avatar tiles that pop in, grouped by team in team mode; offline players show a dashed tile and how long they have been away; each tile has a small remove button.
+- The standings table of zeros is gone from the lobby, and "End game" moved to the bottom.
+
 ### Home screen
 - The join and login pages open with the cow and the Quizmoo name big and centre stage, with a short tagline; on laptops the cow is on the left and the form on the right.
 - The cow bobs, blinks and flicks its ears, the name's letters drop in, and answer shapes float around the edges. Tap the cow and it jumps and says something ("Moo!" and three more lines).

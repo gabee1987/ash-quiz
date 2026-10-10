@@ -118,6 +118,8 @@
       "confirmEnd": "Befejezed a játékot mindenkinek?",
       "kick": "Eltávolítás",
       "confirmKick": "Kiveszed {{name}} játékost a játékból?",
+      "kickPlayer": "{{name}} kivétele",
+      "teamEmpty": "Még senki",
       "online": "Online",
       "offline": "Offline",
       "waitingForPlayers": "Még senki sincs itt. Oszd meg a PIN-kódot vagy a QR-kódot.",
