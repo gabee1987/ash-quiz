@@ -43,6 +43,17 @@
       "fun": "Fun and games"
     }
   },
+  "home": {
+    "tagline": "Think. Quiz. Outsmart the herd!",
+    "cowLabel": "Pet the cow",
+    "joinLink": "Joining as a player? Enter the PIN",
+    "moo": {
+      "line1": "Moo!",
+      "line2": "Type the PIN, I’m waiting!",
+      "line3": "Quiz time!",
+      "line4": "Mooo… ready?"
+    }
+  },
   "common": {
     "loading": "Loading…",
     "next": "Next",

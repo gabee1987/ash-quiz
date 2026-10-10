@@ -64,3 +64,31 @@ $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 5. Open the login page on a laptop. Expected: hero left, login card right; a link back to joining.
 6. Switch to dark mode and to Hungarian. Expected: readable in both, texts translated.
 7. Turn on "reduce motion" in the OS. Expected: everything stands still.
+
+## Results
+
+- `src/components/home-hero.test.tsx` (5 cases): the speech lines cycle and start again after the last, every line exists in both languages, the app name is the page heading, nothing is said before the first tap and each tap shows the next line, the line is announced through a live region.
+- Performance on the production build, phone profile (390 × 844, CPU slowed 4×), median of 7 runs:
+
+  | | Before | After |
+  |---|---|---|
+  | `/` largest contentful paint | 488 ms | 508 ms |
+  | `/login` largest contentful paint | 456 ms | 520 ms |
+  | Layout shift | 0 | 0 |
+  | Main-thread time over 5 s idle | 8–9 ms | 46 ms |
+  | JavaScript / CSS loaded | 744 / 108 KB | 751 / 113 KB |
+  | Animated properties other than transform and opacity | none | none |
+
+  The idle cost is Chrome's bookkeeping for 21 running compositor animations (about 2 ms per animation per 5 s on the slowed CPU, none of it layout or paint); it varied between 44 and 88 ms across identical runs.
+- Screens checked: join and login on a phone and a laptop, light and dark, Hungarian and English; the PIN boxes end at 612 of 844 px (asserted); a tap mid-jump with the bubble; every speech line inside a 360 px screen in both languages (asserted); reduced motion: no running animation and the bubble stays (asserted).
+- All 9 e2e specs pass, including the axe check of the join and login pages in both modes.
+
+## Deviations
+
+- **No "look around" for the pupils**: they already sit at the edge of the eye whites (the cow's cross-eyed look), so there is no room to move them. The idle motion is the bob, the blink and the ear flicks.
+- **Five floating shapes, not up to eight**, and **no fade on the wordmark and tagline**: each running animation costs a little main-thread time, and text that fades in from transparent delays the largest contentful paint until it is visible.
+- **The login hero is the same size as the join hero** on phones; the login card fits below it on a 390 × 844 screen, so a smaller variant was not needed.
+- **One app slogan on both pages** ("Think. Quiz. Outsmart the herd!" / "Gondolkodj. Válaszolj. Győzd le a csordát!"), informal in Hungarian, instead of a separate host tagline on the login page (the user's call after testing).
+- **The Hungarian texts of the whole app were rewritten** (182 of 588 strings) in a friendly, informal tone at the user's request: no "Ön" on host and editor screens any more, verbs instead of noun phrases in headings. Placeholders were checked by script; the English texts are unchanged.
+- **The speech bubble is outlined in the text colour**, not the theme colour: where its tail overlaps the cow's tile, a theme-coloured outline vanished and the bubble looked cut off.
+- **A layout shift of 0.0002** can appear when the Nunito font arrives after the first paint: the wordmark's letters are separate boxes, so the font swap moves them. Google's "good" threshold is 0.1; preloading the font would remove it but touches every page.

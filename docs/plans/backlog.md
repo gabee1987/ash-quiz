@@ -51,6 +51,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Streak bonus, ordering question, avatars, nickname generator and filter, play again (phase 13).
 - Pause and resume, host messages that leave by themselves, showing an answered question again, "Show podium" telling the host where it went, the selected-answer marker, the double scrollbar (phase 14).
 - Phone game screens without the header, question images that fit, review cards, results summary, new game dialog in groups (phase 15).
+- Join and login home screen with the big animated cow (phase 16).
 
 ### Open
 
@@ -61,5 +62,4 @@ Collected while testing phases 9 to 12. Effort as above.
 | Host lobby restructure | Design | M | The lobby screen of the host control (QR code, PIN, players, message box) as one composition around the QR code instead of stacked panels. |
 | Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
 | Change answers until a deadline | Feature | M | A game mode where players can change their answer until the time is up (or an earlier deadline); the last answer counts, and the speed bonus uses its time or is turned off. |
-| Join and login home screen redesign | Design | M | The join page (`/`) and the login page (`/login`) get a clearer structure with the cow logo and the app name big and centre stage, in a joyful, game-like style: a funny logo animation (blink, wobble, a "moo" bounce) and a livelier animated background. Must stay snappy: CSS keyframes on `transform` and `opacity` only, inline SVG logo (no image or animation library downloads), no layout shift, nothing that blocks typing the PIN, everything stopped under reduced motion. Check with a Lighthouse performance run on a throttled phone profile before and after. |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |

@@ -34,7 +34,7 @@ t('play.answeredCount', { count: snapshot.answeredCount })
 
 ## Tone
 
-Hungarian uses informal "te" for players (event atmosphere) and formal, concise wording for host and editor screens. English is plain and short. Keep button labels to one or two words. Error messages say what to do next: "Nincs ilyen játék. Ellenőrizd a PIN-t."
+Hungarian is friendly, natural and informal ("te") on every screen, hosts, editor and admin pages included; never "Ön" or "Kérjük, …" (the user decided it is a game, October 2026). Write what a person would say: headings and calls to action as verbs ("Csatlakozz!", "Lépj be!", "Értékeld a válaszokat", "Törlöd ezt a kvízt?"), not noun phrases ("Csatlakozás a játékhoz", "Válaszok értékelése"). Short nouns stay where Hungarian apps use them on buttons ("Mentés", "Törlés", "Mégse", "Kész"). Prefer everyday words: "online/offline", "végleg", "pár mező", "Valami elromlott". Messages from the app speak as "we" ("Keressük a játékot…", "Nem találjuk."). English is plain and short. English is plain and short. Keep button labels to one or two words. Error messages say what to do next: "Nincs ilyen játék. Ellenőrizd a PIN-t."
 
 ## Adding a new error code
 

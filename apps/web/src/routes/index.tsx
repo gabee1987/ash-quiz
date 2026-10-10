@@ -7,7 +7,9 @@ import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { AvatarPicker } from '@/components/avatar-picker'
 import { ChoiceCards } from '@/components/choice-cards'
+import { FloatingShapes } from '@/components/floating-shapes'
 import { FormAlert } from '@/components/form-alert'
+import { HomeHero } from '@/components/home-hero'
 import { PinInput } from '@/components/pin-input'
 import { Button } from '@/components/ui/button'
 import { TextField } from '../components/text-field'
@@ -119,98 +121,102 @@ function JoinPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-5">
-      <h1 className="animate-fade-up text-center text-3xl font-black tracking-tight">{t('join.title')}</h1>
-      <form
-        className="flex animate-pop flex-col gap-5 rounded-3xl border bg-card p-5 shadow-soft"
-        onSubmit={(e) => void onSubmit(e)}
-        noValidate
-      >
-        <div ref={pinBox} className="flex flex-col gap-2">
-          <div className="flex min-h-10 items-center justify-between gap-2">
-            <span className="font-semibold">{t('join.pin')}</span>
-            {canScan && (
-              <Button type="button" variant="outline" size="sm" onClick={() => setScanning(true)}>
-                <CameraIcon aria-hidden="true" />
-                {t('join.scan')}
-              </Button>
-            )}
-          </div>
-          <PinInput value={pin} onChange={setPin} invalid={!!pinError} describedBy={pinError ? 'pin-error' : undefined} />
-          {pinError && (
-            <p id="pin-error" className="text-sm font-semibold text-destructive">
-              {pinError}
-            </p>
-          )}
-          {/* Until the game is found: OK closes the keyboard and checks the PIN. */}
-          {!game &&
-            (pinValid && info.isFetching ? (
-              <p role="status" className="flex min-h-11 items-center justify-center gap-2 font-semibold text-muted-foreground">
-                <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
-                {t('join.findingGame')}
+    <div className="mx-auto grid w-full max-w-sm flex-1 content-center gap-7 lg:max-w-5xl lg:grid-cols-2 lg:items-center lg:gap-16">
+      <FloatingShapes />
+      <HomeHero tagline={t('home.tagline')} />
+      <div className="flex w-full flex-col gap-5 lg:max-w-sm lg:justify-self-center">
+        <form
+          className="flex animate-pop flex-col gap-5 rounded-3xl border bg-card p-5 shadow-soft"
+          onSubmit={(e) => void onSubmit(e)}
+          noValidate
+        >
+          <h2 className="text-center text-2xl font-black tracking-tight">{t('join.title')}</h2>
+          <div ref={pinBox} className="flex flex-col gap-2">
+            <div className="flex min-h-10 items-center justify-between gap-2">
+              <span className="font-semibold">{t('join.pin')}</span>
+              {canScan && (
+                <Button type="button" variant="outline" size="sm" onClick={() => setScanning(true)}>
+                  <CameraIcon aria-hidden="true" />
+                  {t('join.scan')}
+                </Button>
+              )}
+            </div>
+            <PinInput value={pin} onChange={setPin} invalid={!!pinError} describedBy={pinError ? 'pin-error' : undefined} />
+            {pinError && (
+              <p id="pin-error" className="text-sm font-semibold text-destructive">
+                {pinError}
               </p>
-            ) : (
-              <Button type="button" variant="secondary" onClick={confirmPin}>
-                <CheckIcon aria-hidden="true" />
-                {t('join.pinOk')}
-              </Button>
-            ))}
-        </div>
-        {/* Name, avatar and team come once the PIN has found a game: they belong to that game. */}
-        {game ? (
-          <div ref={nameSection} className="flex animate-pop scroll-mt-4 flex-col gap-5">
-            <p className="rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
-              {game.quizTitle}
-            </p>
-            <TextField
-              label={t('join.name')}
-              name="name"
-              maxLength={24}
-              autoComplete="off"
-              enterKeyHint="go"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('join.namePlaceholder')}
-              error={nameError}
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="-mt-3 self-start"
-              disabled={surprise.isPending}
-              onClick={() => surprise.mutate()}
-            >
-              {surprise.isPending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <DicesIcon aria-hidden="true" />}
-              {t('join.surprise')}
-            </Button>
-            <AvatarPicker value={avatar} onChange={setAvatar} />
-            {teamMode && (
-              <ChoiceCards
-                legend={t('join.team')}
-                value={teamId ?? ''}
-                columns={1}
-                choices={game.teams.map((team) => ({ value: team.id, label: team.name }))}
-                onChange={setTeamId}
-                help={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
-              />
             )}
-            {error && <FormAlert>{t(error)}</FormAlert>}
-            <Button type="submit" size="xl" disabled={pending}>
-              {pending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
-              {pending ? t('common.loading') : t('join.submit')}
-            </Button>
+            {/* Until the game is found: OK closes the keyboard and checks the PIN. */}
+            {!game &&
+              (pinValid && info.isFetching ? (
+                <p role="status" className="flex min-h-11 items-center justify-center gap-2 font-semibold text-muted-foreground">
+                  <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
+                  {t('join.findingGame')}
+                </p>
+              ) : (
+                <Button type="button" variant="secondary" onClick={confirmPin}>
+                  <CheckIcon aria-hidden="true" />
+                  {t('join.pinOk')}
+                </Button>
+              ))}
           </div>
-        ) : (
-          error && <FormAlert>{t(error)}</FormAlert>
-        )}
-      </form>
-      <Link
-        to="/login"
-        className="self-center rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
-      >
-        {t('join.hostLogin')}
-      </Link>
+          {/* Name, avatar and team come once the PIN has found a game: they belong to that game. */}
+          {game ? (
+            <div ref={nameSection} className="flex animate-pop scroll-mt-4 flex-col gap-5">
+              <p className="rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
+                {game.quizTitle}
+              </p>
+              <TextField
+                label={t('join.name')}
+                name="name"
+                maxLength={24}
+                autoComplete="off"
+                enterKeyHint="go"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t('join.namePlaceholder')}
+                error={nameError}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="-mt-3 self-start"
+                disabled={surprise.isPending}
+                onClick={() => surprise.mutate()}
+              >
+                {surprise.isPending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <DicesIcon aria-hidden="true" />}
+                {t('join.surprise')}
+              </Button>
+              <AvatarPicker value={avatar} onChange={setAvatar} />
+              {teamMode && (
+                <ChoiceCards
+                  legend={t('join.team')}
+                  value={teamId ?? ''}
+                  columns={1}
+                  choices={game.teams.map((team) => ({ value: team.id, label: team.name }))}
+                  onChange={setTeamId}
+                  help={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
+                />
+              )}
+              {error && <FormAlert>{t(error)}</FormAlert>}
+              <Button type="submit" size="xl" disabled={pending}>
+                {pending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
+                {pending ? t('common.loading') : t('join.submit')}
+              </Button>
+            </div>
+          ) : (
+            error && <FormAlert>{t(error)}</FormAlert>
+          )}
+        </form>
+        <Link
+          to="/login"
+          className="self-center rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
+          {t('join.hostLogin')}
+        </Link>
+      </div>
       {scanning && (
         <Suspense fallback={null}>
           <QrScanner

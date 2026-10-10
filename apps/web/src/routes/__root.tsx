@@ -17,12 +17,15 @@ function RootLayout() {
   useEffect(() => installSquish(), [])
   useEffect(() => installSocketToasts(), [])
   // A phone in a game gets the whole screen: no header, its settings behind a floating button.
-  const inGame = useRouterState({ select: (state) => state.location.pathname.startsWith('/play/') })
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const inGame = pathname.startsWith('/play/')
+  // The join and login pages show the logo and name big in their hero.
+  const home = pathname === '/' || pathname === '/login'
   return (
     <>
       <Backdrop />
       <div className="flex min-h-full flex-col">
-        {inGame ? <GameMenu /> : <AppHeader />}
+        {inGame ? <GameMenu /> : <AppHeader brand={!home} />}
         <main className={cn('flex flex-1 flex-col px-4 pb-6', inGame && 'pt-[max(0.75rem,env(safe-area-inset-top))]')}>
           <Outlet />
         </main>

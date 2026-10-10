@@ -159,7 +159,7 @@ Quizmoo: a browser-based, mobile-first live quiz (Kahoot-like) for team events, 
 - Runtime / deployment target: one Node process serving both API, Socket.IO and the built SPA on the same origin. Docker image for Render/Railway or a laptop on the venue LAN. Postgres via docker-compose locally, Railway/Render/Supabase Postgres in the cloud.
 
 ### Git and delivery
-- The user runs every git command. The agent never runs `git`.
+- The user runs every git command. The agent never runs `git`, not even read-only commands (`log`, `show`, `diff`, `status`): read the files and `docs/plans/` instead, and `gh` for pull request state.
 - Branches: `main` (production only), `develop` (integration), `feature/*`, `fix/*`, `chore/*` off `develop`.
 - Work is organised in phases under `docs/plans/`, implemented with the `implement-phase` skill. Every phase or task ends with the delivery report defined in the `git-workflow` skill: branch, one-line commit message (sentence case, no type prefix, e.g. "Add socket game sessions"), verification command, tests added, manual test list.
 - Skills in `.claude/skills/`, one small file per topic. Process: `implement-phase`, `git-workflow`, `verification`, `browser-checks`. Server: `game-engine`, `scoring`, `realtime`, `server-api`, `database`. Web: `web-ui`, `game-screens`, `quiz-editor`, `design-system`, `motion`, `socket-client`. Both: `i18n`. Session learnings go into the matching skill (see `implement-phase`).

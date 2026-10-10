@@ -81,6 +81,12 @@
 - Host control between questions: a panel about the question on the screens says what they show (answers revealed, the scoreboard after it, or shown again) and gives the question's type, time and points, its image, the correct answer, how many answered and were right, the average time, the fastest right answer, the answer bars and who did not answer.
 - The new game dialog shows the settings in three groups (game flow, look, scoring) with short summaries. "Change" opens one group; a group changed for this game is marked and can be reset to the quiz's settings.
 
+### Home screen
+- The join and login pages open with the cow and the Quizmoo name big and centre stage, with a short tagline; on laptops the cow is on the left and the form on the right.
+- The cow bobs, blinks and flicks its ears, the name's letters drop in, and answer shapes float around the edges. Tap the cow and it jumps and says something ("Moo!" and three more lines).
+- The Hungarian texts are rewritten across the app in a friendly, informal tone ("Csatlakozz!" instead of "Csatlakozás a játékhoz"), hosts and editors included.
+- The pages stay as fast as before: no new downloads, every animation runs on the graphics thread, nothing jumps while loading, and everything stands still with reduced motion.
+
 ### Fixes
 - The selected answer on phones (colourful buttons) is marked inside the option, in its text colour, instead of with a ring that reached into the neighbouring answers.
 - The quiz editor no longer shows two scrollbars when the quiz settings are open beside a short question.

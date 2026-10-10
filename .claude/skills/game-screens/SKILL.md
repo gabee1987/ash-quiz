@@ -1,11 +1,15 @@
 ---
 name: game-screens
-description: Layout rules for the Quizmoo game screens: the phone (/play) mobile-first rules, game menu, question image fit, timer, join flow, review cards, the projector (/screen) sizes and the host control panels. Load when changing what players, the projector or the host see during a game.
+description: Layout rules for the Quizmoo player-facing screens: the join and login home pages with the animated cow, the phone (/play) mobile-first rules, game menu, question image fit, timer, join flow, review cards, the projector (/screen) sizes and the host control panels. Load when changing what players, the projector or the host see during a game.
 ---
 
 # Game screens
 
 Screens are pure functions of the latest snapshot (see `web-ui`). Colours and motion are in `design-system` and `motion`.
+
+## Join and login pages (`/`, `/login`)
+
+Both start with `HomeHero` (the animated `CowLogo` on a primary tile, the wordmark as the page `h1`, the one app slogan `home.tagline` on both pages; tapping the cow cycles through `home.moo.line1..4` in a speech bubble outlined in `foreground`, since a `primary` outline disappears where it overlaps the primary tile; its tail is an inline SVG whose fill reaches 4 px up into the bubble to cover its bottom border, with the two sides stroked on top; an exact-fit tail left the border line across it on 1× and 1.25× screens) and `FloatingShapes` (five answer shapes in the candy palette behind the content). On phones the hero sits above the card; from `lg` the hero is left and the card right. The card heading is an `h2`. `AppHeader brand={false}` on these two routes (set in `__root.tsx`), so the logo is not shown twice. Keep the PIN boxes visible without scrolling on a 390 × 844 phone.
 
 ## Phone (`/play/$pin`, join page)
 

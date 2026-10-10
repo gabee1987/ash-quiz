@@ -16,3 +16,12 @@ description: Quizmoo animation rules: CSS keyframe utilities, staggering, keying
 - Scrollbars are styled globally in `styles.css` (pill thumb in the theme colour, plumper on hover); Firefox gets the thin `scrollbar-color` variant.
 - The projector's results summary (`useSlideshow`) moves on every 8 s and can be paused (button or P); resuming keeps the time that was left.
 - Host messages fly in and out with an elastic animation and show their remaining time as a progress bar on the message itself.
+
+## Performance rules (learned in phase 16)
+
+- Animate HTML elements, not parts inside an SVG: Chrome runs transform animations of HTML elements on the compositor, but animating an SVG child repaints the SVG on the main thread every frame. To move parts of a drawing, stack one `<svg>` per part in absolutely positioned wrappers and animate the wrappers (`CowLogo` in `components/cow-logo.tsx`).
+- An element with an SVG `transform` attribute loses it when CSS animates its `transform`; animate a wrapper instead.
+- Every running animation still costs a little main-thread time (about 2 ms per 5 s each on a 4× slowed CPU), even on the compositor and with `will-change`. Keep endless idle animations few (the home pages run 21 in all).
+- Never fade the largest text of a page in from `opacity: 0`: the largest contentful paint waits until it is visible. Use transform-only entrances for headings and taglines.
+- The reduced-motion rule ends animations at their last keyframe. An animation that ends hidden (the cow's speech bubble) needs `animation: none` in the reduced-motion block, or it never shows.
+- Measure before and after with the phone profile script described in `browser-checks`.

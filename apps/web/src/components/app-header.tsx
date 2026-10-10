@@ -3,15 +3,17 @@ import { languages, setLanguage } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { ModeToggle } from './mode-toggle'
 
-/** Compact header on every screen: logo mark, language and colour mode. */
-export function AppHeader() {
+/** Compact header: logo mark, language and colour mode. Without `brand` (the home pages show a big one) only the settings. */
+export function AppHeader({ brand = true }: { brand?: boolean }) {
   const { t } = useTranslation()
   return (
-    <header className="flex items-center justify-between gap-3 px-4 py-3">
-      <span className="flex items-center gap-2.5">
-        <LogoMark />
-        <span className="text-lg font-black tracking-tight">{t('app.name')}</span>
-      </span>
+    <header className={cn('flex items-center gap-3 px-4 py-3', brand ? 'justify-between' : 'justify-end')}>
+      {brand && (
+        <span className="flex items-center gap-2.5">
+          <LogoMark />
+          <span className="text-lg font-black tracking-tight">{t('app.name')}</span>
+        </span>
+      )}
       <span className="flex items-center gap-1">
         <LanguageSwitch />
         <ModeToggle />
