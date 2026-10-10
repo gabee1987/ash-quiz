@@ -16,7 +16,7 @@ The server side (rooms, snapshots, timers) is in the `realtime` skill.
 - `lib/socket-toasts.ts` turns transitions into toasts: "Reconnected" after a drop, nothing on the first connect.
 - `clockOffset = snapshot.serverNow - Date.now()` is updated on every snapshot; countdowns use `questionEndsAt - (Date.now() + clockOffset)`.
 - Player tokens are kept in `localStorage` under `quizmoo.player.<pin>` as `{ token, name }`. Storage access is wrapped in try/catch.
-- Answers go through `sendAnswer`: the option stays pending until `{ ok: true }` or a definitive error. A lost ack (or `errors.playerNotFound` from a socket that has not rejoined yet) is retried once while the question is still open; `errors.alreadyAnswered` on the retry counts as sent. When both fail the player gets `errors.answerNotSent` ("tap again") as a toast; never a silent loss.
+- Answers go through `sendAnswer`: the option stays pending until `{ ok: true }` or a definitive error. A lost ack (or `errors.playerNotFound` from a socket that has not rejoined yet) is retried once while the question is still open; `errors.alreadyAnswered` on the retry counts as sent; with answer changes on, the server takes an identical retry as a no-op, so it acks `{ ok: true }` and keeps the first time. When both fail the player gets `errors.answerNotSent` ("tap again") as a toast; never a silent loss.
 
 ## Open issue
 

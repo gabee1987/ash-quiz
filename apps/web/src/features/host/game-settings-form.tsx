@@ -29,7 +29,7 @@ export function settingsError(settings: GameSettings): string | null {
 export const settingsSections = {
   flow: ['mode', 'teamNames', 'revealAnswers', 'scoreboard', 'finalResults'],
   look: ['theme', 'answerPalette', 'answerSymbols', 'answerStyle'],
-  scoring: ['speedBonus', 'streakBonus', 'shuffleOptions'],
+  scoring: ['speedBonus', 'streakBonus', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
 export type SettingsSection = keyof typeof settingsSections
 export const allSections = Object.keys(settingsSections) as SettingsSection[]
@@ -55,10 +55,19 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
     scoring: [
       settings.speedBonus ? t('host.create.speedBonus') : null,
       settings.streakBonus ? t('host.create.streakBonus') : null,
+      answerChangesLabel(settings, t),
       settings.shuffleOptions ? t('host.create.shuffle') : null,
     ],
   }[section]
   return items.filter((item): item is string => Boolean(item))
+}
+
+/** Short label of the answer changes setting, or null when it is off. */
+export function answerChangesLabel(settings: GameSettings, t: TFunction): string | null {
+  if (!settings.answerChanges) return null
+  return settings.answerLockSec > 0
+    ? t('host.create.answerChangesLocked', { count: settings.answerLockSec })
+    : t('host.create.answerChangesShort')
 }
 
 /** One line describing the settings, e.g. "Classic · After each question · Plain · Speed bonus". */
@@ -257,6 +266,27 @@ export function GameSettingsForm({
             checked={value.streakBonus}
             onChange={(streakBonus) => set({ streakBonus })}
           />
+          <SwitchRow
+            label={t('host.create.answerChanges')}
+            description={t('host.create.answerChangesHelp')}
+            checked={value.answerChanges}
+            onChange={(answerChanges) => set({ answerChanges })}
+          />
+          {value.answerChanges && (
+            <div className="pb-2">
+              <ChoiceCards
+                legend={t('host.create.answerLock')}
+                value={String(value.answerLockSec)}
+                choices={[...new Set([0, 5, 10, value.answerLockSec])]
+                  .sort((a, b) => a - b)
+                  .map((sec) => ({
+                    value: String(sec),
+                    label: sec === 0 ? t('host.create.answerLockEnd') : t('host.create.answerLockBefore', { count: sec }),
+                  }))}
+                onChange={(sec) => set({ answerLockSec: Number(sec) })}
+              />
+            </div>
+          )}
           <SwitchRow
             label={t('host.create.shuffle')}
             checked={value.shuffleOptions}

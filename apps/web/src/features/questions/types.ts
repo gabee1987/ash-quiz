@@ -15,5 +15,7 @@ export interface QuestionProps<Q extends PublicQuestion['type']> {
   colourful?: boolean
   /** Symbol set of the options (game setting). */
   symbols?: AnswerSymbols | undefined
+  /** The answer given before, shown selected when the player changes it. */
+  initial?: Answer | null | undefined
   onSubmit?: (answer: Answer) => void
 }

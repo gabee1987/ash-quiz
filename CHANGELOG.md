@@ -81,6 +81,11 @@
 - Host control between questions: a panel about the question on the screens says what they show (answers revealed, the scoreboard after it, or shown again) and gives the question's type, time and points, its image, the correct answer, how many answered and were right, the average time, the fastest right answer, the answer bars and who did not answer.
 - The new game dialog shows the settings in three groups (game flow, look, scoring) with short summaries. "Change" opens one group; a group changed for this game is marked and can be reset to the quiz's settings.
 
+### Change answers
+- New game setting "Change answers" (scoring group, off by default): players can change their answer while the question runs, and the last one counts, with its time for the speed bonus.
+- An optional lock-in stops changes 5 or 10 seconds before the end; a player who has not answered yet can still answer until the time is up.
+- On the phone, the answered view offers "Change answer" with the seconds left; changing shows the question again with the previous answer selected, and "Keep it" goes back.
+
 ### Host lobby
 - While players join, the host control is one layout around the QR code: the QR code, the PIN in big digits, the join link and "Open projector" in one card, with Start and the players next to it.
 - Players appear as avatar tiles that pop in, grouped by team in team mode; offline players show a dashed tile and how long they have been away; each tile has a small remove button.

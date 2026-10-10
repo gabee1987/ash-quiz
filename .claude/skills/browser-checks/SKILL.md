@@ -21,7 +21,7 @@ It uses the dev database, which is the user's data (see `database`).
 ## Screenshot scripts
 
 - Playwright scripts (`.cjs`) live in the session scratchpad, never in the repo. Run them with Node and take `chromium` from `@playwright/test`, the only Playwright package installed (`require(require.resolve('@playwright/test', { paths: ['C:/Coding/quizmoo/apps/web'] }))`). Use the installed Chrome (`channel: 'chrome'`), as the e2e config does.
-- Log in with the host account the user gave for testing; never write that password into a repo file.
+- Log in with the host account the user gave for testing; never write that password into a repo file. If the session has no `E2E_USERNAME` / `E2E_PASSWORD` in its environment, ask the user for them (or to run the e2e and screenshots) at the start of the browser step; do not search old transcripts for the password or create extra accounts or databases to get around it (the permission guard refuses both).
 - Each script creates its own quiz and games with a fixed prefix (e.g. "Shots p16") and deletes every quiz and game with that prefix in a `finally` block, also after a failure.
 - Phone shots at 390 × 844, laptop at 1440 × 900, projector at 1920 × 1080; take both colour modes when colours changed. Assert the claim when there is one (e.g. "no scroll": `scrollHeight <= innerHeight`), then look at the picture.
 - Small details (borders, joins, 1–2 px overlaps) are checked at `deviceScaleFactor` 1, 1.25 and 1.5 as well, enlarged with nearest-neighbour scaling: a 3× render hides 1 px rounding gaps that the user's Windows laptop shows. When the user sends a screenshot that disagrees with yours, enlarge theirs first and compare before changing anything.

@@ -20,6 +20,7 @@ Both start with `HomeHero` (the animated `CowLogo` on a primary tile, the wordma
 - Forms: `inputMode="numeric"` for the PIN, `autoComplete="off"`, `enterKeyHint`.
 - A persistent thin status bar shows connection state when it is not `connected`, using `errors.connectionLost`.
 - Timer: a shrinking bar plus a ring with the seconds, driven by `requestAnimationFrame` against the clock offset. Stop at 0, never negative; the last five seconds turn red and pulse.
+- Answered view: a check, "Answer sent!" and the count. With `answerChanges` it adds "Change answer" and the seconds left (`changeWindow` in `features/play/change-window.ts`, server time; frozen and disabled while paused). Changing shows the question again with the previous answer as `initial` on every question input, plus "Keep it"; it falls back to the answered view when the lock-in starts or the change is acked.
 - Join: the PIN comes first, the name and avatar only after the PIN is accepted. `PinInput` (one box per digit) and the lazy `QrScanner` (camera + `jsqr`, decoded on the device; offered only when `navigator.mediaDevices.getUserMedia` exists, i.e. HTTPS or localhost). `pinFromScan` in `lib/pin.ts` accepts the join link, a play link or the bare digits.
 - End-of-game review (`podium.tsx`): one `<details>` card per question, open by default, the question as a heading alone on the first row, level result chips, the card tinted with its result tone (`--tone`) through sRGB `color-mix` (see `design-system`).
 

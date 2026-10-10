@@ -266,6 +266,39 @@ describe('question flow', () => {
     expectCode(() => answer(state, 'p1', { type: 'single', optionId: 'b' }, T0), 'errors.alreadyAnswered')
   })
 
+  describe('with answer changes', () => {
+    it('replaces the answer and its time; the reveal scores the last one', () => {
+      let state = startGame(withPlayers(1, { answerChanges: true }), T0)
+      state = answer(state, 'p1', { type: 'single', optionId: 'b' }, T0 + 2_000)
+      state = answer(state, 'p1', { type: 'single', optionId: 'a' }, T0 + 10_000)
+      expect(state.players.p1!.answers['q-single']).toMatchObject({ answer: { optionId: 'a' }, timeMs: 10_000 })
+      state = endQuestion(state)
+      expect(state.players.p1!.answers['q-single']).toMatchObject({ correct: true, points: 750 })
+      expectSerialisable(state)
+    })
+
+    it('keeps the time when the same answer comes again', () => {
+      const first = answer(startGame(withPlayers(1, { answerChanges: true }), T0), 'p1', correctAnswers[0]!, T0 + 1_000)
+      const again = answer(first, 'p1', correctAnswers[0]!, T0 + 9_000)
+      expect(again).toBe(first)
+    })
+
+    it('refuses changes in the lock-in seconds but still takes a first answer', () => {
+      const state = answer(startGame(withPlayers(2, { answerChanges: true, answerLockSec: 5 }), T0), 'p1', correctAnswers[0]!, T0)
+      expect(() => answer(state, 'p1', { type: 'single', optionId: 'b' }, T0 + 15_000)).not.toThrow()
+      expectCode(() => answer(state, 'p1', { type: 'single', optionId: 'b' }, T0 + 15_001), 'errors.answerLocked')
+      expect(() => answer(state, 'p2', correctAnswers[0]!, T0 + 19_000)).not.toThrow()
+    })
+
+    it('moves the lock with added time', () => {
+      const state = extendTime(
+        answer(startGame(withPlayers(1, { answerChanges: true, answerLockSec: 5 }), T0), 'p1', correctAnswers[0]!, T0),
+        10,
+      )
+      expect(() => answer(state, 'p1', { type: 'single', optionId: 'b' }, T0 + 20_000)).not.toThrow()
+    })
+  })
+
   it('rejects a wrong answer type and unknown option ids', () => {
     const state = startGame(withPlayers(1), T0)
     expectCode(() => answer(state, 'p1', { type: 'truefalse', value: true }, T0), 'errors.invalidAnswer')

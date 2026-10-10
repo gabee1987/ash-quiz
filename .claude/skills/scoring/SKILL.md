@@ -9,7 +9,7 @@ Scoring is part of the pure engine (`apps/server/src/game`, see `game-engine`). 
 
 ## Points
 
-Let `P` = question points, `T` = time limit in ms, `t` = the answer's stored `timeMs` (answer time minus `questionStartedAt` when it was given, so a later resume does not change it; clamped to `[0, T]`).
+Let `P` = question points, `T` = time limit in ms, `t` = the answer's stored `timeMs` (answer time minus `questionStartedAt` when it was given, so a later resume does not change it; clamped to `[0, T]`). A changed answer (`settings.answerChanges`) carries the time of the change.
 
 - Correct answer, speed bonus on: `round(P * (1 - t / T / 2))`, so between `P` and `P/2`.
 - Correct answer, speed bonus off: `P`.

@@ -1,7 +1,7 @@
 import { DndContext, closestCenter, type UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { Option } from '@quizmoo/shared'
+import type { Answer, Option } from '@quizmoo/shared'
 import { ChevronDownIcon, ChevronUpIcon, GripVerticalIcon, Loader2Icon } from 'lucide-react'
 import { useCallback, useState, type KeyboardEventHandler } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,9 +16,9 @@ import type { QuestionProps } from './types'
  * "Put in order": the items arrive shuffled; the player drags them (or uses the arrows) into
  * order and sends. On the projector the same list is shown read-only.
  */
-export function OrderAnswer({ question, mode, disabled, pending, large, onSubmit }: QuestionProps<'order'>) {
+export function OrderAnswer({ question, mode, disabled, pending, large, initial, onSubmit }: QuestionProps<'order'>) {
   const { t } = useTranslation()
-  const [items, setItems] = useState<Option[]>(question.options)
+  const [items, setItems] = useState<Option[]>(() => initialOrder(question.options, initial))
   // The editor's preview edits the items live; in a game they never change, so a player's order stays.
   const signature = question.options.map((o) => `${o.id}:${o.text}`).join('|')
   const [shownSignature, setShownSignature] = useState(signature)
@@ -77,6 +77,12 @@ export function OrderAnswer({ question, mode, disabled, pending, large, onSubmit
       )}
     </div>
   )
+}
+
+/** The options in the order the player sent before, if any. */
+function initialOrder(options: Option[], initial: Answer | null | undefined): Option[] {
+  if (initial?.type !== 'order') return options
+  return initial.optionIds.flatMap((id) => options.filter((o) => o.id === id))
 }
 
 function OrderItem({

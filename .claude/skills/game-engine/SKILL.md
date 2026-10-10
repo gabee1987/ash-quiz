@@ -39,7 +39,7 @@ interface Team { id: string; name: string; score: number }
 
 ## Commands
 
-Each command is `(state, input, now) => GameState` and returns a new object (no mutation). Invalid commands throw `EngineError` whose `code` is an i18n key (`errors.gameNotFound`, `errors.gameAlreadyStarted`, `errors.nameTaken`, `errors.gameFull`, `errors.notYourTurn`, `errors.questionClosed`, `errors.alreadyAnswered`, `errors.invalidAnswer`, `errors.unknownTeam`, `errors.invalidTransition`).
+Each command is `(state, input, now) => GameState` and returns a new object (no mutation). Invalid commands throw `EngineError` whose `code` is an i18n key (`errors.gameNotFound`, `errors.gameAlreadyStarted`, `errors.nameTaken`, `errors.gameFull`, `errors.notYourTurn`, `errors.questionClosed`, `errors.alreadyAnswered`, `errors.answerLocked`, `errors.invalidAnswer`, `errors.unknownTeam`, `errors.invalidTransition`).
 
 | Command | Allowed in | Effect |
 |---|---|---|
@@ -53,7 +53,7 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | `showQuestion(index)` / `closeQuestion()` | reveal or scoreboard, not `awaitingGrading`, not `answersHidden(state, 'screen')`, `0 <= index <= questionIndex` | `reviewIndex` set / cleared; snapshots then show that question as phase `reveal` with `reviewing: true`, own results, no round points (ranks do not move); `next`, `showScoreboard` and `endGame` clear it |
 | `kickPlayer(playerId)` | any except finished | removes player, recomputes nothing (their past points stay out of team totals from then on) |
 | `startGame()` | lobby, at least 1 player, at least 1 question | goes to question 0 |
-| `submitAnswer(playerId, questionId, answer)` | question, before `questionEndsAt`, once per player per question | records answer, answer type must match question type |
+| `submitAnswer(playerId, questionId, answer)` | question, before `questionEndsAt`, once per player per question unless `settings.answerChanges` | records answer, answer type must match question type; with `answerChanges` a different answer replaces the record (new `at` and `timeMs`) until `questionEndsAt - answerLockSec` (then `errors.answerLocked`; first answers still taken until the end), and an identical one returns the state unchanged so a retry keeps its time |
 | `endQuestion()` | question | scores all answers, goes to reveal; sets `awaitingGrading` for host-graded text |
 | `gradeText(correctPlayerIds)` | reveal with `awaitingGrading` | marks listed answers correct, scores them, clears flag |
 | `next()` | reveal -> scoreboard; scoreboard -> question (index+1) or finished | |

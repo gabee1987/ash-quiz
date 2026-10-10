@@ -26,7 +26,7 @@ One Node.js process serves the API, the realtime connection (Socket.IO) and the 
 | [docs/deploy.md](docs/deploy.md) | Running it on a laptop at the venue, on Railway or on Render, environment variables, first admin |
 | [docs/security-notes.md](docs/security-notes.md) | Security controls, dependency audit and documented exceptions |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
-| [docs/plans](docs/plans) | How it was built, phase by phase |
+| [docs/plans](docs/plans) | The phase in progress, the phase list and the backlog |
 
 ## Run it with Docker (quickest)
 
