@@ -80,4 +80,5 @@ $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 
 - **Lock-in as choice cards, not a free number:** "The time is up", "5 s before the end", "10 s before the end" (a different saved value is shown as an extra card). The app has no number fields in the settings, and three choices are quicker on a phone. The schema still takes any 0 to 60.
 - **No server change for retries:** an identical answer is a no-op in the engine, so the client's single retry needs no answer id.
+- **The last player to answer cannot change:** their answer closes the question early (the early close stays, as decided); a solo test therefore never shows the button. Tested by the user with two phones.
 - **Not checked in the browser by the agent:** the session had no host login for screenshots and the e2e run; the user runs the new e2e spec and the manual tests.
