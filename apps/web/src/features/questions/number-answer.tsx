@@ -11,9 +11,9 @@ export function parseNumber(input: string): number | null {
   return Number.isFinite(value) ? value : null
 }
 
-export function NumberAnswer({ mode, disabled, large, onSubmit }: QuestionProps<'number'>) {
+export function NumberAnswer({ mode, disabled, large, initial, onSubmit }: QuestionProps<'number'>) {
   const { t } = useTranslation()
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState(initial?.type === 'number' ? String(initial.value) : '')
   if (mode === 'display') {
     return <p className={`text-center text-muted-foreground ${large ? 'text-4xl' : ''}`}>{t('screen.answerOnPhone')}</p>
   }

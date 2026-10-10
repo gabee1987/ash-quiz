@@ -362,8 +362,8 @@ describeDb('sockets (database)', () => {
     })
   }
 
-  async function newGame(): Promise<string> {
-    const res = await built.app.inject({ method: 'POST', url: '/api/games', headers: { cookie: hostCookie }, payload: { quizId } })
+  async function newGame(settings?: Record<string, unknown>): Promise<string> {
+    const res = await built.app.inject({ method: 'POST', url: '/api/games', headers: { cookie: hostCookie }, payload: { quizId, settings } })
     expect(res.statusCode).toBe(201)
     return res.json().pin
   }
@@ -436,6 +436,25 @@ describeDb('sockets (database)', () => {
     expect(await b.socket.emitWithAck('player:answer', answer)).toEqual({ ok: true })
     expect((await reveal).reveal!.answeredCount).toBe(2)
     expect(await a.socket.emitWithAck('player:answer', answer)).toEqual({ error: 'errors.questionClosed' })
+  })
+
+  it('with answer changes, the reveal scores the changed answer', async () => {
+    const pin = await newGame({ answerChanges: true })
+    const hostSocket = await host(pin)
+    const a = await player(pin, 'Anna')
+    await player(pin, 'Bence')
+    const question = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'question')
+    await command(hostSocket, { type: 'start' })
+    const q = (await question).question!
+
+    const changed = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.myAnswer?.type === 'single' && s.myAnswer.optionId === 'a')
+    expect(await a.socket.emitWithAck('player:answer', { questionId: q.id, answer: { type: 'single', optionId: 'b' } })).toEqual({ ok: true })
+    expect(await a.socket.emitWithAck('player:answer', { questionId: q.id, answer: { type: 'single', optionId: 'a' } })).toEqual({ ok: true })
+    await changed
+
+    const revealed = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'reveal')
+    await command(hostSocket, { type: 'endQuestion' })
+    expect((await revealed).lastCorrect).toBe(true)
   })
 
   it('a token reclaims the same player with its score after a disconnect', async () => {

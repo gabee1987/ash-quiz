@@ -138,6 +138,10 @@ export const gameSettingsSchema = z
     speedBonus: z.boolean().default(true),
     /** Correct answers in a row earn extra points: +100 from the second, up to +500. */
     streakBonus: z.boolean().default(false),
+    /** Players may change their answer while the question runs; the last one counts, with its time. */
+    answerChanges: z.boolean().default(false),
+    /** Changes stop this many seconds before the end (0: until the time is up). First answers are still taken. */
+    answerLockSec: z.number().int().min(0).max(60).default(0),
     /** Shuffle answer options per game. */
     shuffleOptions: z.boolean().default(false),
     /** Team names prepared by the host (team mode only). Players pick one when joining. */

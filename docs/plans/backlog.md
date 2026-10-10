@@ -53,6 +53,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Phone game screens without the header, question images that fit, review cards, results summary, new game dialog in groups (phase 15).
 - Join and login home screen with the big animated cow (phase 16).
 - Host lobby rebuilt around the QR code, with player tiles (phase 17).
+- Players can change their answer until the time is up or a lock-in a few seconds before; the last answer counts, with its time (phase 18).
 
 ### Open
 
@@ -61,6 +62,5 @@ Collected while testing phases 9 to 12. Effort as above.
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
 | Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
-| Change answers until a deadline | Feature | M | A game mode where players can change their answer until the time is up (or an earlier deadline); the last answer counts, and the speed bonus uses its time or is turned off. |
 | Names page markup | Fix | S | The admin "Surprise me" names page nests a list inside a paragraph; React's development build reports it as invalid HTML (seen when the e2e suite runs against the dev server). Production is unaffected. |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |

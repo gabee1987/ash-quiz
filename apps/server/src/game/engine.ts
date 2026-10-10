@@ -139,7 +139,13 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
   if (state.pausedAt) throw new EngineError('errors.gamePaused')
   const question = currentQuestion(state)
   if (question.id !== input.questionId) throw new EngineError('errors.questionClosed')
-  if (player.answers[question.id]) throw new EngineError('errors.alreadyAnswered')
+  const previous = player.answers[question.id]
+  if (previous) {
+    if (!state.settings.answerChanges) throw new EngineError('errors.alreadyAnswered')
+    // The same answer again (a retry, or a second tap) keeps its time.
+    if (JSON.stringify(previous.answer) === JSON.stringify(input.answer)) return state
+    if (now > state.questionEndsAt - state.settings.answerLockSec * 1000) throw new EngineError('errors.answerLocked')
+  }
   if (!answerFits(question, input.answer)) throw new EngineError('errors.invalidAnswer')
 
   return withPlayer(state, {

@@ -4,8 +4,10 @@ import { stagger } from '../../lib/motion'
 import type { QuestionProps } from './types'
 
 /** Tap to submit. Polls share this layout. */
-export function SingleChoice({ question, mode, disabled, pending, large, colourful, symbols, onSubmit }: QuestionProps<'single' | 'poll'>) {
-  const [chosen, setChosen] = useState<string | null>(null)
+export function SingleChoice({ question, mode, disabled, pending, large, colourful, symbols, initial, onSubmit }: QuestionProps<'single' | 'poll'>) {
+  const [chosen, setChosen] = useState<string | null>(
+    initial?.type === 'single' || initial?.type === 'poll' ? initial.optionId : null,
+  )
   return (
     <div className="@container flex flex-1 flex-col">
       <div className="grid flex-1 auto-rows-fr gap-3 @md:grid-cols-2">

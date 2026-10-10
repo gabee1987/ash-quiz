@@ -17,6 +17,7 @@ export function QuestionInput(props: {
   large?: boolean
   colourful?: boolean
   symbols?: AnswerSymbols | undefined
+  initial?: Answer | null | undefined
   onSubmit?: (answer: Answer) => void
 }) {
   const { question, ...rest } = props

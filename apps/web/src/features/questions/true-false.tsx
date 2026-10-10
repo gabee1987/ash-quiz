@@ -4,9 +4,9 @@ import { OptionButton } from '../../components/option-button'
 import { stagger } from '../../lib/motion'
 import type { QuestionProps } from './types'
 
-export function TrueFalse({ mode, disabled, pending, large, colourful, symbols, onSubmit }: QuestionProps<'truefalse'>) {
+export function TrueFalse({ mode, disabled, pending, large, colourful, symbols, initial, onSubmit }: QuestionProps<'truefalse'>) {
   const { t } = useTranslation()
-  const [chosen, setChosen] = useState<boolean | null>(null)
+  const [chosen, setChosen] = useState<boolean | null>(initial?.type === 'truefalse' ? initial.value : null)
   const choices = [
     { value: true, label: t('play.true') },
     { value: false, label: t('play.false') },

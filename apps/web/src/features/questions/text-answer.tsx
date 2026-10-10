@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import type { QuestionProps } from './types'
 
-export function TextAnswer({ mode, disabled, large, onSubmit }: QuestionProps<'text'>) {
+export function TextAnswer({ mode, disabled, large, initial, onSubmit }: QuestionProps<'text'>) {
   const { t } = useTranslation()
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState(initial?.type === 'text' ? initial.value : '')
   if (mode === 'display') {
     return <p className={`text-center text-muted-foreground ${large ? 'text-4xl' : ''}`}>{t('screen.answerOnPhone')}</p>
   }
