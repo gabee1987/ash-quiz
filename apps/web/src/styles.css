@@ -886,6 +886,170 @@
   }
 }
 
+/*
+ * Home hero (join and login pages): the cow bobs, blinks and flicks its ears, jumps when tapped,
+ * and the name's letters drop in. Every moving part is an HTML element animated with transform
+ * or opacity only, so it all runs on the compositor (see cow-logo.tsx).
+ */
+.hero-bob {
+  transform-origin: 50% 100%;
+  animation: hero-bob 3.2s ease-in-out infinite;
+}
+.hero-shadow {
+  animation: hero-shadow 3.2s ease-in-out infinite;
+}
+.hero-jump {
+  transform-origin: 50% 100%;
+  animation: hero-jump 0.8s ease-out both;
+}
+.hero-bubble {
+  transform-origin: 0 100%;
+  animation: hero-bubble 2.6s ease-out both;
+}
+.hero-letter {
+  animation: hero-letter 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.cow-ear-left {
+  transform-origin: 26% 35%;
+  animation: cow-ear-left 5s ease-in-out infinite;
+}
+.cow-ear-right {
+  transform-origin: 74% 35%;
+  animation: cow-ear-right 6.5s ease-in-out infinite;
+}
+.cow-eyes {
+  transform-origin: 50% 43%;
+  animation: cow-blink 4.2s linear infinite;
+}
+.floating-shape {
+  animation: float-about 8s ease-in-out infinite alternate;
+}
+@keyframes hero-bob {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+@keyframes hero-shadow {
+  50% {
+    transform: scaleX(0.75);
+    opacity: 0.6;
+  }
+}
+/* Squats, leaps with a stretch and a tilt, splats on landing and wobbles back. */
+@keyframes hero-jump {
+  15% {
+    transform: translateY(4px) scale(1.12, 0.82);
+  }
+  40% {
+    transform: translateY(-34px) scale(0.9, 1.12) rotate(-6deg);
+    animation-timing-function: ease-in;
+  }
+  60% {
+    transform: translateY(0) scale(1.1, 0.88);
+  }
+  78% {
+    transform: scale(0.96, 1.04) rotate(3deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+/* Pops out of the cow's head, stays for a moment and floats off. */
+@keyframes hero-bubble {
+  0% {
+    transform: scale(0.3) rotate(-12deg);
+    opacity: 0;
+  }
+  12% {
+    transform: scale(1.1) rotate(4deg);
+    opacity: 1;
+  }
+  20%,
+  85% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10px) scale(0.9);
+    opacity: 0;
+  }
+}
+/* Transform only: the letters are visible from the first frame, so the name paints (and counts as painted) at once. */
+@keyframes hero-letter {
+  from {
+    transform: translateY(-0.45em) scale(0.6) rotate(-15deg);
+  }
+  55% {
+    transform: translateY(0.08em) scale(1.12, 0.9);
+  }
+  75% {
+    transform: translateY(-0.05em) scale(0.97, 1.04);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes cow-ear-left {
+  0%,
+  80%,
+  96%,
+  100% {
+    transform: none;
+  }
+  84% {
+    transform: rotate(-18deg);
+  }
+  88% {
+    transform: rotate(6deg);
+  }
+  92% {
+    transform: rotate(-10deg);
+  }
+}
+@keyframes cow-ear-right {
+  0%,
+  60%,
+  76%,
+  100% {
+    transform: none;
+  }
+  64% {
+    transform: rotate(18deg);
+  }
+  68% {
+    transform: rotate(-6deg);
+  }
+  72% {
+    transform: rotate(10deg);
+  }
+}
+@keyframes cow-blink {
+  0%,
+  90%,
+  94%,
+  100% {
+    transform: none;
+  }
+  92% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes float-about {
+  from {
+    transform: translate(0, 0) rotate(-10deg);
+  }
+  50% {
+    transform: translate(10px, -18px) rotate(8deg);
+  }
+  to {
+    transform: translate(-8px, -6px) rotate(18deg) scale(1.1);
+  }
+}
+
 /* Reduced motion: primitives and app animations end immediately in their final state. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -898,6 +1062,10 @@
   /* The message's time bar is information, not decoration: it still drains (its stripes stand still). */
   .note-time-fill {
     animation-duration: var(--note-time) !important;
+  }
+  /* The cow's speech bubble would end faded out at once: it just shows, until the next tap. */
+  .hero-bubble {
+    animation: none !important;
   }
 }
 

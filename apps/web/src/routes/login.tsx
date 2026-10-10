@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { FloatingShapes } from '@/components/floating-shapes'
+import { HomeHero } from '@/components/home-hero'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toastError } from '@/lib/toast'
@@ -42,41 +44,51 @@ function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-center text-2xl">
-            <h1>{t('auth.title')}</h1>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
-            <TextField
-              label={t('auth.username')}
-              name="username"
-              autoComplete="username"
-              autoCapitalize="none"
-              enterKeyHint="next"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              error={usernameError}
-            />
-            <TextField
-              label={t('auth.password')}
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              enterKeyHint="go"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={passwordError}
-            />
-            <Button type="submit" size="lg" className="mt-2" disabled={login.isPending}>
-              {login.isPending ? t('common.loading') : t('auth.submit')}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="mx-auto grid w-full max-w-sm flex-1 content-center gap-7 lg:max-w-5xl lg:grid-cols-2 lg:items-center lg:gap-16">
+      <FloatingShapes />
+      <HomeHero tagline={t('home.tagline')} />
+      <div className="flex w-full flex-col gap-5 lg:max-w-sm lg:justify-self-center">
+        <Card className="animate-pop">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl">
+              <h2>{t('auth.title')}</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+              <TextField
+                label={t('auth.username')}
+                name="username"
+                autoComplete="username"
+                autoCapitalize="none"
+                enterKeyHint="next"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                error={usernameError}
+              />
+              <TextField
+                label={t('auth.password')}
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                enterKeyHint="go"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                error={passwordError}
+              />
+              <Button type="submit" size="lg" className="mt-2" disabled={login.isPending}>
+                {login.isPending ? t('common.loading') : t('auth.submit')}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+        <Link
+          to="/"
+          className="self-center rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
+          {t('home.joinLink')}
+        </Link>
+      </div>
     </div>
   )
 }

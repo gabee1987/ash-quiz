@@ -1,11 +1,11 @@
 ---
 name: realtime
-description: Socket.IO conventions for Quizmoo in apps/server/src/realtime and the web socket client: rooms, join and reconnect by token, snapshot broadcasting, server-side timers, persistence and restore. Load when touching sockets, the game manager, timers or reconnection.
+description: Socket.IO conventions for Quizmoo in apps/server/src/realtime: game manager, rooms, join and reconnect by token, snapshot broadcasting, server-side timers, persistence and restore. Load when touching server sockets, the game manager, timers or restore; the browser side is in socket-client.
 ---
 
 # Realtime layer
 
-The engine decides, the realtime layer executes. `apps/server/src/realtime` owns the in-memory registry of running games, the socket handlers, the question timers and persistence.
+The engine decides, the realtime layer executes. `apps/server/src/realtime` owns the in-memory registry of running games, the socket handlers, the question timers and persistence. The web client is in the `socket-client` skill.
 
 ## Game manager
 
@@ -51,15 +51,3 @@ Every incoming event body is parsed with the shared Zod schema first. Parse fail
 
 Rate limit: a player socket may send at most 10 events per second; beyond that, events are dropped and the socket is disconnected after a warning log.
 
-## Web client (`apps/web/src/lib/socket.ts`)
-
-- One `io()` instance per page, `autoConnect: false`, `transports: ['websocket', 'polling']`, reconnection on with `reconnectionDelayMax: 3000`.
-- A small store (`useSyncExternalStore`) holds `{ status, since, attempts, player, host, clockOffset, closed }`. `status` is `idle` (no session) | `connecting` | `connected` | `reconnecting` | `offline` (from `navigator.onLine` and the `offline`/`online` events) | `closed` (session ended for good, `closed` holds the i18n key). `since` is when the status last changed; the connection bar shows the time since.
-- `online` and `visibilitychange` (page visible) restart the connection at once instead of waiting for the backoff.
-- On every `connect` (first and re-connects alike) the client re-sends its join or attach with the stored token. The session is "live" again once a snapshot arrives on the new connection.
-- Every other emit in a session waits for that (up to 5 s, then `errors.connectionLost`): Socket.IO flushes events buffered while disconnected before the rejoin, and the server would reject them from an unknown socket.
-- Snapshots with a lower `seq` than the held one are ignored.
-- `lib/socket-toasts.ts` turns transitions into toasts: "Reconnected" after a drop, nothing on the first connect.
-- `clockOffset = snapshot.serverNow - Date.now()` is updated on every snapshot; countdowns use `questionEndsAt - (Date.now() + clockOffset)`.
-- Player tokens are kept in `localStorage` under `quizmoo.player.<pin>` as `{ token, name }`. Storage access is wrapped in try/catch.
-- Answers go through `sendAnswer`: the option stays pending until `{ ok: true }` or a definitive error. A lost ack (or `errors.playerNotFound` from a socket that has not rejoined yet) is retried once while the question is still open; `errors.alreadyAnswered` on the retry counts as sent. When both fail the player gets `errors.answerNotSent` ("tap again") as a toast; never a silent loss.

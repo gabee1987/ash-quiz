@@ -138,7 +138,10 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
     await expect(rows.nth(0)).toContainText('Player Red')
     await expect(rows.nth(0)).toContainText('3')
     await expect(rows.nth(2)).toContainText('Player Blue')
-    await expect(page.locator('ol > li').filter({ hasText: 'Capital of Hungary?' })).toContainText('67% correct')
+    // The summary on top; the questions behind their tab.
+    await expect(page.getByText('Right on average')).toBeVisible()
+    await page.getByRole('tab', { name: /Questions/ }).click()
+    await expect(page.getByRole('tabpanel').locator('ol > li').filter({ hasText: 'Capital of Hungary?' })).toContainText('67% correct')
   })
 
   await test.step('clean up the game and the quiz', async () => {

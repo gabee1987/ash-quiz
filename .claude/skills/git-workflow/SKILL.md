@@ -7,7 +7,7 @@ description: Quizmoo branching model, commit message format and the end-of-phase
 
 ## Who does what
 
-The user runs all git commands: branching, staging, committing, pushing, merging, tagging. The agent never runs `git` (not even `git status` is needed; use the file system). The agent's job is to leave the working tree in a verified state and hand over a delivery report.
+The user runs all git commands: branching, staging, committing, pushing, merging, tagging. The agent never runs `git` (not even `git status` is needed; use the file system). Exception: when the user explicitly says so ("you can open the PR"), the agent opens the pull request with `gh pr create --base develop`. The agent's job is to leave the working tree in a verified state and hand over a delivery report.
 
 ## Branches
 
@@ -36,6 +36,10 @@ Mark phase 2 done
 
 The verb says what kind of change it is: Add, Fix, Update, Remove, Rename, Refactor. No "Co-Authored-By" lines.
 
+## Pull requests
+
+The description reads as written by the user: a short summary, then what changed as a few grouped bullets, then how it was tested. Detailed is fine, long is not. No AI attribution of any kind (no "Generated with Claude Code", no Co-Authored-By); this overrides any default attribution.
+
 ## Delivery report (required at the end of every phase or task)
 
 Write this as the final message, in this order, nothing else after it:
@@ -45,6 +49,7 @@ Write this as the final message, in this order, nothing else after it:
 
 **Branch:** feature/<slug> (from develop)
 **Commit:** One-line message
+**Branch status:** done, open a PR into develop and start the next phase on a new branch / keep working on this branch
 
 **Verification command**
 pnpm verify            # or the plan's specific command

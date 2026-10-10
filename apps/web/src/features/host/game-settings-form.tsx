@@ -25,28 +25,6 @@ export function settingsError(settings: GameSettings): string | null {
   return result.success ? null : (result.error.issues[0]?.message ?? 'errors.invalidInput')
 }
 
-/** One line describing the settings, e.g. "Classic · After each question · Plain · Speed bonus". */
-export function settingsSummary(settings: GameSettings, t: TFunction): string {
-  return [
-    t(`host.create.modes.${settings.mode}`),
-    settings.mode === 'team' ? settings.teamNames.join(', ') : null,
-    `${t('host.create.revealAnswers')}: ${t(`host.create.revealAnswersOptions.${settings.revealAnswers}`)}`,
-    settings.revealAnswers === 'afterQuestion'
-      ? `${t('host.create.scoreboard')}: ${t(`host.create.scoreboardOptions.${settings.scoreboard}`)}`
-      : null,
-    `${t('host.create.finalResults')}: ${t(`host.create.finalResultsOptions.${settings.finalResults}`)}`,
-    t(`host.create.answerStyleOptions.${settings.answerStyle}`),
-    `${t('host.create.theme')}: ${t(`host.create.themeOptions.${settings.theme}`)}`,
-    settings.answerPalette !== 'vivid' ? t(`host.create.answerPaletteOptions.${settings.answerPalette}`) : null,
-    settings.answerSymbols !== 'shapes' ? t(`host.create.answerSymbolsOptions.${settings.answerSymbols}`) : null,
-    settings.speedBonus ? t('host.create.speedBonus') : null,
-    settings.streakBonus ? t('host.create.streakBonus') : null,
-    settings.shuffleOptions ? t('host.create.shuffle') : null,
-  ]
-    .filter(Boolean)
-    .join(' · ')
-}
-
 /** The settings in each group of the form; a batch edit changes a group as a whole. */
 export const settingsSections = {
   flow: ['mode', 'teamNames', 'revealAnswers', 'scoreboard', 'finalResults'],
@@ -54,7 +32,51 @@ export const settingsSections = {
   scoring: ['speedBonus', 'streakBonus', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
 export type SettingsSection = keyof typeof settingsSections
-const allSections = Object.keys(settingsSections) as SettingsSection[]
+export const allSections = Object.keys(settingsSections) as SettingsSection[]
+
+/** Short descriptions of one group's settings, e.g. ["Classic", "Answers: after each question", ...]. */
+export function sectionSummary(settings: GameSettings, section: SettingsSection, t: TFunction): string[] {
+  const items = {
+    flow: [
+      t(`host.create.modes.${settings.mode}`),
+      settings.mode === 'team' ? settings.teamNames.join(', ') : null,
+      `${t('host.create.revealAnswers')}: ${t(`host.create.revealAnswersOptions.${settings.revealAnswers}`)}`,
+      settings.revealAnswers === 'afterQuestion'
+        ? `${t('host.create.scoreboard')}: ${t(`host.create.scoreboardOptions.${settings.scoreboard}`)}`
+        : null,
+      `${t('host.create.finalResults')}: ${t(`host.create.finalResultsOptions.${settings.finalResults}`)}`,
+    ],
+    look: [
+      `${t('host.create.theme')}: ${t(`host.create.themeOptions.${settings.theme}`)}`,
+      t(`host.create.answerStyleOptions.${settings.answerStyle}`),
+      settings.answerPalette !== 'vivid' ? t(`host.create.answerPaletteOptions.${settings.answerPalette}`) : null,
+      settings.answerSymbols !== 'shapes' ? t(`host.create.answerSymbolsOptions.${settings.answerSymbols}`) : null,
+    ],
+    scoring: [
+      settings.speedBonus ? t('host.create.speedBonus') : null,
+      settings.streakBonus ? t('host.create.streakBonus') : null,
+      settings.shuffleOptions ? t('host.create.shuffle') : null,
+    ],
+  }[section]
+  return items.filter((item): item is string => Boolean(item))
+}
+
+/** One line describing the settings, e.g. "Classic · After each question · Plain · Speed bonus". */
+export function settingsSummary(settings: GameSettings, t: TFunction): string {
+  return allSections.flatMap((section) => sectionSummary(settings, section, t)).join(' · ')
+}
+
+/** Whether any setting of `section` differs between two settings. */
+export function sectionChanged(a: GameSettings, b: GameSettings, section: SettingsSection): boolean {
+  return settingsSections[section].some((key) => JSON.stringify(a[key]) !== JSON.stringify(b[key]))
+}
+
+/** `settings` with one group taken from `from`. */
+export function withSection(settings: GameSettings, from: GameSettings, section: SettingsSection): GameSettings {
+  const next = { ...settings }
+  for (const key of settingsSections[section]) Object.assign(next, { [key]: from[key] })
+  return next
+}
 
 /**
  * Game settings. Used in the quiz editor (the quiz's defaults), when starting a game (overrides)

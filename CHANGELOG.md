@@ -73,6 +73,20 @@
 - Show again: between questions the host can put any question already played back on the projector and the phones (from "Questions so far" in the review panel) to talk it through. Each phone shows its own result on it; scores and ranks do not change. "Back to the game" returns to where the game was.
 - After the podium is shown, the host control says it is on the projector and has an "Open projector" button. Opening the projector again brings up the window that is already open instead of opening a second one.
 
+### Phone and results screens
+- Phones in a game have the whole screen: no header; the language and light or dark mode are in a small round menu button in the top right corner.
+- A question with an image shows the image and every answer together without scrolling: the image shrinks to the space the answers leave.
+- The end-of-game review on phones is one card per question, open at first: the question as a large heading, then a chip in the result's colour ("Correct! +900", "Not this time", "Voted", "No answer"). The whole card takes that colour (border, pressed edge, a coloured band behind the title and a light tint below), and your answer and the correct one follow on separate lines. Each card folds away with its arrow.
+- The results page starts with a summary: the podium, number of players and questions, the average share of right answers, the average answer time, and the easiest and hardest question. Players and questions follow in two tabs.
+- Host control between questions: a panel about the question on the screens says what they show (answers revealed, the scoreboard after it, or shown again) and gives the question's type, time and points, its image, the correct answer, how many answered and were right, the average time, the fastest right answer, the answer bars and who did not answer.
+- The new game dialog shows the settings in three groups (game flow, look, scoring) with short summaries. "Change" opens one group; a group changed for this game is marked and can be reset to the quiz's settings.
+
+### Home screen
+- The join and login pages open with the cow and the Quizmoo name big and centre stage, with a short tagline; on laptops the cow is on the left and the form on the right.
+- The cow bobs, blinks and flicks its ears, the name's letters drop in, and answer shapes float around the edges. Tap the cow and it jumps and says something ("Moo!" and three more lines).
+- The Hungarian texts are rewritten across the app in a friendly, informal tone ("Csatlakozz!" instead of "Csatlakozás a játékhoz"), hosts and editors included.
+- The pages stay as fast as before: no new downloads, every animation runs on the graphics thread, nothing jumps while loading, and everything stands still with reduced motion.
+
 ### Fixes
 - The selected answer on phones (colourful buttons) is marked inside the option, in its text colour, instead of with a ring that reached into the neighbouring answers.
 - The quiz editor no longer shows two scrollbars when the quiz settings are open beside a short question.

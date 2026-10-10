@@ -1,6 +1,6 @@
-import type { PlayerQuestionResult, PlayerSnapshot } from '@quizmoo/shared'
+import type { AnswerSymbols, PlayerQuestionResult, PlayerSnapshot } from '@quizmoo/shared'
 import { Link } from '@tanstack/react-router'
-import { TrophyIcon } from 'lucide-react'
+import { ChevronDownIcon, TrophyIcon } from 'lucide-react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -42,7 +42,9 @@ export function Podium({ snapshot }: { snapshot: PlayerSnapshot }) {
       </div>
       <h2 className="text-xl font-extrabold">{t('play.podium')}</h2>
       <PodiumStage places={snapshot.mode === 'team' ? snapshot.teams : snapshot.players} compact celebrate={false} />
-      {snapshot.myResults && snapshot.myResults.length > 0 && <MyResults results={snapshot.myResults} />}
+      {snapshot.myResults && snapshot.myResults.length > 0 && (
+        <MyResults results={snapshot.myResults} symbols={snapshot.settings.answerSymbols} />
+      )}
       <Button asChild size="lg" className="w-full">
         <Link to="/" onClick={() => forgetPlayer(snapshot.pin)}>
           {t('play.backToHome')}
@@ -52,34 +54,88 @@ export function Podium({ snapshot }: { snapshot: PlayerSnapshot }) {
   )
 }
 
-/** The player's answer to every question next to the correct one. */
-function MyResults({ results }: { results: PlayerQuestionResult[] }) {
+/** How a question went for the player: its colour, foreground and the stamp's label. */
+type Outcome = 'right' | 'wrong' | 'voted' | 'missed'
+const outcomeLook: Record<Outcome, { tone: string; toneForeground: string; label: string }> = {
+  right: { tone: 'var(--success)', toneForeground: 'var(--success-foreground)', label: 'play.correct' },
+  wrong: { tone: 'var(--destructive)', toneForeground: 'var(--destructive-foreground)', label: 'play.wrong' },
+  voted: { tone: 'var(--primary)', toneForeground: 'var(--primary-foreground)', label: 'play.voted' },
+  missed: { tone: 'var(--muted-foreground)', toneForeground: 'var(--background)', label: 'play.noAnswer' },
+}
+
+function outcomeOf(result: PlayerQuestionResult): Outcome {
+  if (result.question.type === 'poll') return result.answer ? 'voted' : 'missed'
+  if (result.correct === true) return 'right'
+  if (result.correct === false) return 'wrong'
+  // Unanswered, or host-graded text that was never graded.
+  return result.answer ? 'voted' : 'missed'
+}
+
+/**
+ * The player's answer to every question, open at first: one chunky card each, tinted in the result
+ * colour (border, pressed bottom edge, a coloured band behind the title and a light tint below), with the question as the
+ * card's heading on its own row and a chip ("Correct! +900", "Not this time") under it.
+ * The chevron folds a card away.
+ */
+function MyResults({ results, symbols }: { results: PlayerQuestionResult[]; symbols: AnswerSymbols }) {
   const { t, i18n } = useTranslation()
   return (
-    <section className="flex w-full flex-col gap-2">
+    <section className="flex w-full flex-col gap-3">
       <h2 className="text-center text-xl font-extrabold">{t('play.yourAnswers')}</h2>
-      <ol className="flex flex-col gap-2">
-        {results.map(({ question, answer, correct, points }, index) => (
-          <li
-            key={question.id}
-            className={`flex flex-col gap-1 rounded-xl px-4 py-3 ${correct === true ? 'border-2 border-success bg-success/15' : correct === false ? 'border-2 border-destructive bg-destructive/10' : 'border bg-card'}`}
-          >
-            <div className="flex items-start gap-2">
-              <span className="font-bold tabular-nums">{index + 1}.</span>
-              <p className="flex-1 font-semibold wrap-break-word">{question.text}</p>
-              {correct === true && <CheckIcon className="size-6 shrink-0" />}
-              {correct === false && <CrossIcon className="size-6 shrink-0" />}
-            </div>
-            <p className="text-sm wrap-break-word text-foreground">
-              {t('play.yourAnswer')}:{' '}
-              <span className="font-semibold">{answer ? formatAnswer(answer, question, t, i18n.language) : t('play.noAnswer')}</span>
-              {question.type !== 'poll' && <> · {t('play.points', { count: points })}</>}
-            </p>
-            <div className="text-sm">
-              <CorrectAnswer question={question} />
-            </div>
-          </li>
-        ))}
+      <ol className="flex flex-col gap-4">
+        {results.map((result, index) => {
+          const { question, answer, points } = result
+          const outcome = outcomeOf(result)
+          const look = outcomeLook[outcome]
+          return (
+            <li key={question.id} className="animate-fade-up" style={stagger(index, 50, 300)}>
+              <details
+                open
+                style={{ ['--tone' as string]: look.tone, ['--tone-foreground' as string]: look.toneForeground }}
+                // Tints mix in sRGB: in oklch the card's own hue (0 for white) would pull green towards beige.
+                className="group overflow-hidden rounded-2xl border-2 border-[color-mix(in_srgb,var(--tone)_75%,var(--border))] bg-[color-mix(in_srgb,var(--tone)_8%,var(--card))] shadow-[0_5px_0_color-mix(in_oklch,var(--tone),black_22%),0_14px_30px_-12px_var(--shadow-color)]"
+              >
+                <summary className="flex cursor-pointer list-none flex-col gap-2.5 bg-[color-mix(in_srgb,var(--tone)_22%,var(--card))] px-4 pt-3.5 pb-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset [&::-webkit-details-marker]:hidden">
+                  <h3 className="text-xl leading-snug font-black wrap-break-word">{question.text}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-extrabold tracking-wide text-muted-foreground uppercase">
+                      {t('results.questionNumber', { index: index + 1 })}
+                    </span>
+                    <span className="flex-1" />
+                    {/* The result as a chunky chip in its colour. */}
+                    <span
+                      className="flex animate-pop items-center gap-1.5 rounded-full bg-(--tone) py-1 pr-1 pl-2.5 text-sm font-black text-(--tone-foreground) shadow-[0_3px_0_color-mix(in_oklch,var(--tone),black_25%)]"
+                      style={stagger(index, 50, 500)}
+                    >
+                      {outcome === 'right' && <CheckIcon className="size-4" drawn />}
+                      {outcome === 'wrong' && <CrossIcon className="size-4" />}
+                      <span className={outcome === 'right' ? undefined : 'pr-1.5'}>{t(look.label)}</span>
+                      {outcome === 'right' && (
+                        <span className="rounded-full bg-(--tone-foreground)/20 px-2 py-0.5 tabular-nums">+{points}</span>
+                      )}
+                    </span>
+                    <ChevronDownIcon
+                      className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </summary>
+                <div className="flex flex-col gap-3 border-t border-[color-mix(in_srgb,var(--tone)_35%,var(--border))] px-4 py-3">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-semibold text-muted-foreground">{t('play.yourAnswer')}</p>
+                    <p className="text-lg font-bold wrap-break-word">
+                      {answer ? formatAnswer(answer, question, t, i18n.language) : t('play.noAnswer')}
+                    </p>
+                  </div>
+                  {/* Left-aligned here; the reveal centres it. */}
+                  <div className="[&>div]:items-start [&>div]:text-left [&_ul]:justify-start">
+                    <CorrectAnswer question={question} symbols={symbols} />
+                  </div>
+                </div>
+              </details>
+            </li>
+          )
+        })}
       </ol>
     </section>
   )

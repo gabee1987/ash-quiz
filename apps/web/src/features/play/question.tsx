@@ -39,7 +39,8 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <p className="animate-fade-up text-sm font-semibold text-muted-foreground">
+      {/* Tall enough to keep the timer below the floating settings button. */}
+      <p className="flex min-h-10 animate-fade-up items-center pr-12 text-sm font-semibold text-muted-foreground">
         {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })}
       </p>
       {snapshot.questionEndsAt !== null && (
@@ -54,24 +55,32 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
       <h1 className="animate-fade-up text-2xl font-black wrap-break-word" style={stagger(1, 0, 60)}>
         {question.text}
       </h1>
+      {/*
+        The image takes the space the answers leave (3 : 2 with them) and shrinks to fit, so the
+        image and every answer are on screen together; it never gets smaller than 7 rem.
+      */}
       {question.imageId && (
-        <img
-          src={`/api/images/${question.imageId}`}
-          alt=""
-          className="max-h-48 animate-pop self-center rounded-2xl object-contain shadow-soft"
-          style={stagger(1, 0, 120)}
-        />
+        <div className="relative min-h-28 flex-3">
+          <img
+            src={`/api/images/${question.imageId}`}
+            alt=""
+            className="absolute inset-0 m-auto max-h-full max-w-full animate-pop rounded-2xl object-contain shadow-soft"
+            style={stagger(1, 0, 120)}
+          />
+        </div>
       )}
       {error && <FormAlert>{t(error)}</FormAlert>}
-      <QuestionInput
-        question={question}
-        mode="answer"
-        disabled={pending || closed || paused}
-        pending={pending}
-        colourful={snapshot.settings.answerStyle === 'colourful'}
-        symbols={snapshot.settings.answerSymbols}
-        onSubmit={(a) => void submit(a)}
-      />
+      <div className="flex flex-2 flex-col">
+        <QuestionInput
+          question={question}
+          mode="answer"
+          disabled={pending || closed || paused}
+          pending={pending}
+          colourful={snapshot.settings.answerStyle === 'colourful'}
+          symbols={snapshot.settings.answerSymbols}
+          onSubmit={(a) => void submit(a)}
+        />
+      </div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 ---
 name: server-api
-description: Fastify, auth, session, Drizzle and migration conventions for apps/server. Load when adding HTTP routes, touching the database schema, sessions, login, quiz CRUD, image upload or results export.
+description: Fastify routes, auth and session conventions for apps/server: layout, the route table, error shape, login and cookies. Load when adding or changing HTTP routes, sessions, login, quiz CRUD, image upload or results export; the schema and migrations are in the database skill.
 ---
 
 # Server API
@@ -19,6 +19,8 @@ apps/server/src
   realtime/         sockets, game manager (see realtime skill)
   scripts/seed.ts   creates the first admin user and a sample quiz
 ```
+
+Database, migrations, images and retention are in the `database` skill.
 
 `buildApp` takes its dependencies (`db`, `gameManager`) as arguments so tests can inject fakes or a test database. Nothing reads `process.env` outside `config.ts`.
 
@@ -63,14 +65,3 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 - Users are created by the seed script or by an admin via `POST /api/users` (admin only, phase 6). No self-registration.
 - Keep `users` free of personal data: username only. Future SSO adds an `oidc_identities` table; do not add provider columns to `users`.
 
-## Database
-
-- Drizzle with the `postgres` driver. Schema in `db/schema.ts`, migrations generated with `pnpm --filter @quizmoo/server db:generate` into `apps/server/drizzle/`, applied with `db:migrate`. Never edit a generated migration that has been applied; add a new one.
-- Migrations run automatically at server start in production (`migrate()` from `drizzle-orm/postgres-js/migrator`) so Railway/Render deploys need no extra step.
-- Queries live in the route or manager that uses them. No repository layer.
-- JSON columns are typed with `$type<>()` from shared types and validated with Zod on write.
-- Images: accept `image/jpeg`, `image/png`, `image/webp` up to 5 MB, resize with `sharp` to max 1280 px on the long edge, store as WebP. Reject anything else with 400.
-
-## Results and retention
-
-Results are derived from the persisted `games.state` (player answers and scores), never stored twice. A daily job deletes finished games older than `RESULTS_RETENTION_DAYS` (default 90) in line with data minimisation.

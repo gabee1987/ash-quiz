@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useGameTheme } from '@/lib/themes'
 import { ConnectionBar } from '../../components/connection-bar'
-import { DistributionBars } from '../../components/distribution-bars'
 import { QrCode } from '../../components/qr-code'
 import { Spinner } from '../../components/spinner'
 import { Controls } from '../../features/host/controls'
@@ -17,6 +16,7 @@ import { MessageBox } from '../../features/host/message-box'
 import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
+import { ShownQuestion } from '../../features/host/shown-question'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { RankList } from '../../features/play/scoreboard'
 import { ApiError, apiFetch } from '../../lib/api'
@@ -173,12 +173,7 @@ function PhaseDetail({
       return <LiveQuestion host={host} clockOffset={clockOffset} />
     case 'reveal':
     case 'scoreboard':
-      return host.reveal ? (
-        <div className="flex flex-col gap-3">
-          <p className="text-xl font-extrabold wrap-break-word">{host.reveal.question.text}</p>
-          <DistributionBars reveal={host.reveal} symbols={host.settings.answerSymbols} />
-        </div>
-      ) : null
+      return <ShownQuestion host={host} />
     case 'finished':
       return (
         <section className="flex flex-col gap-2">
