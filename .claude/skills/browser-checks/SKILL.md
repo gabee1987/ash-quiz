@@ -42,6 +42,8 @@ Git Bash turns a bare `/` argument into `C:/Program Files/Git/`; pass page names
 $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 ```
 
+Run the final e2e pass against the production build (:3999): against the Vite dev server, React's development warnings (e.g. invalid HTML nesting) are console errors, and `nicknames.e2e.ts` fails on them. Scripts that clean up games must end an unfinished game first (from the host page: "Játék vége" / "End game", accept the confirm); the API refuses to delete it with `errors.gameNotFinished`.
+
 A failed run can leave "E2E" quizzes and games behind; delete them before rerunning. When a UI change moves something an e2e spec looks for (a tab, a dialog step), update the spec in the same change.
 
 ## The user's running dev servers

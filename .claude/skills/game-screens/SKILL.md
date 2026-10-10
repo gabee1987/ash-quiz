@@ -29,6 +29,9 @@ Targets 1080p at 2 to 4 m viewing distance: question text at 40 px or more, opti
 
 ## Host control (`/host/games/$pin`)
 
+The lobby phase has its own layout, `HostLobby` (`features/host/host-lobby.tsx`): a join card (quiz title, settings line, online and latency badges, the QR code next to the PIN when the card is at least `@lg` wide, the join link, Open projector) and, beside it, Start (only once someone has joined), `LobbyPlayers` (avatar tiles grouped by `lobbyGroups`, no scores, offline tiles dashed with a faded avatar so the text keeps its contrast, a remove button per tile) and the message box, with End game last. The review panel is not shown in the lobby. The e2e specs wait for the `connectedOfTotal` badge ("1 / 1 connected"), so keep it in the lobby.
+
+
 During a running question `LiveQuestion` shows the answers coming in. In reveal, scoreboard and when a question is shown again, `ShownQuestion` (`features/host/shown-question.tsx`) says what the screens show and gives the question's type, time, points, image, correct answer, answered and right counts, average time, the fastest right answer, the bars and who did not answer.
 
 ## Results page (`/host/results/$gameId`)

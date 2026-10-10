@@ -26,9 +26,6 @@ export function Controls({ host, onCommand }: { host: HostSnapshot; onCommand: (
           {t('host.game.reconnectingHint', { count: reconnecting })}
         </p>
       )}
-      {host.phase === 'lobby' && host.players.length === 0 && (
-        <p className="text-center text-muted-foreground">{t('host.game.waitingForPlayers')}</p>
-      )}
       {(host.resultsPending || host.playersWaiting) && (
         <p className="rounded-xl bg-warning px-4 py-2 text-center font-semibold text-warning-foreground">
           {t(

@@ -7,7 +7,7 @@ description: Quizmoo branching model, commit message format and the end-of-phase
 
 ## Who does what
 
-The user runs all git commands: branching, staging, committing, pushing, merging, tagging. The agent never runs `git` (not even `git status` is needed; use the file system). Exception: when the user explicitly says so ("you can open the PR"), the agent opens the pull request with `gh pr create --base develop`. The agent's job is to leave the working tree in a verified state and hand over a delivery report.
+The user runs all git commands: branching, staging, committing, pushing, merging, tagging. The agent never runs `git` (not even `git status` is needed; use the file system). Exceptions, only when the user explicitly asks in that message: opening the pull request (`gh pr create --base develop`, description in the user's voice), and creating the next branch (`git status` must be clean first, then `git checkout develop; git pull; git checkout -b <branch>`). Never commit, push or merge. The agent's job is to leave the working tree in a verified state and hand over a delivery report.
 
 ## Branches
 

@@ -7,10 +7,10 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useGameTheme } from '@/lib/themes'
 import { ConnectionBar } from '../../components/connection-bar'
-import { QrCode } from '../../components/qr-code'
 import { Spinner } from '../../components/spinner'
 import { Controls } from '../../features/host/controls'
 import { GradingPanel } from '../../features/host/grading-panel'
+import { HostLobby } from '../../features/host/host-lobby'
 import { LiveQuestion } from '../../features/host/live-question'
 import { MessageBox } from '../../features/host/message-box'
 import { PlayAgainButton } from '../../features/host/play-again-button'
@@ -18,6 +18,7 @@ import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
 import { ShownQuestion } from '../../features/host/shown-question'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
+import { settingsLine } from '../../features/host/settings-line'
 import { RankList } from '../../features/play/scoreboard'
 import { ApiError, apiFetch } from '../../lib/api'
 import { openProjector } from '../../lib/projector'
@@ -69,6 +70,21 @@ function HostGamePage() {
   }
   if (!host) return <Spinner />
 
+  if (host.phase === 'lobby') {
+    return (
+      <>
+        <ConnectionBar status={status} since={since} />
+        <HostLobby
+          host={host}
+          clockOffset={clockOffset}
+          joinUrl={info.data?.joinUrl ?? null}
+          connected={status === 'connected'}
+          send={send}
+        />
+      </>
+    )
+  }
+
   return (
     <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <ConnectionBar status={status} since={since} />
@@ -79,7 +95,6 @@ function HostGamePage() {
         <PhaseDetail
           host={host}
           clockOffset={clockOffset}
-          joinUrl={info.data?.joinUrl ?? null}
           gameId={info.data?.gameId ?? null}
         />
         {host.phase === 'reveal' && host.awaitingGrading && (
@@ -97,18 +112,7 @@ function HostGamePage() {
 function Header({ host, connected }: { host: HostSnapshot; connected: boolean }) {
   const { t } = useTranslation()
   const online = host.players.filter((p) => p.connected).length
-  const settings = [
-    t(`host.create.modes.${host.settings.mode}`),
-    host.settings.speedBonus ? t('host.create.speedBonus') : null,
-    host.settings.streakBonus ? t('host.create.streakBonus') : null,
-    host.settings.shuffleOptions ? t('host.create.shuffle') : null,
-    host.settings.revealAnswers === 'atEnd' ? t('host.create.revealAnswersOptions.atEnd') : null,
-    host.settings.revealAnswers === 'afterQuestion' && host.settings.scoreboard === 'onDemand'
-      ? t('host.create.scoreboardOptions.onDemand')
-      : null,
-    host.settings.answerStyle === 'colourful' ? t('host.create.answerStyleOptions.colourful') : null,
-    host.settings.finalResults === 'onRelease' ? t('host.create.finalResultsOptions.onRelease') : null,
-  ].filter(Boolean)
+  const settings = settingsLine(host, t)
   return (
     <header className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border bg-card p-4 shadow-soft">
       <div className="min-w-0">
@@ -152,23 +156,17 @@ function Header({ host, connected }: { host: HostSnapshot; connected: boolean })
 function PhaseDetail({
   host,
   clockOffset,
-  joinUrl,
   gameId,
 }: {
   host: HostSnapshot
   clockOffset: number
-  joinUrl: string | null
   gameId: string | null
 }) {
   const { t } = useTranslation()
   switch (host.phase) {
     case 'lobby':
-      return joinUrl ? (
-        <div className="flex flex-col items-center gap-3">
-          <QrCode value={joinUrl} className="w-full max-w-[min(90vw,65vh)]" />
-          <p className="text-center text-lg break-all">{joinUrl}</p>
-        </div>
-      ) : null
+      // The lobby has its own layout (HostLobby).
+      return null
     case 'question':
       return <LiveQuestion host={host} clockOffset={clockOffset} />
     case 'reveal':
